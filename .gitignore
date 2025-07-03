@@ -1,0 +1,22 @@
+# macOS system files
+.DS_Store
+
+# clasp credentials
+.clasp.json
+
+# VS Code settings (optional)
+.vscode/
+
+# Node modules (if any future tooling)
+node_modules/
+
+# Logs and temporary files
+*.log
+
+# Apps Script build output (if using a bundler later)
+dist/
+
+
+**/.clasp.json
+**/.DS_Store
+**/node_modules
