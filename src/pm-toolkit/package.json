@@ -1,0 +1,26 @@
+{
+  "name": "pm-toolkit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "updateLibraryVersion.js",
+  "scripts": {
+    "clean": "rimraf build",
+    "build": "npm run clean && node esbuild.config.js && copyfiles -u 1 'src/**/*.json' build/",
+    "push": "npm run build && clasp push",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "googleapis": "^150.0.1"
+  },
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.99",
+    "copyfiles": "^2.4.1",
+    "esbuild": "^0.25.5",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,25 +1,28 @@
-function startsWithProjectNumber(name) {
+import { INACTIVE_STATUSES } from "./constants";
+import { getOrCreateProjectStatusSheet } from "./close-project";
+
+export function startsWithProjectNumber(name: string) {
   return /^\d+\s+/.test(name);
 }
 
-// Logic constant for script-based calculations
-const calculateAdvanceMax = (contractPrice, changeOrders) =>
-  (contractPrice + changeOrders) * (MAX_ADVANCE_PERCENTAGE / 100);
-
-function toNumber(value) {
+export function toNumber(value: string) {
   const num = Number(value);
   return isNaN(num) ? 0 : num;
 }
 
 // Utility to set a named range's value
-function setNamedValue(sheet, rangeName, value) {
+export function setNamedValue(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  rangeName: string,
+  value: string
+) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheetName = sheet.getName();
   const fullName = `'${sheetName}'!${rangeName}`;
 
   try {
     const range = ss.getRangeByName(fullName);
-    
+
     if (range) {
       range.setValue(value);
     } else {
@@ -30,19 +33,7 @@ function setNamedValue(sheet, rangeName, value) {
   }
 }
 
-function getProjectNumber(sheet) {
-  const name = sheet.getName();
-  const match = name.trim().match(/^(\d+)\s+/);
-  return match ? match[1] : "N/A";
-}
-
-function getClientName(sheet) {
-  const name = sheet.getName();
-  const match = name.trim().match(/^\d+\s+(.*)$/);
-  return match ? match[1] : "N/A";
-}
-
-function getProjectStatusMap() {
+export function getProjectStatusMap() {
   const sheet = getOrCreateProjectStatusSheet();
   const values = sheet.getDataRange().getValues();
   const map = new Map();
@@ -58,17 +49,19 @@ function getProjectStatusMap() {
   return map;
 }
 
-function extractProjectNumber(name) {
+export function extractProjectNumber(name: string) {
   const match = name.match(/^(\d{3,4})/);
   return match ? match[1] : null;
 }
 
-function isClosedTabName(name) {
+export function isClosedTabName(name: string) {
   const lower = name.toLowerCase();
-  return INACTIVE_STATUSES.some(status => new RegExp(`\\b${status}\\b`).test(lower));
+  return INACTIVE_STATUSES.some((status) =>
+    new RegExp(`\\b${status}\\b`).test(lower)
+  );
 }
 
-function logToSheet(message) {
+export function logToSheet(message: string) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("Debug") || ss.insertSheet("Debug");
   sheet.appendRow([new Date(), message]);
