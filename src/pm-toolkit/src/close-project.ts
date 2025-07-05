@@ -1,4 +1,13 @@
-function closeProject(sheet) {
+import {
+  CLOSED_SUFFIX,
+  COL_PROJECT_STATUS,
+  PROJECT_STATUS_CLOSED,
+  PROJECT_STATUS_SHEET_NAME,
+  PROJECT_TAB_NAME_REGEX,
+} from "./constants";
+import { generateProjectDashboard } from "./dashboard/generate-dashboard";
+
+export function closeProject(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
   const tabName = sheet.getName();
   const newName = `${tabName}${CLOSED_SUFFIX}`;
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -9,10 +18,12 @@ function closeProject(sheet) {
   // 2. Update _ProjectStatus
   const statusSheet = getOrCreateProjectStatusSheet();
   const data = statusSheet.getDataRange().getValues();
-  const projectRow = data.findIndex(row => row[0] === tabName);
+  const projectRow = data.findIndex((row) => row[0] === tabName);
 
   if (projectRow !== -1) {
-    statusSheet.getRange(projectRow + 1, COL_PROJECT_STATUS).setValue(PROJECT_STATUS_CLOSED);
+    statusSheet
+      .getRange(projectRow + 1, COL_PROJECT_STATUS)
+      .setValue(PROJECT_STATUS_CLOSED);
   } else {
     statusSheet.appendRow([tabName, PROJECT_STATUS_CLOSED]);
   }
@@ -23,7 +34,7 @@ function closeProject(sheet) {
   generateProjectDashboard();
 }
 
-function closeActiveProject() {
+export function closeActiveProject() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const tabName = sheet.getName();
 
@@ -40,7 +51,7 @@ function closeActiveProject() {
   closeProject(sheet);
 }
 
-function promptProjectToClose() {
+export function promptProjectToClose() {
   const ui = SpreadsheetApp.getUi();
   const projectTabs = getAllOpenProjectTabs();
 
@@ -68,19 +79,23 @@ function promptProjectToClose() {
   closeProject(sheet);
 }
 
-function isProjectTab(sheet) {
+export function isProjectTab(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
   const name = sheet.getName();
   return PROJECT_TAB_NAME_REGEX.test(name); // crude check: starts with project number
 }
 
-function getAllOpenProjectTabs() {
+export function getAllOpenProjectTabs() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  return ss.getSheets()
-    .filter(s => isProjectTab(s) && !s.isSheetHidden() && !/closed/i.test(s.getName()))
-    .map(s => s.getName());
+  return ss
+    .getSheets()
+    .filter(
+      (s) =>
+        isProjectTab(s) && !s.isSheetHidden() && !/closed/i.test(s.getName())
+    )
+    .map((s) => s.getName());
 }
 
-function getOrCreateProjectStatusSheet() {
+export function getOrCreateProjectStatusSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(PROJECT_STATUS_SHEET_NAME);
 
