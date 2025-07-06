@@ -75,6 +75,7 @@ export function generateProjectTable(
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let rowIndex = startRow;
 
+  // Title row
   if (title) {
     sheet.getRange(rowIndex, startCol).setValue(title).setFontWeight("bold");
     sheet
@@ -86,24 +87,33 @@ export function generateProjectTable(
     rowIndex++;
   }
 
+  const headerRow = rowIndex;
   sheet
-    .getRange(rowIndex, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(headerRow, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
     .setValues([PROJECT_DASHBOARD_HEADERS]);
-  rowIndex++;
 
-  const tableStartRow = rowIndex;
+  const descriptionRow = headerRow + 1;
+  const dataStartRow = descriptionRow + 1;
+  let dataEndRow = dataStartRow - 1;
 
   for (const sheetTab of projectSheets) {
     const rowData = getProjectRowData(sheetTab);
-    sheet.getRange(rowIndex, startCol, 1, rowData.length).setValues([rowData]);
-    rowIndex++;
+    sheet
+      .getRange(
+        dataStartRow + (dataEndRow - dataStartRow + 1),
+        startCol,
+        1,
+        rowData.length
+      )
+      .setValues([rowData]);
+    dataEndRow++;
   }
 
-  const numRows = rowIndex - tableStartRow;
+  const numRows = dataEndRow - dataStartRow + 1;
   if (numRows > 0) {
     sheet
       .getRange(
-        tableStartRow,
+        dataStartRow,
         startCol,
         numRows,
         PROJECT_DASHBOARD_HEADERS.length
@@ -114,13 +124,14 @@ export function generateProjectTable(
   Logger.log(
     `Wrote ${projectSheets.length} rows at row ${startRow}, col ${startCol} for "${title}"`
   );
+
   return {
     title,
     startRow,
     startCol,
-    headerRow: startRow + 1,
-    dataStartRow: startRow + 2,
-    dataEndRow: rowIndex - 1,
+    headerRow,
+    dataStartRow,
+    dataEndRow,
   };
 }
 

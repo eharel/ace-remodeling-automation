@@ -1,3 +1,8 @@
+import {
+  EXPECTED_PROFIT_PERCENTAGE,
+  MAX_ADVANCE_PERCENTAGE,
+} from "../constants";
+
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
   CLIENT_NAME: "COL_CLIENT_NAME",
@@ -51,10 +56,12 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.CONTRACT_PRICE,
     label: DASHBOARD_LABELS.CONTRACT_PRICE,
+    description: "CP",
   },
   {
     key: DASHBOARD_KEYS.CHANGE_ORDERS,
     label: DASHBOARD_LABELS.CHANGE_ORDERS,
+    description: "CO",
   },
   {
     key: DASHBOARD_KEYS.TOTAL_ADVANCE,
@@ -63,7 +70,7 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.MAX_ADVANCE,
     label: DASHBOARD_LABELS.MAX_ADVANCE,
-    description: "10% × (Contract + COs)",
+    description: `${MAX_ADVANCE_PERCENTAGE}% × (Contract + COs)`,
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
   },
   {
@@ -75,11 +82,13 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.EXPENSES,
     label: DASHBOARD_LABELS.EXPENSES,
+    description: "Bills / PO",
   },
   {
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
     label: DASHBOARD_LABELS.EXPECTED_PROFIT,
-    description: "Contract + COs - Expenses",
+    description: `${EXPECTED_PROFIT_PERCENTAGE}% of (Contract + COs)`,
+
     help: "What the PM is expected to keep after all subs and materials are paid",
   },
   {
@@ -91,7 +100,7 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.PM_AFTER_ADVANCE,
     label: DASHBOARD_LABELS.PM_AFTER_ADVANCE,
-    description: "Final Payment - Sub Expenses",
+    // description: "Final Payment - Sub Expenses",
     help: "Amount the PM keeps after paying subs from final payment",
   },
 ];
