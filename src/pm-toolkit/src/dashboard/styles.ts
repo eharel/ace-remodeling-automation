@@ -4,8 +4,10 @@ import {
 } from "./project-fields";
 import { CURRENCY_COLUMNS } from "./project-fields";
 import {
+  DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
+  getColumnDescription,
   getColumnKey,
   getColumnLabel,
 } from "./columns";
@@ -47,7 +49,11 @@ function stylizeTable(
 
   applyTitleStyle(sheet, startRow, startCol);
   applyHeaderStyle(sheet, headerRow, startCol);
-  applyZebraStriping(sheet, dataStartRow - 1, startCol, numRows);
+  applyDescriptionRow(sheet, headerRow + 1, startCol);
+
+  const { row: zebraRow, numRows: zebraRows } = getZebraStripingBounds(table);
+  applyZebraStriping(sheet, zebraRow, startCol, zebraRows);
+
   applyCurrencyFormatting(
     sheet,
     dataStartRow,
@@ -62,7 +68,10 @@ function stylizeTable(
     numRows,
     headerIndexMap
   );
-  applyBorders(sheet, headerRow, startCol, numRows);
+
+  const totalTableRows = dataEndRow - headerRow + 1;
+  applyBorders(sheet, headerRow, startCol, totalTableRows);
+
   resizeColumns(sheet, startCol);
 }
 
@@ -106,6 +115,56 @@ function applyHeaderStyle(
     .setFontWeight("bold")
     .setBackground("#f1f3f4")
     .setHorizontalAlignment("center");
+}
+
+function applyDescriptionRow(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  row: number,
+  startCol: number
+) {
+  const descriptions = DASHBOARD_COLUMNS.map((col) => {
+    return col.description
+      ? col.help
+        ? `📘 ${col.description}`
+        : col.description
+      : "";
+  });
+
+  const range = sheet.getRange(row, startCol, 1, descriptions.length);
+  range
+    .setValues([descriptions])
+    .setFontSize(7)
+    .setFontStyle("italic")
+    .setBackground("#f9f9f9")
+    .setWrap(true)
+    .setVerticalAlignment("middle");
+
+  sheet.setRowHeight(row, 22);
+
+  // ✅ Add subtle bottom border to separate from data
+  range.setBorder(
+    false, // top
+    false, // left
+    true, // bottom
+    false, // right
+    false, // vertical
+    false, // horizontal
+    "#d0d0d0", // border color
+    SpreadsheetApp.BorderStyle.SOLID
+  );
+
+  // ✅ Add hover tips on description cells
+  DASHBOARD_COLUMNS.forEach((col, i) => {
+    if (col.help) {
+      range.getCell(1, i + 1).setNote(col.help);
+    }
+  });
+}
+
+function getZebraStripingBounds(table: TableInfo) {
+  const row = table.dataStartRow - 1;
+  const numRows = table.dataEndRow - row + 1;
+  return { row, numRows };
 }
 
 function applyZebraStriping(
@@ -198,15 +257,10 @@ function applyBorders(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   headerRow: number,
   startCol: number,
-  numRows: number
+  totalRows: number
 ) {
   sheet
-    .getRange(
-      headerRow,
-      startCol,
-      numRows + 1,
-      PROJECT_DASHBOARD_HEADERS.length
-    )
+    .getRange(headerRow, startCol, totalRows, PROJECT_DASHBOARD_HEADERS.length)
     .setBorder(true, true, true, true, true, true);
 }
 
@@ -223,7 +277,7 @@ function resizeColumns(
     } else if (key === DASHBOARD_KEYS.CLIENT_NAME) {
       sheet.setColumnWidth(col, 140);
     } else {
-      sheet.setColumnWidth(col, 120);
+      sheet.setColumnWidth(col, 136);
     }
   });
 }
@@ -238,10 +292,7 @@ function alignProjectNoColumn(
     const col = table.startCol + colIndex;
     const numRows = table.dataEndRow - table.dataStartRow + 1;
 
-    // Force plain text number format to prevent auto-formatting (e.g., currency)
     sheet.getRange(table.dataStartRow, col, numRows).setNumberFormat("@");
-
-    // Center align the values
     sheet
       .getRange(table.dataStartRow, col, numRows)
       .setHorizontalAlignment("center");
@@ -268,5 +319,6 @@ function addTimestamp(
     .setFontSize(10)
     .setHorizontalAlignment("left");
 
-  sheet.setFrozenRows(table.headerRow);
+  const frozenRowCount = table.dataStartRow - 1;
+  sheet.setFrozenRows(frozenRowCount);
 }
