@@ -4,7 +4,7 @@
 # clasp credentials
 .clasp.json
 
-# VS Code settings (optional)
+# VS Code settings
 .vscode/
 
 # Node modules (if any future tooling)
@@ -13,10 +13,8 @@ node_modules/
 # Logs and temporary files
 *.log
 
-# Apps Script build output (if using a bundler later)
-dist/
+# Compiled output from TypeScript
+build/
 
-
-**/.clasp.json
-**/.DS_Store
-**/node_modules
+# (Optional) Ignore dist if using a bundler in the future
+# dist/
