@@ -1,15 +1,10 @@
 import { PROJECT_DASHBOARD_SHEET_NAME } from "../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
-import {
-  LEGACY_CELLS,
-  PROJECT_DASHBOARD_HEADERS,
-  PROJECT_FIELDS,
-} from "./project-fields";
 import { COL_GAP_BETWEEN_TABLES } from "../constants";
 import { IS_ASCENDING_ORDER } from "../constants";
 import { FieldContext } from "./types";
 import { stylizeDashboard } from "./styles";
-import { DASHBOARD_KEYS } from "./columns";
+import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 
 export function generateProjectDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -37,8 +32,7 @@ export function generateProjectDashboard() {
 
   const startRow = 1;
   const startColActive = 1;
-  const startColClosed =
-    PROJECT_DASHBOARD_HEADERS.length + COL_GAP_BETWEEN_TABLES;
+  const startColClosed = DASHBOARD_COLUMNS.length + COL_GAP_BETWEEN_TABLES;
 
   const tableInfo = [];
 
@@ -79,7 +73,7 @@ export function generateProjectTable(
   if (title) {
     sheet.getRange(rowIndex, startCol).setValue(title).setFontWeight("bold");
     sheet
-      .getRange(rowIndex, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
+      .getRange(rowIndex, startCol, 1, DASHBOARD_COLUMNS.length)
       .merge()
       .setHorizontalAlignment("center")
       .setFontSize(12)
@@ -89,8 +83,8 @@ export function generateProjectTable(
 
   const headerRow = rowIndex;
   sheet
-    .getRange(headerRow, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
-    .setValues([PROJECT_DASHBOARD_HEADERS]);
+    .getRange(headerRow, startCol, 1, DASHBOARD_COLUMNS.length)
+    .setValues([DASHBOARD_COLUMNS.map((col) => col.label)]);
 
   const descriptionRow = headerRow + 1;
   const dataStartRow = descriptionRow + 1;
@@ -112,12 +106,7 @@ export function generateProjectTable(
   const numRows = dataEndRow - dataStartRow + 1;
   if (numRows > 0) {
     sheet
-      .getRange(
-        dataStartRow,
-        startCol,
-        numRows,
-        PROJECT_DASHBOARD_HEADERS.length
-      )
+      .getRange(dataStartRow, startCol, numRows, DASHBOARD_COLUMNS.length)
       .sort({ column: startCol, ascending: IS_ASCENDING_ORDER });
   }
 
@@ -150,8 +139,8 @@ export function getProjectRowData(
 function buildNamedRangeMap(
   ss: GoogleAppsScript.Spreadsheet.Spreadsheet,
   sheetName: string
-) {
-  const namedRangeMap = new Map();
+): Map<string, GoogleAppsScript.Spreadsheet.Range> {
+  const namedRangeMap = new Map<string, GoogleAppsScript.Spreadsheet.Range>();
 
   for (const nr of ss.getNamedRanges()) {
     const range = nr.getRange();
@@ -168,12 +157,14 @@ export function buildDirectValueMap(
 ): Map<string, any> {
   const map = new Map<string, any>();
 
-  for (const cellRef of Object.values(LEGACY_CELLS)) {
+  for (const col of DASHBOARD_COLUMNS) {
+    if (!col.legacyCell) continue;
+
     try {
-      const value = sheet.getRange(cellRef).getValue();
-      map.set(cellRef, value); // ✅ Use M2, M7, etc. as the map key
+      const value = sheet.getRange(col.legacyCell).getValue();
+      map.set(col.legacyCell, value); // Still use cellRef (like "M2") as the key
     } catch (e) {
-      map.set(cellRef, "N/A");
+      map.set(col.legacyCell, "N/A");
     }
   }
 
@@ -187,7 +178,7 @@ function buildProjectRowData(
 ) {
   const rowData = [];
 
-  for (const field of PROJECT_FIELDS) {
+  for (const field of DASHBOARD_COLUMNS) {
     const fieldContext: FieldContext = {
       sheet: sheetTab,
       rowData, // built progressively
