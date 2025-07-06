@@ -1,9 +1,13 @@
 import { MAX_ADVANCE_PERCENTAGE } from "../constants";
-import { PROJECT_FIELDS } from "./project-fields";
+import { PROJECT_DASHBOARD_HEADERS } from "./project-fields";
 import { LEGACY_CELLS } from "./project-fields";
+import { DashboardColumnKey } from "./columns";
+import { getColumnLabel } from "./columns";
 
-export function getFieldValue(rowData: any[], header: string) {
-  const index = PROJECT_FIELDS.findIndex((f) => f.dbHeader === header);
+export function getFieldValue(rowData: any[], key: DashboardColumnKey) {
+  const label = getColumnLabel(key);
+  const index = PROJECT_DASHBOARD_HEADERS.indexOf(label);
+  if (index === -1) throw new Error(`Column label not found for key: ${key}`);
   return rowData[index];
 }
 

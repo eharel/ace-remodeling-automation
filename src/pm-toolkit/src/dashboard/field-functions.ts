@@ -1,13 +1,11 @@
 import type { FieldContext } from "./types";
 import * as NR from "../constants/named-ranges";
-import * as COL from "../constants/column-headers";
-import { getNamedRange } from "./utils";
-import { LEGACY_CELLS } from "./project-fields";
 import { calculateAdvanceMax } from "./utils";
 import { getFieldValue } from "./utils";
 import { toNumber } from "../utils";
 import { EXPECTED_PROFIT_PERCENTAGE } from "../constants";
 import { getValueFromNamedOrLegacy } from "./utils";
+import { DASHBOARD_KEYS as KEYS } from "./columns";
 
 export function getProjectNumber({
   sheet,
@@ -38,7 +36,7 @@ export function getContractPrice({
     namedRangeMap,
     directValueMap,
     NR.NR_CONTRACT_PRICE,
-    COL.COL_CONTRACT_PRICE
+    KEYS.CONTRACT_PRICE
   );
 }
 
@@ -50,7 +48,7 @@ export function getChangeOrders({
     namedRangeMap,
     directValueMap,
     NR.NR_CHANGE_ORDER_TOTAL,
-    COL.COL_CHANGE_ORDERS
+    KEYS.CHANGE_ORDERS
   );
 }
 
@@ -62,17 +60,15 @@ export function getExpenses({
     namedRangeMap,
     directValueMap,
     NR.NR_EXPENSE_TOTAL,
-    COL.COL_EXPENSES
+    KEYS.EXPENSES
   );
 }
 
 export function getMaxAdvance({ rowData }: FieldContext): number | string {
   // TODO: Do I need to consider legacy cells here?
 
-  const contractPrice = toNumber(
-    getFieldValue(rowData, COL.COL_CONTRACT_PRICE)
-  );
-  const changeOrders = toNumber(getFieldValue(rowData, COL.COL_CHANGE_ORDERS));
+  const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
+  const changeOrders = toNumber(getFieldValue(rowData, KEYS.CHANGE_ORDERS));
 
   if (typeof contractPrice !== "number" || typeof changeOrders !== "number")
     return "N/A";
@@ -88,13 +84,13 @@ export function getTotalAdvance({
     namedRangeMap,
     directValueMap,
     NR.NR_ADVANCE_TOTAL,
-    COL.COL_TOTAL_ADVANCE
+    KEYS.TOTAL_ADVANCE
   );
 }
 
 export function getAdvanceBalance({ rowData }: FieldContext): number | string {
-  const maxAdvance = toNumber(getFieldValue(rowData, COL.COL_MAX_ADVANCE));
-  const totalAdvance = toNumber(getFieldValue(rowData, COL.COL_TOTAL_ADVANCE));
+  const maxAdvance = toNumber(getFieldValue(rowData, KEYS.MAX_ADVANCE));
+  const totalAdvance = toNumber(getFieldValue(rowData, KEYS.TOTAL_ADVANCE));
 
   if (typeof maxAdvance !== "number" || typeof totalAdvance !== "number")
     return "N/A";
@@ -110,16 +106,14 @@ export function getPMAfterAdvance({
     namedRangeMap,
     directValueMap,
     NR.NR_PM_AFTER_ADVANCE,
-    COL.COL_PM_AFTER_ADVANCE
+    KEYS.PM_AFTER_ADVANCE
   );
 }
 
 export function getExpectedProfit({ rowData }: FieldContext): number | string {
   // 20% of (contract price + change orders)
-  const contractPrice = toNumber(
-    getFieldValue(rowData, COL.COL_CONTRACT_PRICE)
-  );
-  const changeOrders = toNumber(getFieldValue(rowData, COL.COL_CHANGE_ORDERS));
+  const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
+  const changeOrders = toNumber(getFieldValue(rowData, KEYS.CHANGE_ORDERS));
 
   if (typeof contractPrice !== "number" || typeof changeOrders !== "number")
     return "N/A";
@@ -130,10 +124,8 @@ export function getExpectedProfit({ rowData }: FieldContext): number | string {
 export function getProfitAfterAdvance({
   rowData,
 }: FieldContext): number | string {
-  const expectedProfit = toNumber(
-    getFieldValue(rowData, COL.COL_EXPECTED_PROFIT)
-  );
-  const totalAdvance = toNumber(getFieldValue(rowData, COL.COL_TOTAL_ADVANCE));
+  const expectedProfit = toNumber(getFieldValue(rowData, KEYS.EXPECTED_PROFIT));
+  const totalAdvance = toNumber(getFieldValue(rowData, KEYS.TOTAL_ADVANCE));
 
   if (typeof expectedProfit !== "number" || typeof totalAdvance !== "number")
     return "N/A";
