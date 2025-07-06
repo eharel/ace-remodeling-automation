@@ -9,6 +9,7 @@ import { COL_GAP_BETWEEN_TABLES } from "../constants";
 import { IS_ASCENDING_ORDER } from "../constants";
 import { FieldContext } from "./types";
 import { stylizeDashboard } from "./styles";
+import { DASHBOARD_KEYS } from "./columns";
 
 export function generateProjectDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -183,7 +184,13 @@ function buildProjectRowData(
       directValueMap,
     };
 
-    const value = field.valueFn?.(fieldContext) ?? "N/A";
+    let value = field.valueFn?.(fieldContext) ?? "N/A";
+
+    // Force Project No to be a string to prevent auto-formatting
+    if (field.key === DASHBOARD_KEYS.PROJECT_NO && typeof value === "number") {
+      value = value.toString();
+    }
+
     rowData.push(value);
   }
 
