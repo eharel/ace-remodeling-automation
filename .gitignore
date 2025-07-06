@@ -1,20 +1,25 @@
 # macOS system files
 .DS_Store
+**/.DS_Store
 
-# clasp credentials
+# clasp credentials (should not be versioned)
 .clasp.json
+**/.clasp.json
 
-# VS Code settings
+# VS Code settings (optional)
 .vscode/
-
-# Node modules (if any future tooling)
-node_modules/
 
 # Logs and temporary files
 *.log
 
-# Compiled output from TypeScript
-build/
+# Node modules (if using npm tooling)
+node_modules/
+**/node_modules/
 
-# (Optional) Ignore dist if using a bundler in the future
-# dist/
+# TypeScript output (custom build dir)
+build/
+**/build/
+
+# Build output (optional, if bundling later)
+dist/
+**/dist/

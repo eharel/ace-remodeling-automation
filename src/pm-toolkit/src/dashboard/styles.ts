@@ -1,9 +1,4 @@
 import {
-  headerIndexMap as globalHeaderIndexMap,
-  PROJECT_DASHBOARD_HEADERS,
-} from "./project-fields";
-import { CURRENCY_COLUMNS } from "./project-fields";
-import {
   DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
@@ -54,13 +49,7 @@ function stylizeTable(
   const { row: zebraRow, numRows: zebraRows } = getZebraStripingBounds(table);
   applyZebraStriping(sheet, zebraRow, startCol, zebraRows);
 
-  applyCurrencyFormatting(
-    sheet,
-    dataStartRow,
-    startCol,
-    numRows,
-    headerIndexMap
-  );
+  applyCurrencyFormatting(sheet, dataStartRow, startCol, numRows);
   applyConditionalFormatting(
     sheet,
     dataStartRow,
@@ -81,7 +70,7 @@ function getHeaderIndexMap(
   startCol: number
 ): Record<string, number> {
   const headers = sheet
-    .getRange(headerRow, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(headerRow, startCol, 1, DASHBOARD_COLUMNS.length)
     .getValues()[0];
   const map: Record<string, number> = {};
 
@@ -98,7 +87,7 @@ function applyTitleStyle(
   startCol: number
 ) {
   sheet
-    .getRange(startRow, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(startRow, startCol, 1, DASHBOARD_COLUMNS.length)
     .setFontWeight("bold")
     .setFontSize(12)
     .setHorizontalAlignment("center")
@@ -111,7 +100,7 @@ function applyHeaderStyle(
   startCol: number
 ) {
   sheet
-    .getRange(headerRow, startCol, 1, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(headerRow, startCol, 1, DASHBOARD_COLUMNS.length)
     .setFontWeight("bold")
     .setBackground("#f1f3f4")
     .setHorizontalAlignment("center");
@@ -130,14 +119,15 @@ function applyDescriptionRow(
       : "";
   });
 
-  const range = sheet.getRange(row, startCol, 1, descriptions.length);
+  const range = sheet.getRange(row, startCol, 1, DASHBOARD_COLUMNS.length);
   range
     .setValues([descriptions])
     .setFontSize(7)
     .setFontStyle("italic")
     .setBackground("#f9f9f9")
     .setWrap(true)
-    .setVerticalAlignment("middle");
+    .setVerticalAlignment("middle")
+    .setHorizontalAlignment("center");
 
   sheet.setRowHeight(row, 22);
 
@@ -174,7 +164,7 @@ function applyZebraStriping(
   numRows: number
 ) {
   sheet
-    .getRange(row, col, numRows, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(row, col, numRows, DASHBOARD_COLUMNS.length)
     .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
 }
 
@@ -182,13 +172,11 @@ function applyCurrencyFormatting(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   startRow: number,
   startCol: number,
-  numRows: number,
-  headerIndexMap: Record<string, number>
+  numRows: number
 ) {
-  CURRENCY_COLUMNS.forEach((header) => {
-    const colIndex = headerIndexMap[header];
-    if (colIndex !== undefined) {
-      const range = sheet.getRange(startRow, startCol + colIndex, numRows);
+  DASHBOARD_COLUMNS.forEach((col, i) => {
+    if (col.format === "currency") {
+      const range = sheet.getRange(startRow, startCol + i, numRows);
       range.setNumberFormat("$#,##0.00");
     }
   });
@@ -260,7 +248,7 @@ function applyBorders(
   totalRows: number
 ) {
   sheet
-    .getRange(headerRow, startCol, totalRows, PROJECT_DASHBOARD_HEADERS.length)
+    .getRange(headerRow, startCol, totalRows, DASHBOARD_COLUMNS.length)
     .setBorder(true, true, true, true, true, true);
 }
 
@@ -268,13 +256,12 @@ function resizeColumns(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   startCol: number
 ) {
-  PROJECT_DASHBOARD_HEADERS.forEach((header, i) => {
+  DASHBOARD_COLUMNS.forEach((column, i) => {
     const col = startCol + i;
-    const key = getColumnKey(header);
 
-    if (key === DASHBOARD_KEYS.PROJECT_NO) {
+    if (column.key === DASHBOARD_KEYS.PROJECT_NO) {
       sheet.setColumnWidth(col, 75);
-    } else if (key === DASHBOARD_KEYS.CLIENT_NAME) {
+    } else if (column.key === DASHBOARD_KEYS.CLIENT_NAME) {
       sheet.setColumnWidth(col, 140);
     } else {
       sheet.setColumnWidth(col, 136);
@@ -304,7 +291,7 @@ function addTimestamp(
   table: TableInfo
 ) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const timestampCol = table.startCol + PROJECT_DASHBOARD_HEADERS.length + 1;
+  const timestampCol = table.startCol + DASHBOARD_COLUMNS.length + 1;
   const cell = sheet.getRange(1, timestampCol);
 
   cell
