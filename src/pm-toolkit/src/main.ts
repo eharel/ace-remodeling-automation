@@ -1,9 +1,12 @@
+import { buildMainMenu } from "./menu/main-menu";
+import { generateProjectDashboard } from "./projects/dashboard/generate-dashboard";
+import { startsWithProjectNumber } from "./projects/utils";
 import { PROJECT_DASHBOARD_SHEET_NAME } from "./constants";
-import { generateProjectDashboard } from "./dashboard/generate-dashboard";
-import { startsWithProjectNumber } from "./utils";
 
-declare global {
-  var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
+export function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  const menu = buildMainMenu(ui);
+  menu.addToUi();
 }
 
 export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
@@ -16,6 +19,3 @@ export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
     generateProjectDashboard();
   }
 }
-
-// 👇 Export globally for Apps Script triggers
-globalThis.onEdit = onEdit;

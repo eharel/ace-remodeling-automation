@@ -1,4 +1,14 @@
-// src/index.ts
+import { registerGlobals } from "./register-globals";
+
+import { onOpen, onEdit } from "./main";
+import { showStructureHelp, showFirstTimeSetup } from "./menu/modals";
+import {
+  closeActiveProject,
+  promptProjectToClose,
+} from "./projects/close-project";
+import { generateProjectDashboard } from "./projects/dashboard/generate-dashboard";
+import { promptForNewProject } from "./projects/new-project";
+import { generateLeadsPaymentsDashboard } from "./leads-payments/generate-dashboard";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
@@ -9,20 +19,17 @@ declare global {
   var promptProjectToClose: () => void;
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
+  var generateLeadsPaymentsDashboard: () => void;
 }
 
-import { onEdit } from "./onedit-handler";
-import { onOpen, showStructureHelp, showFirstTimeSetup } from "./menu";
-import { closeActiveProject, promptProjectToClose } from "./close-project";
-import { generateProjectDashboard } from "./dashboard/generate-dashboard";
-import { promptForNewProject } from "./new-project";
-
-// ✅ Register globally for Apps Script
-globalThis.onEdit = onEdit;
-globalThis.onOpen = onOpen;
-globalThis.showStructureHelp = showStructureHelp;
-globalThis.showFirstTimeSetup = showFirstTimeSetup;
-globalThis.closeActiveProject = closeActiveProject;
-globalThis.promptProjectToClose = promptProjectToClose;
-globalThis.generateProjectDashboard = generateProjectDashboard;
-globalThis.promptForNewProject = promptForNewProject;
+registerGlobals({
+  onOpen,
+  onEdit,
+  showStructureHelp,
+  showFirstTimeSetup,
+  closeActiveProject,
+  promptProjectToClose,
+  generateProjectDashboard,
+  promptForNewProject,
+  generateLeadsPaymentsDashboard,
+});

@@ -1,7 +1,7 @@
-import { PROJECT_DASHBOARD_SHEET_NAME } from "../constants";
+import { PROJECT_DASHBOARD_SHEET_NAME } from "../../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
-import { COL_GAP_BETWEEN_TABLES } from "../constants";
-import { IS_ASCENDING_ORDER } from "../constants";
+import { COL_GAP_BETWEEN_TABLES } from "../../constants";
+import { IS_ASCENDING_ORDER } from "../../constants";
 import { FieldContext } from "./types";
 import { stylizeDashboard } from "./styles";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";

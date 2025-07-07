@@ -1,4 +1,4 @@
-import { MAX_ADVANCE_PERCENTAGE } from "../constants";
+import { MAX_ADVANCE_PERCENTAGE } from "../../constants";
 import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./columns";
 
 export function getFieldValue(rowData: any[], key: DashboardColumnKey) {

@@ -1,7 +1,7 @@
 import {
   EXPECTED_PROFIT_PERCENTAGE,
   MAX_ADVANCE_PERCENTAGE,
-} from "../constants";
+} from "../../constants";
 import * as GF from "./field-functions";
 import { FieldContext } from "./types";
 
@@ -81,7 +81,7 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
     label: DASHBOARD_LABELS.EXPECTED_PROFIT,
-    description: `${EXPECTED_PROFIT_PERCENTAGE}% of (Contract + COs)`,
+    description: `${EXPECTED_PROFIT_PERCENTAGE}% of (CP + COs)`,
     valueFn: (fieldContext: FieldContext) => GF.getExpectedProfit(fieldContext),
     help: "What the PM is expected to keep after all subs and materials are paid",
     format: "currency",
@@ -90,7 +90,7 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
     key: DASHBOARD_KEYS.MAX_ADVANCE,
     label: DASHBOARD_LABELS.MAX_ADVANCE,
     valueFn: (fieldContext: FieldContext) => GF.getMaxAdvance(fieldContext),
-    description: `${MAX_ADVANCE_PERCENTAGE}% × (Contract + COs)`,
+    description: `${MAX_ADVANCE_PERCENTAGE}% of (CP + COs)`,
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
     format: "currency",
     legacyCell: "M19",

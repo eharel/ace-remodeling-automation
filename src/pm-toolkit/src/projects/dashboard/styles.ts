@@ -2,8 +2,6 @@ import {
   DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
-  getColumnDescription,
-  getColumnKey,
   getColumnLabel,
 } from "./columns";
 
@@ -201,6 +199,7 @@ function applyConditionalFormatting(
     }
   };
 
+  applyColorForKey(DASHBOARD_KEYS.EXPECTED_PROFIT);
   applyColorForKey(DASHBOARD_KEYS.ADVANCE_BALANCE);
   applyColorForKey(DASHBOARD_KEYS.PM_AFTER_ADVANCE);
 }
