@@ -5,7 +5,7 @@ import {
   getColumnLabel,
 } from "./columns";
 
-export type TableInfo = {
+type TableInfo = {
   startRow: number;
   startCol: number;
   headerRow: number;
@@ -46,61 +46,15 @@ export function stylizeTable(
     dataEndRow,
     summaryRow,
   } = table;
-
   const numRows = dataEndRow - dataStartRow + 1;
-  const zebraStriping = getZebraStripingBounds(table);
-  const totalTableRows = dataEndRow - headerRow + 1;
-
-  applyCoreTableStyle(sheet, {
-    startRow,
-    startCol,
-    headerRow,
-    descriptionRow: headerRow + 1,
-    zebraRow: zebraStriping.row,
-    zebraRows: zebraStriping.numRows,
-    dataStartRow,
-    numRows,
-    totalTableRows,
-    headerIndexMap,
-  });
-
-  if (summaryRow !== undefined) {
-    applySummaryRowStyle(sheet, summaryRow, startCol);
-  }
-}
-
-function applyCoreTableStyle(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  config: {
-    startRow: number;
-    startCol: number;
-    headerRow: number;
-    descriptionRow: number;
-    zebraRow: number;
-    zebraRows: number;
-    dataStartRow: number;
-    numRows: number;
-    totalTableRows: number;
-    headerIndexMap: Record<string, number>;
-  }
-) {
-  const {
-    startRow,
-    startCol,
-    headerRow,
-    descriptionRow,
-    zebraRow,
-    zebraRows,
-    dataStartRow,
-    numRows,
-    totalTableRows,
-    headerIndexMap,
-  } = config;
 
   applyTitleStyle(sheet, startRow, startCol);
   applyHeaderStyle(sheet, headerRow, startCol);
-  applyDescriptionRow(sheet, descriptionRow, startCol);
+  applyDescriptionRow(sheet, headerRow + 1, startCol);
+
+  const { row: zebraRow, numRows: zebraRows } = getZebraStripingBounds(table);
   applyZebraStriping(sheet, zebraRow, startCol, zebraRows);
+
   applyCurrencyFormatting(sheet, dataStartRow, startCol, numRows);
   applyConditionalFormatting(
     sheet,
@@ -109,8 +63,16 @@ function applyCoreTableStyle(
     numRows,
     headerIndexMap
   );
+
+  const totalTableRows = dataEndRow - headerRow + 1;
   applyBorders(sheet, headerRow, startCol, totalTableRows);
+
   resizeColumns(sheet, startCol);
+
+  // ✅ Style the actual summary row if present
+  if (summaryRow !== undefined) {
+    applySummaryRowStyle(sheet, summaryRow, startCol);
+  }
 }
 
 export function getHeaderIndexMap(
@@ -180,6 +142,7 @@ function applyDescriptionRow(
 
   sheet.setRowHeight(row, 22);
 
+  // ✅ Add subtle bottom border to separate from data
   range.setBorder(
     false, // top
     false, // left
@@ -187,10 +150,11 @@ function applyDescriptionRow(
     false, // right
     false, // vertical
     false, // horizontal
-    "#d0d0d0", // color
-    SpreadsheetApp.BorderStyle.SOLID // style
+    "#d0d0d0", // border color
+    SpreadsheetApp.BorderStyle.SOLID
   );
 
+  // ✅ Add hover tips on description cells
   DASHBOARD_COLUMNS.forEach((col, i) => {
     if (col.help) {
       range.getCell(1, i + 1).setNote(col.help);
@@ -367,15 +331,16 @@ function applySummaryRowStyle(
 
   range.setFontWeight("bold").setBackground("#e8e8e8");
 
+  // Top border to visually separate from data
   range.setBorder(
-    true,
+    true, // top
     false,
     false,
     false,
     false,
     false,
-    "black",
-    SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+    "black", // thicker color
+    SpreadsheetApp.BorderStyle.SOLID_MEDIUM // ✅ thicker border
   );
 
   DASHBOARD_COLUMNS.forEach((col, i) => {

@@ -1,5 +1,5 @@
 import { buildMainMenu } from "./menu/main-menu";
-import { generateProjectDashboard } from "./projects/dashboard/generate-dashboard";
+import { generateProjectDashboard } from "./projects/dashboard";
 import { startsWithProjectNumber } from "./projects/utils";
 import { PROJECT_DASHBOARD_SHEET_NAME } from "./constants";
 

@@ -6,9 +6,9 @@ import {
   closeActiveProject,
   promptProjectToClose,
 } from "./projects/close-project";
-import { generateProjectDashboard } from "./projects/dashboard/generate-dashboard";
+import { generateProjectDashboard } from "./projects/dashboard";
 import { promptForNewProject } from "./projects/new-project";
-import { generateLeadsPaymentsDashboard } from "./leads-payments/generate-dashboard";
+import { generateLeadsPaymentsDashboard } from "./leads-payments";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
