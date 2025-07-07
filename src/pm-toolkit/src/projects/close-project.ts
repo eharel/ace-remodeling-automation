@@ -4,8 +4,8 @@ import {
   PROJECT_STATUS_CLOSED,
   PROJECT_STATUS_SHEET_NAME,
   PROJECT_TAB_NAME_REGEX,
-} from "./constants";
-import { generateProjectDashboard } from "./dashboard/generate-dashboard";
+} from "../constants";
+import { generateProjectDashboard } from "./dashboard/";
 
 export function closeProject(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
   const tabName = sheet.getName();

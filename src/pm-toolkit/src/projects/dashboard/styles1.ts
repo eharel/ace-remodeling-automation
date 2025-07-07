@@ -2,8 +2,6 @@ import {
   DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
-  getColumnDescription,
-  getColumnKey,
   getColumnLabel,
 } from "./columns";
 
@@ -13,6 +11,7 @@ type TableInfo = {
   headerRow: number;
   dataStartRow: number;
   dataEndRow: number;
+  summaryRow?: number; // optional to avoid breakage
 };
 
 export function stylizeDashboard(
@@ -34,12 +33,19 @@ export function stylizeDashboard(
   }
 }
 
-function stylizeTable(
+export function stylizeTable(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   table: TableInfo,
   headerIndexMap: Record<string, number>
 ) {
-  const { startRow, startCol, headerRow, dataStartRow, dataEndRow } = table;
+  const {
+    startRow,
+    startCol,
+    headerRow,
+    dataStartRow,
+    dataEndRow,
+    summaryRow,
+  } = table;
   const numRows = dataEndRow - dataStartRow + 1;
 
   applyTitleStyle(sheet, startRow, startCol);
@@ -62,9 +68,14 @@ function stylizeTable(
   applyBorders(sheet, headerRow, startCol, totalTableRows);
 
   resizeColumns(sheet, startCol);
+
+  // ✅ Style the actual summary row if present
+  if (summaryRow !== undefined) {
+    applySummaryRowStyle(sheet, summaryRow, startCol);
+  }
 }
 
-function getHeaderIndexMap(
+export function getHeaderIndexMap(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   headerRow: number,
   startCol: number
@@ -81,7 +92,7 @@ function getHeaderIndexMap(
   return map;
 }
 
-function applyTitleStyle(
+export function applyTitleStyle(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   startRow: number,
   startCol: number
@@ -94,7 +105,7 @@ function applyTitleStyle(
     .setBackground("#e0e0e0");
 }
 
-function applyHeaderStyle(
+export function applyHeaderStyle(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   headerRow: number,
   startCol: number
@@ -201,6 +212,7 @@ function applyConditionalFormatting(
     }
   };
 
+  applyColorForKey(DASHBOARD_KEYS.EXPECTED_PROFIT);
   applyColorForKey(DASHBOARD_KEYS.ADVANCE_BALANCE);
   applyColorForKey(DASHBOARD_KEYS.PM_AFTER_ADVANCE);
 }
@@ -308,4 +320,36 @@ function addTimestamp(
 
   const frozenRowCount = table.dataStartRow - 1;
   sheet.setFrozenRows(frozenRowCount);
+}
+
+function applySummaryRowStyle(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  row: number,
+  startCol: number
+) {
+  const range = sheet.getRange(row, startCol, 1, DASHBOARD_COLUMNS.length);
+
+  range.setFontWeight("bold").setBackground("#e8e8e8");
+
+  // Top border to visually separate from data
+  range.setBorder(
+    true, // top
+    false,
+    false,
+    false,
+    false,
+    false,
+    "black", // thicker color
+    SpreadsheetApp.BorderStyle.SOLID_MEDIUM // ✅ thicker border
+  );
+
+  DASHBOARD_COLUMNS.forEach((col, i) => {
+    const cell = sheet.getRange(row, startCol + i);
+
+    if (col.format === "currency") {
+      cell.setNumberFormat("$#,##0.00").setHorizontalAlignment("right");
+    } else if (col.format !== "text") {
+      cell.setHorizontalAlignment("right");
+    }
+  });
 }
