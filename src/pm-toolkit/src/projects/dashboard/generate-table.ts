@@ -6,7 +6,7 @@ import {
   DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
-} from "./columns";
+} from "./project-columns";
 import { IS_ASCENDING_ORDER } from "../../constants";
 
 export function generateAndStylizeTable(

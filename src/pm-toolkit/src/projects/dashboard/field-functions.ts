@@ -5,7 +5,7 @@ import { getFieldValue } from "./utils";
 import { toNumber } from "../../utils";
 import { EXPECTED_PROFIT_PERCENTAGE } from "../../constants";
 import { getValueFromNamedOrLegacy } from "./utils";
-import { DASHBOARD_KEYS as KEYS } from "./columns";
+import { DASHBOARD_KEYS as KEYS } from "./project-columns";
 
 export function getProjectNumber({
   sheet,
