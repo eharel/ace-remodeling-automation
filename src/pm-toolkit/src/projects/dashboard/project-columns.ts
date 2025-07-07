@@ -3,7 +3,7 @@ import {
   MAX_ADVANCE_PERCENTAGE,
 } from "../../constants";
 import * as GF from "./field-functions";
-import { FieldContext, ProjectColumn } from "./types";
+import { FieldContext } from "./types";
 
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
@@ -39,7 +39,17 @@ export type DashboardColumnLabel =
 export type DashboardColumnKey =
   (typeof DASHBOARD_KEYS)[keyof typeof DASHBOARD_KEYS];
 
-export const DASHBOARD_COLUMNS: ProjectColumn[] = [
+export type DashboardColumn = {
+  key: DashboardColumnKey;
+  label: string;
+  description?: string;
+  help?: string;
+  valueFn?: (fieldContext: FieldContext) => any;
+  format?: "currency" | "text";
+  legacyCell?: string;
+};
+
+export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
     label: DASHBOARD_LABELS.PROJECT_NO,
@@ -127,10 +137,18 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   },
 ];
 
-import { buildLabelKeyMaps } from "../../columns/utils";
+export const COLUMN_LABELS_BY_KEY: Record<
+  DashboardColumnKey,
+  DashboardColumnLabel
+> = DASHBOARD_COLUMNS.reduce((acc, col) => {
+  acc[col.key] = col.label as DashboardColumnLabel;
+  return acc;
+}, {} as Record<DashboardColumnKey, DashboardColumnLabel>);
 
-const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
-  DASHBOARD_COLUMNS
-);
-export const COLUMN_LABELS_BY_KEY = labelMaps.labelsByKey;
-export const COLUMN_KEYS_BY_LABEL = labelMaps.keysByLabel;
+export const COLUMN_KEYS_BY_LABEL: Record<
+  DashboardColumnLabel,
+  DashboardColumnKey
+> = DASHBOARD_COLUMNS.reduce((acc, col) => {
+  acc[col.label as DashboardColumnLabel] = col.key;
+  return acc;
+}, {} as Record<DashboardColumnLabel, DashboardColumnKey>);

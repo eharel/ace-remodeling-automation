@@ -5,7 +5,7 @@ import {
   COL_GAP_BETWEEN_TABLES,
 } from "../../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
-import { DASHBOARD_COLUMNS } from "./columns";
+import { DASHBOARD_COLUMNS } from "./project-columns";
 import { generateAndStylizeTable } from "./generate-table";
 
 export function generateProjectDashboard() {

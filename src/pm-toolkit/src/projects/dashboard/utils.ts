@@ -1,5 +1,5 @@
 import { MAX_ADVANCE_PERCENTAGE } from "../../constants";
-import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./columns";
+import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./project-columns";
 
 export function getFieldValue(rowData: any[], key: DashboardColumnKey) {
   const index = DASHBOARD_COLUMNS.findIndex((col) => col.key === key);

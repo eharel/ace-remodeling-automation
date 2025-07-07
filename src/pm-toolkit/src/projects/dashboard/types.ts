@@ -1,4 +1,5 @@
-import { DashboardColumnKey } from "./columns";
+import { BaseColumn } from "../../columns";
+import { DashboardColumnKey, DashboardColumnLabel } from "./project-columns";
 
 export interface FieldContext {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
@@ -7,7 +8,10 @@ export interface FieldContext {
   rowData: any[];
 }
 
-export interface ProjectField {
+export type ProjectColumn = BaseColumn<FieldContext> & {
   key: DashboardColumnKey;
-  valueFn?: (fieldContext: FieldContext) => any;
-}
+  label: DashboardColumnLabel;
+  description?: string;
+  help?: string;
+  legacyCell?: string;
+};

@@ -1,4 +1,4 @@
-import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
+import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./project-columns";
 import { FieldContext } from "./types";
 
 export function getProjectRowData(

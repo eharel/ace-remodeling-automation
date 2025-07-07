@@ -1,9 +1,11 @@
+import { getColumnLabel } from "../../columns";
 import {
+  COLUMN_LABELS_BY_KEY,
   DASHBOARD_COLUMNS,
   DASHBOARD_KEYS,
   DashboardColumnKey,
-  getColumnLabel,
-} from "./columns";
+  DashboardColumnLabel,
+} from "./project-columns";
 
 export type TableInfo = {
   startRow: number;
@@ -237,7 +239,7 @@ function applyConditionalFormatting(
   headerIndexMap: Record<string, number>
 ) {
   const applyColorForKey = (key: DashboardColumnKey) => {
-    const header = getColumnLabel(key);
+    const header = getColumnLabel(key, COLUMN_LABELS_BY_KEY);
     const colIndex = headerIndexMap[header];
     if (colIndex !== undefined) {
       const col = startCol + colIndex;
@@ -322,7 +324,10 @@ function alignProjectNoColumn(
   table: TableInfo,
   headerIndexMap: Record<string, number>
 ) {
-  const colIndex = headerIndexMap[getColumnLabel(DASHBOARD_KEYS.PROJECT_NO)];
+  const colIndex =
+    headerIndexMap[
+      getColumnLabel(DASHBOARD_KEYS.PROJECT_NO, COLUMN_LABELS_BY_KEY)
+    ];
   if (colIndex !== undefined) {
     const col = table.startCol + colIndex;
     const numRows = table.dataEndRow - table.dataStartRow + 1;
