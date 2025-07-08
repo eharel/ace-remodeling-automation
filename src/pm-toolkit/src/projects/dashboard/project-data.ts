@@ -1,17 +1,17 @@
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./project-columns";
-import { FieldContext } from "./types";
+import { ProjectContext, ProjectDashboardRow } from "./types";
 
 export function getProjectRowData(
   sheetTab: GoogleAppsScript.Spreadsheet.Sheet
-) {
+): ProjectDashboardRow {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const namedRangeMap = buildNamedRangeMap(ss, sheetTab.getName());
   const directValueMap = buildDirectValueMap(sheetTab);
 
-  const rowData: any[] = [];
+  const rowData: ProjectDashboardRow = {};
 
   for (const field of DASHBOARD_COLUMNS) {
-    const ctx: FieldContext = {
+    const ctx: ProjectContext = {
       sheet: sheetTab,
       namedRangeMap,
       directValueMap,
@@ -24,7 +24,7 @@ export function getProjectRowData(
       value = value.toString();
     }
 
-    rowData.push(value);
+    rowData[field.key] = value;
   }
 
   return rowData;

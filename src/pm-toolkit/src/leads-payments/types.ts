@@ -1,3 +1,6 @@
+import { BaseColumn } from "../columns";
+import { LeadsColumnKey, LeadsColumnLabel } from "./columns";
+
 export type PaymentEntry = {
   date: Date;
   amount: number;
@@ -10,5 +13,16 @@ export type LeadsInputRow = {
   totalLeads: number;
   signedProposals: number;
   approvedRevenue: number;
-  conversionRate: number;
 };
+
+export type LeadsDashboardRow = Record<LeadsColumnKey, number | string>;
+
+export interface LeadsContext {
+  rowData: LeadsDashboardRow;
+}
+
+export type LeadsColumn = BaseColumn<
+  LeadsContext,
+  LeadsColumnKey,
+  LeadsColumnLabel
+>;

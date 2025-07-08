@@ -1,4 +1,4 @@
-import type { FieldContext } from "./types";
+import type { ProjectContext } from "./types";
 import * as NR from "../../constants/named-ranges";
 import { calculateAdvanceMax } from "./utils";
 import { getFieldValue } from "./utils";
@@ -10,7 +10,7 @@ import { DASHBOARD_KEYS as KEYS } from "./project-columns";
 export function getProjectNumber({
   sheet,
   namedRangeMap,
-}: FieldContext): string {
+}: ProjectContext): string {
   const nr = namedRangeMap.get(NR.NR_PROJECT_NUMBER);
   if (nr) return nr.getValue();
 
@@ -19,7 +19,10 @@ export function getProjectNumber({
   return match ? match[1] : "N/A";
 }
 
-export function getClientName({ sheet, namedRangeMap }: FieldContext): string {
+export function getClientName({
+  sheet,
+  namedRangeMap,
+}: ProjectContext): string {
   const nr = namedRangeMap.get(NR.NR_CLIENT_NAME);
   if (nr) return nr.getValue();
 
@@ -31,7 +34,7 @@ export function getClientName({ sheet, namedRangeMap }: FieldContext): string {
 export function getContractPrice({
   namedRangeMap,
   directValueMap,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   return getValueFromNamedOrLegacy(
     namedRangeMap,
     directValueMap,
@@ -43,7 +46,7 @@ export function getContractPrice({
 export function getChangeOrders({
   namedRangeMap,
   directValueMap,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   return getValueFromNamedOrLegacy(
     namedRangeMap,
     directValueMap,
@@ -55,7 +58,7 @@ export function getChangeOrders({
 export function getExpenses({
   namedRangeMap,
   directValueMap,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   return getValueFromNamedOrLegacy(
     namedRangeMap,
     directValueMap,
@@ -64,7 +67,7 @@ export function getExpenses({
   );
 }
 
-export function getMaxAdvance({ rowData }: FieldContext): number | string {
+export function getMaxAdvance({ rowData }: ProjectContext): number | string {
   // TODO: Do I need to consider legacy cells here?
 
   const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
@@ -79,7 +82,7 @@ export function getMaxAdvance({ rowData }: FieldContext): number | string {
 export function getTotalAdvance({
   namedRangeMap,
   directValueMap,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   return getValueFromNamedOrLegacy(
     namedRangeMap,
     directValueMap,
@@ -88,7 +91,9 @@ export function getTotalAdvance({
   );
 }
 
-export function getAdvanceBalance({ rowData }: FieldContext): number | string {
+export function getAdvanceBalance({
+  rowData,
+}: ProjectContext): number | string {
   const maxAdvance = toNumber(getFieldValue(rowData, KEYS.MAX_ADVANCE));
   const totalAdvance = toNumber(getFieldValue(rowData, KEYS.TOTAL_ADVANCE));
 
@@ -101,7 +106,7 @@ export function getAdvanceBalance({ rowData }: FieldContext): number | string {
 export function getPMAfterAdvance({
   namedRangeMap,
   directValueMap,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   return getValueFromNamedOrLegacy(
     namedRangeMap,
     directValueMap,
@@ -110,7 +115,9 @@ export function getPMAfterAdvance({
   );
 }
 
-export function getExpectedProfit({ rowData }: FieldContext): number | string {
+export function getExpectedProfit({
+  rowData,
+}: ProjectContext): number | string {
   // 20% of (contract price + change orders)
   const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
   const changeOrders = toNumber(getFieldValue(rowData, KEYS.CHANGE_ORDERS));
@@ -123,7 +130,7 @@ export function getExpectedProfit({ rowData }: FieldContext): number | string {
 
 export function getProfitAfterAdvance({
   rowData,
-}: FieldContext): number | string {
+}: ProjectContext): number | string {
   const expectedProfit = toNumber(getFieldValue(rowData, KEYS.EXPECTED_PROFIT));
   const totalAdvance = toNumber(getFieldValue(rowData, KEYS.TOTAL_ADVANCE));
 

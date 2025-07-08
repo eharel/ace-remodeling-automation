@@ -96,7 +96,13 @@ function addProjectRows(
 
   for (const tab of tabs) {
     const rowData = getProjectRowData(tab);
-    sheet.getRange(rowIndex, startCol, 1, rowData.length).setValues([rowData]);
+
+    const rowValues = DASHBOARD_COLUMNS.map((col) => rowData[col.key]);
+
+    sheet
+      .getRange(rowIndex, startCol, 1, rowValues.length)
+      .setValues([rowValues]);
+
     rowIndex++;
   }
 

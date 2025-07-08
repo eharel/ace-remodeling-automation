@@ -1,22 +1,16 @@
 import { MAX_ADVANCE_PERCENTAGE } from "../../constants";
 import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./project-columns";
+import { ProjectDashboardRow } from "./types";
+import { getNamedRange } from "../../utils";
 
-export function getFieldValue(rowData: any[], key: DashboardColumnKey) {
-  const index = DASHBOARD_COLUMNS.findIndex((col) => col.key === key);
-  if (index === -1) throw new Error(`Column key not found: ${key}`);
-  return rowData[index];
-}
-
-export function getNamedRange(
-  namedRangeMap: Map<string, GoogleAppsScript.Spreadsheet.Range>,
-  key: string
-): GoogleAppsScript.Spreadsheet.Range | undefined {
-  return (
-    namedRangeMap.get(key) ??
-    [...namedRangeMap.entries()].find(
-      ([name]) => name.endsWith(`__${key}`) || name.endsWith(`!${key}`)
-    )?.[1]
-  );
+export function getFieldValue(
+  rowData: ProjectDashboardRow,
+  key: DashboardColumnKey
+) {
+  if (!(key in rowData)) {
+    throw new Error(`Key not found in rowData: ${key}`);
+  }
+  return rowData[key];
 }
 
 // Logic constant for script-based calculations
