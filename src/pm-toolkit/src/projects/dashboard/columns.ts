@@ -3,7 +3,7 @@ import {
   MAX_ADVANCE_PERCENTAGE,
 } from "../../constants";
 import * as GF from "./field-functions";
-import { FieldContext, ProjectColumn } from "./types";
+import { ProjectColumn, ProjectContext } from "./types";
 
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
@@ -43,19 +43,22 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
     label: DASHBOARD_LABELS.PROJECT_NO,
-    valueFn: (fieldContext: FieldContext) => GF.getProjectNumber(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getProjectNumber(projectContext),
     format: "text",
   },
   {
     key: DASHBOARD_KEYS.CLIENT_NAME,
     label: DASHBOARD_LABELS.CLIENT_NAME,
-    valueFn: (fieldContext: FieldContext) => GF.getClientName(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getClientName(projectContext),
     format: "text",
   },
   {
     key: DASHBOARD_KEYS.CONTRACT_PRICE,
     label: DASHBOARD_LABELS.CONTRACT_PRICE,
-    valueFn: (fieldContext: FieldContext) => GF.getContractPrice(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getContractPrice(projectContext),
     description: "CP",
     format: "currency",
     legacyCell: "M2",
@@ -63,7 +66,8 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.CHANGE_ORDERS,
     label: DASHBOARD_LABELS.CHANGE_ORDERS,
-    valueFn: (fieldContext: FieldContext) => GF.getChangeOrders(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getChangeOrders(projectContext),
     description: "CO",
     format: "currency",
     legacyCell: "M7",
@@ -72,14 +76,16 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
     label: DASHBOARD_LABELS.EXPECTED_PROFIT,
     description: `${EXPECTED_PROFIT_PERCENTAGE}% of (CP + COs)`,
-    valueFn: (fieldContext: FieldContext) => GF.getExpectedProfit(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getExpectedProfit(projectContext),
     help: "What the PM is expected to keep after all subs and materials are paid",
     format: "currency",
   },
   {
     key: DASHBOARD_KEYS.MAX_ADVANCE,
     label: DASHBOARD_LABELS.MAX_ADVANCE,
-    valueFn: (fieldContext: FieldContext) => GF.getMaxAdvance(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getMaxAdvance(projectContext),
     description: `${MAX_ADVANCE_PERCENTAGE}% of (CP + COs)`,
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
     format: "currency",
@@ -88,7 +94,8 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.TOTAL_ADVANCE,
     label: DASHBOARD_LABELS.TOTAL_ADVANCE,
-    valueFn: (fieldContext: FieldContext) => GF.getTotalAdvance(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getTotalAdvance(projectContext),
     format: "currency",
     legacyCell: "I21",
   },
@@ -97,14 +104,15 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     label: DASHBOARD_LABELS.ADVANCE_BALANCE,
     description: "Max Advance - Total Advance",
     help: "Remaining room before exceeding the allowed advance limit",
-    valueFn: (fieldContext: FieldContext) => GF.getAdvanceBalance(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getAdvanceBalance(projectContext),
     format: "currency",
   },
   {
     key: DASHBOARD_KEYS.EXPENSES,
     label: DASHBOARD_LABELS.EXPENSES,
     description: "Bills / PO",
-    valueFn: (fieldContext: FieldContext) => GF.getExpenses(fieldContext),
+    valueFn: (projectContext: ProjectContext) => GF.getExpenses(projectContext),
     format: "currency",
     legacyCell: "M13",
   },
@@ -112,8 +120,8 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     key: DASHBOARD_KEYS.PROFIT_AFTER_ADVANCE,
     label: DASHBOARD_LABELS.PROFIT_AFTER_ADVANCE,
     description: "Expected Profit - Total Advance",
-    valueFn: (fieldContext: FieldContext) =>
-      GF.getProfitAfterAdvance(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getProfitAfterAdvance(projectContext),
     format: "currency",
     help: "Expected profit once the advance is paid out",
   },
@@ -121,7 +129,8 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     key: DASHBOARD_KEYS.PM_AFTER_ADVANCE,
     label: DASHBOARD_LABELS.PM_AFTER_ADVANCE,
     help: "Amount the PM keeps after the total advance is paid out",
-    valueFn: (fieldContext: FieldContext) => GF.getPMAfterAdvance(fieldContext),
+    valueFn: (projectContext: ProjectContext) =>
+      GF.getPMAfterAdvance(projectContext),
     format: "currency",
     legacyCell: "M21",
   },

@@ -1,17 +1,21 @@
 import { BaseColumn } from "../../columns";
 import { DashboardColumnKey, DashboardColumnLabel } from "./project-columns";
 
-export interface FieldContext {
+export type ProjectDashboardRow = {
+  [key in DashboardColumnKey]?: any;
+};
+
+export interface ProjectContext {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
   namedRangeMap: Map<string, GoogleAppsScript.Spreadsheet.Range>;
   directValueMap: Map<string, any>;
-  rowData: any[];
+  rowData: ProjectDashboardRow;
 }
 
-export type ProjectColumn = BaseColumn<FieldContext> & {
-  key: DashboardColumnKey;
-  label: DashboardColumnLabel;
-  description?: string;
-  help?: string;
+export type ProjectColumn = BaseColumn<
+  ProjectContext,
+  DashboardColumnKey,
+  DashboardColumnLabel
+> & {
   legacyCell?: string;
 };

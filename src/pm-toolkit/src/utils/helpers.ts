@@ -29,3 +29,21 @@ export function logToSheet(message: string) {
   const sheet = ss.getSheetByName("Debug") || ss.insertSheet("Debug");
   sheet.appendRow([new Date(), message]);
 }
+
+export function getNamedRange(
+  namedRangeMap: Map<string, GoogleAppsScript.Spreadsheet.Range>,
+  key: string
+): GoogleAppsScript.Spreadsheet.Range | undefined {
+  return (
+    namedRangeMap.get(key) ??
+    [...namedRangeMap.entries()].find(
+      ([name]) => name.endsWith(`__${key}`) || name.endsWith(`!${key}`)
+    )?.[1]
+  );
+}
+
+export function formatPercent(numerator: number, denominator: number): number {
+  return denominator > 0
+    ? Math.round((numerator / denominator) * 10000) / 100
+    : 0;
+}
