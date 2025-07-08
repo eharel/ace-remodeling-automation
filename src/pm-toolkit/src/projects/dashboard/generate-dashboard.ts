@@ -5,8 +5,10 @@ import {
   COL_GAP_BETWEEN_TABLES,
 } from "../../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
-import { DASHBOARD_COLUMNS } from "./project-columns";
-import { generateAndStylizeTable } from "./generate-table";
+import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./project-columns";
+import { generateAndStylizeTable } from "../../utils";
+import { getProjectRowData } from "./project-data";
+import { addTimestamp } from "../../styles";
 
 export function generateProjectDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -17,12 +19,24 @@ export function generateProjectDashboard() {
   const startColActive = 1;
   const startColClosed = DASHBOARD_COLUMNS.length + COL_GAP_BETWEEN_TABLES;
 
+  // Columns to sum in the dashboard summary row
+  const PROJECT_KEYS_TO_SUM = [
+    DASHBOARD_KEYS.CONTRACT_PRICE,
+    DASHBOARD_KEYS.CHANGE_ORDERS,
+    DASHBOARD_KEYS.MAX_ADVANCE,
+    DASHBOARD_KEYS.TOTAL_ADVANCE,
+    DASHBOARD_KEYS.ADVANCE_BALANCE,
+  ];
+
   generateAndStylizeTable(
     dashboardSheet,
     activeSheets,
     startRow,
     startColActive,
-    "🟢 Active Projects"
+    "🟢 Active Projects",
+    DASHBOARD_COLUMNS,
+    PROJECT_KEYS_TO_SUM,
+    getProjectRowData
   );
 
   generateAndStylizeTable(
@@ -30,8 +44,16 @@ export function generateProjectDashboard() {
     closedSheets,
     startRow,
     startColClosed,
-    "🔴 Closed Projects"
+    "🔴 Closed Projects",
+    DASHBOARD_COLUMNS,
+    PROJECT_KEYS_TO_SUM,
+    getProjectRowData
   );
+
+  // Add timestamp just below the title of Active Projects
+  const lastRow =
+    Math.max(activeSheets.length, closedSheets.length) + startRow + 5;
+  addTimestamp(dashboardSheet, lastRow, 1, "Dashboard last updated:");
 }
 
 function getOrCreateDashboardSheet(

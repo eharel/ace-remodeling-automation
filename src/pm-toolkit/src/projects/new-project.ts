@@ -8,7 +8,7 @@ import {
   ADVANCE_MAX_FORMULA,
 } from "../constants";
 import { TEMPLATE_SPREADSHEET_ID } from "../constants";
-import { setNamedValue } from "../utils";
+import { setNamedValue } from "../utils/helpers";
 
 export function promptForNewProject() {
   const ui = SpreadsheetApp.getUi();

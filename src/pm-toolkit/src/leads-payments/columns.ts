@@ -1,7 +1,7 @@
 // leads/dashboard.ts
 import { LeadsColumn, LeadsContext } from "./types";
 import { buildLabelKeyMaps } from "../columns/utils";
-import { formatPercent } from "../utils";
+import { formatPercent } from "../utils/helpers";
 
 export const LEADS_KEYS = {
   YEAR: "COL_LEADS_YEAR",
