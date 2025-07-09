@@ -1,5 +1,4 @@
 import { BaseColumn } from "../columns";
-import { getHeaderIndexMap } from "../styles/table";
 import { stylizeTable } from "../styles";
 import { IS_ASCENDING_ORDER } from "../constants";
 
@@ -13,7 +12,10 @@ export type TableInfo = {
   summaryRow?: number;
 };
 
-export function generateAndStylizeTable<RowType extends Record<string, any>>(
+export function generateAndStylizeTable<
+  RowType extends Record<string, any>,
+  T extends string
+>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   tabs: GoogleAppsScript.Spreadsheet.Sheet[],
   startRow: number,
@@ -21,7 +23,8 @@ export function generateAndStylizeTable<RowType extends Record<string, any>>(
   title: string,
   columns: BaseColumn<any, any, any>[],
   keysToSum: string[],
-  getRowData: (tab: GoogleAppsScript.Spreadsheet.Sheet) => RowType
+  getRowData: (tab: GoogleAppsScript.Spreadsheet.Sheet) => RowType,
+  colorKeys: readonly T[]
 ): TableInfo {
   const table = generateTable(
     sheet,
@@ -33,18 +36,13 @@ export function generateAndStylizeTable<RowType extends Record<string, any>>(
     keysToSum,
     getRowData
   );
-  const headerMap = getHeaderIndexMap(
-    sheet,
-    table.headerRow,
-    table.startCol,
-    columns
-  );
-  stylizeTable(sheet, table, columns, headerMap, keysToSum);
+  const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
+  stylizeTable(sheet, table, columns, keyToIndex, colorKeys);
 
   return table;
 }
 
-function generateTable<RowType extends Record<string, any>>(
+function generateTable<RowType extends Record<string, any>, T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   tabs: GoogleAppsScript.Spreadsheet.Sheet[],
   startRow: number,

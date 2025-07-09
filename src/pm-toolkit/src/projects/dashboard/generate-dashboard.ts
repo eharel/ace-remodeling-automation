@@ -28,6 +28,12 @@ export function generateProjectDashboard() {
     DASHBOARD_KEYS.ADVANCE_BALANCE,
   ];
 
+  const PROJECT_COLOR_KEYS = [
+    DASHBOARD_KEYS.EXPECTED_PROFIT,
+    DASHBOARD_KEYS.ADVANCE_BALANCE,
+    DASHBOARD_KEYS.PM_AFTER_ADVANCE,
+  ] as const;
+
   generateAndStylizeTable(
     dashboardSheet,
     activeSheets,
@@ -36,7 +42,8 @@ export function generateProjectDashboard() {
     "🟢 Active Projects",
     DASHBOARD_COLUMNS,
     PROJECT_KEYS_TO_SUM,
-    getProjectRowData
+    getProjectRowData,
+    PROJECT_COLOR_KEYS
   );
 
   generateAndStylizeTable(
@@ -47,7 +54,8 @@ export function generateProjectDashboard() {
     "🔴 Closed Projects",
     DASHBOARD_COLUMNS,
     PROJECT_KEYS_TO_SUM,
-    getProjectRowData
+    getProjectRowData,
+    PROJECT_COLOR_KEYS
   );
 
   // Add timestamp just below the title of Active Projects

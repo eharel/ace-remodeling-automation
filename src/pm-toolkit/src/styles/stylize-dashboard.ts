@@ -8,8 +8,6 @@ import {
   applyConditionalFormatting,
   applyBorders,
   resizeColumns,
-  getHeaderIndexMap,
-  addTimestamp,
   applySummaryRowStyle,
 } from "./";
 
@@ -28,14 +26,11 @@ export function stylizeDashboard<T extends string>(
   columns: BaseColumn<any, any, any>[],
   colorKeys: T[] = []
 ) {
+  // Build key→index map once
+  const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
+
   for (const table of tableInfoArray) {
-    const localHeaderMap = getHeaderIndexMap(
-      sheet,
-      table.headerRow,
-      table.startCol,
-      columns
-    );
-    stylizeTable(sheet, table, columns, localHeaderMap, colorKeys);
+    stylizeTable(sheet, table, columns, keyToIndex, colorKeys);
   }
 }
 
@@ -43,8 +38,8 @@ export function stylizeTable<T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   table: TableInfo,
   columns: BaseColumn<any, any, any>[],
-  headerIndexMap: Record<string, number>,
-  colorKeys: T[] = []
+  keyToIndex: Map<string, number>,
+  colorKeys: readonly T[] = []
 ) {
   const {
     startRow,
@@ -70,7 +65,7 @@ export function stylizeTable<T extends string>(
     dataStartRow,
     startCol,
     numRows,
-    headerIndexMap,
+    keyToIndex,
     colorKeys
   );
   applyBorders(sheet, headerRow, startCol, totalTableRows, columns);

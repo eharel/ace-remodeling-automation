@@ -20,11 +20,11 @@ export function applyConditionalFormatting(
   startRow: number,
   startCol: number,
   numRows: number,
-  headerIndexMap: Record<string, number>,
-  colorKeys: string[]
+  keyToIndex: Map<string, number>,
+  colorKeys: readonly string[]
 ) {
   for (const key of colorKeys) {
-    const colIndex = headerIndexMap[key];
+    const colIndex = keyToIndex.get(key);
     if (colIndex !== undefined) {
       const col = startCol + colIndex;
       stylizeColumnByValueColor(sheet, startRow, col, numRows, {
@@ -61,9 +61,10 @@ export function stylizeColumnByValueColor(
     const cell = range.getCell(i + 1, 1);
     const val = row[0];
 
-    if (typeof val === "number") {
-      if (val > 0) cell.setFontColor(positiveColor);
-      else if (val < 0) cell.setFontColor(negativeColor);
+    const num = Number(val);
+    if (!isNaN(num)) {
+      if (num > 0) cell.setFontColor(positiveColor);
+      else if (num < 0) cell.setFontColor(negativeColor);
       else cell.setFontColor(zeroColor ?? null);
     } else {
       cell.setFontColor(nonNumericColor ?? null);

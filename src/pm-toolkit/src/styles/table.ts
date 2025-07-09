@@ -108,24 +108,6 @@ export function resizeColumns(
   });
 }
 
-export function getHeaderIndexMap(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  headerRow: number,
-  startCol: number,
-  columns: BaseColumn<any, any, any>[]
-): Record<string, number> {
-  const headers = sheet
-    .getRange(headerRow, startCol, 1, columns.length)
-    .getValues()[0];
-  const map: Record<string, number> = {};
-
-  headers.forEach((label, i) => {
-    map[label] = i;
-  });
-
-  return map;
-}
-
 export function addTimestamp(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   row: number,
