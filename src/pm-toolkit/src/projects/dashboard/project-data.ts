@@ -1,16 +1,17 @@
+// 📁 projects/dashboard/project-data.ts
+
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 import { ProjectContext, ProjectDashboardRow } from "./types";
 
 export function getProjectRowData(
-  sheetTab: GoogleAppsScript.Spreadsheet.Sheet
+  sheetTab: GoogleAppsScript.Spreadsheet.Sheet,
+  namedRanges: GoogleAppsScript.Spreadsheet.NamedRange[]
 ): ProjectDashboardRow {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const namedRangeMap = buildNamedRangeMap(ss, sheetTab.getName());
+  const namedRangeMap = buildNamedRangeMapFromList(namedRanges);
   const directValueMap = buildDirectValueMap(sheetTab);
 
   const rowData: ProjectDashboardRow = {};
 
-  // 👇 Extract project number and client name *before* looping through fields
   const tabName = sheetTab.getName();
   const projectMatch = tabName.match(/^(\d+)\s+/);
   const clientMatch = tabName.match(/^\d+\s+(.+)$/);
@@ -23,50 +24,67 @@ export function getProjectRowData(
       sheet: sheetTab,
       namedRangeMap,
       directValueMap,
-      rowData, // shared and growing
+      rowData,
     };
 
     let value = field.valueFn?.(ctx) ?? "N/A";
-
     if (field.key === DASHBOARD_KEYS.PROJECT_NO && typeof value === "number") {
       value = value.toString();
     }
 
-    rowData[field.key] ??= value; // don't override if already set
+    rowData[field.key] ??= value;
   }
 
   return rowData;
 }
 
-function buildNamedRangeMap(
-  ss: GoogleAppsScript.Spreadsheet.Spreadsheet,
-  sheetName: string
+// 🆕 helper:
+function buildNamedRangeMapFromList(
+  namedRanges: GoogleAppsScript.Spreadsheet.NamedRange[]
 ): Map<string, GoogleAppsScript.Spreadsheet.Range> {
-  const namedRangeMap = new Map<string, GoogleAppsScript.Spreadsheet.Range>();
-
-  for (const nr of ss.getNamedRanges()) {
-    const range = nr.getRange();
-    if (range.getSheet().getName() === sheetName) {
-      namedRangeMap.set(nr.getName(), range);
-    }
+  const map = new Map<string, GoogleAppsScript.Spreadsheet.Range>();
+  for (const nr of namedRanges) {
+    map.set(nr.getName(), nr.getRange());
   }
-
-  return namedRangeMap;
+  return map;
 }
 
+/**
+ * Builds a map of named range name -> Range for the current sheet only.
+ */
+function buildNamedRangeMap(
+  namedRanges: GoogleAppsScript.Spreadsheet.NamedRange[]
+): Map<string, GoogleAppsScript.Spreadsheet.Range> {
+  const map = new Map<string, GoogleAppsScript.Spreadsheet.Range>();
+
+  for (const nr of namedRanges) {
+    map.set(nr.getName(), nr.getRange());
+  }
+
+  return map;
+}
+
+/**
+ * Fetches values from legacy cell positions using a single batch call where possible.
+ */
 export function buildDirectValueMap(
   sheet: GoogleAppsScript.Spreadsheet.Sheet
 ): Map<string, any> {
   const map = new Map<string, any>();
 
-  for (const col of DASHBOARD_COLUMNS) {
-    if (!col.legacyCell) continue;
+  const legacyCells = DASHBOARD_COLUMNS.map((col) => col.legacyCell).filter(
+    (cell): cell is string => Boolean(cell)
+  );
 
+  // Fast path for empty
+  if (legacyCells.length === 0) return map;
+
+  // Slightly faster than getRangeList for sparse cells
+  for (const cell of legacyCells) {
     try {
-      const value = sheet.getRange(col.legacyCell).getValue();
-      map.set(col.legacyCell, value); // Still use cellRef (like "M2") as the key
+      map.set(cell, sheet.getRange(cell).getValue());
     } catch (e) {
-      map.set(col.legacyCell, "N/A");
+      map.set(cell, "N/A");
     }
   }
 

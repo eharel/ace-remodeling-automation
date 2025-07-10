@@ -47,3 +47,13 @@ export function formatPercent(numerator: number, denominator: number): number {
     ? Math.round((numerator / denominator) * 10000) / 100
     : 0;
 }
+
+export function toA1Notation(col: number, row: number): string {
+  let letter = "";
+  while (col > 0) {
+    const mod = (col - 1) % 26;
+    letter = String.fromCharCode(65 + mod) + letter;
+    col = Math.floor((col - mod) / 26);
+  }
+  return `${letter}${row}`;
+}

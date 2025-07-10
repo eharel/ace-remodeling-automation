@@ -9,17 +9,18 @@ import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 import { generateAndStylizeTableFromRows } from "../../utils";
 import { getProjectRowData } from "./project-data";
 import { addTimestamp } from "../../styles";
+import { ProjectDashboardRow } from "./types";
+import { toA1Notation } from "../../utils/helpers";
 
 export function generateProjectDashboard() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const dashboardSheet = getOrCreateDashboardSheet(ss);
     dashboardSheet.activate();
-
-    // ⏳ Initial status message
     setDashboardStatus(dashboardSheet, "⏳ Generating dashboard...");
 
     const { activeSheets, closedSheets } = getCategorizedProjectSheets(ss);
+    const namedRangesBySheet = groupNamedRangesBySheet(ss.getNamedRanges());
 
     Logger.log(`Found ${activeSheets.length} active sheets`);
     Logger.log(`Found ${closedSheets.length} closed sheets`);
@@ -42,16 +43,25 @@ export function generateProjectDashboard() {
       DASHBOARD_KEYS.PM_AFTER_ADVANCE,
     ] as const;
 
-    const activeRows = activeSheets.map((s) => {
-      const row = getProjectRowData(s);
-      Logger.log(
-        `Active project row for ${s.getName()}: ${JSON.stringify(row)}`
-      );
-      return row;
-    });
-
+    // 🟢 Active Projects Table
     setDashboardStatus(dashboardSheet, "📊 Generating Active Projects...");
-    Logger.log("Generating Active Projects table...");
+    const activeRows: ProjectDashboardRow[] = [];
+    let beginningRow = startRow;
+    let beginningCol = startColActive;
+    for (let i = 0; i < activeSheets.length; i++) {
+      const sheet = activeSheets[i];
+      setDashboardStatus(
+        dashboardSheet,
+        `📊 Generating Active Projects... (${i + 1}/${activeSheets.length})`,
+        toA1Notation(beginningCol, beginningRow)
+      );
+      const row = getProjectRowData(
+        sheet,
+        namedRangesBySheet.get(sheet.getName()) ?? []
+      );
+      activeRows.push(row);
+    }
+
     generateAndStylizeTableFromRows(
       dashboardSheet,
       activeRows,
@@ -63,16 +73,23 @@ export function generateProjectDashboard() {
       PROJECT_COLOR_KEYS
     );
 
-    const closedRows = closedSheets.map((s) => {
-      const row = getProjectRowData(s);
-      Logger.log(
-        `Closed project row for ${s.getName()}: ${JSON.stringify(row)}`
+    // 🔴 Closed Projects Table
+    const closedRows: ProjectDashboardRow[] = [];
+    beginningRow = startRow;
+    beginningCol = startColClosed;
+    for (let i = 0; i < closedSheets.length; i++) {
+      const sheet = closedSheets[i];
+      setDashboardStatus(
+        dashboardSheet,
+        `📊 Generating Closed Projects... (${i + 1}/${closedSheets.length})`,
+        toA1Notation(beginningCol, beginningRow)
       );
-      return row;
-    });
-
-    setDashboardStatus(dashboardSheet, "📊 Generating Closed Projects...");
-    Logger.log("Generating Closed Projects table...");
+      const row = getProjectRowData(
+        sheet,
+        namedRangesBySheet.get(sheet.getName()) ?? []
+      );
+      closedRows.push(row);
+    }
     generateAndStylizeTableFromRows(
       dashboardSheet,
       closedRows,
@@ -84,8 +101,10 @@ export function generateProjectDashboard() {
       PROJECT_COLOR_KEYS
     );
 
-    const lastRow =
-      Math.max(activeSheets.length, activeSheets.length) + startRow + 5;
+    // ✅ Done
+    const numActiveRows = activeRows.length;
+    const extraRows = 3; // title, headers, description
+    const lastRow = startRow + numActiveRows + extraRows + 2;
     addTimestamp(dashboardSheet, lastRow, 1, "Dashboard last updated:");
 
     SpreadsheetApp.getActiveSpreadsheet().toast(
@@ -102,7 +121,7 @@ export function generateProjectDashboard() {
 function getOrCreateDashboardSheet(
   ss: GoogleAppsScript.Spreadsheet.Spreadsheet
 ): GoogleAppsScript.Spreadsheet.Sheet {
-  let sheet = ss.getSheetByName(PROJECT_DASHBOARD_SHEET_NAME);
+  const sheet = ss.getSheetByName(PROJECT_DASHBOARD_SHEET_NAME);
   return sheet
     ? (sheet.clear(), sheet)
     : ss.insertSheet(PROJECT_DASHBOARD_SHEET_NAME);
@@ -127,10 +146,23 @@ function getCategorizedProjectSheets(
   return { activeSheets, closedSheets };
 }
 
+function groupNamedRangesBySheet(
+  namedRanges: GoogleAppsScript.Spreadsheet.NamedRange[]
+): Map<string, GoogleAppsScript.Spreadsheet.NamedRange[]> {
+  const map = new Map<string, GoogleAppsScript.Spreadsheet.NamedRange[]>();
+  for (const nr of namedRanges) {
+    const sheetName = nr.getRange().getSheet().getName();
+    if (!map.has(sheetName)) map.set(sheetName, []);
+    map.get(sheetName)!.push(nr);
+  }
+  return map;
+}
+
 function setDashboardStatus(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  message: string
+  message: string,
+  cell: string = "A1"
 ) {
-  sheet.getRange("A1").setValue(message);
+  sheet.getRange(cell).setValue(message);
   SpreadsheetApp.flush();
 }
