@@ -1,4 +1,4 @@
-import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./project-columns";
+import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 import { ProjectContext, ProjectDashboardRow } from "./types";
 
 export function getProjectRowData(
@@ -9,6 +9,14 @@ export function getProjectRowData(
   const directValueMap = buildDirectValueMap(sheetTab);
 
   const rowData: ProjectDashboardRow = {};
+
+  // 👇 Extract project number and client name *before* looping through fields
+  const tabName = sheetTab.getName();
+  const projectMatch = tabName.match(/^(\d+)\s+/);
+  const clientMatch = tabName.match(/^\d+\s+(.+)$/);
+
+  rowData[DASHBOARD_KEYS.PROJECT_NO] = projectMatch?.[1] ?? "N/A";
+  rowData[DASHBOARD_KEYS.CLIENT_NAME] = clientMatch?.[1] ?? "N/A";
 
   for (const field of DASHBOARD_COLUMNS) {
     const ctx: ProjectContext = {
@@ -24,7 +32,7 @@ export function getProjectRowData(
       value = value.toString();
     }
 
-    rowData[field.key] = value;
+    rowData[field.key] ??= value; // don't override if already set
   }
 
   return rowData;

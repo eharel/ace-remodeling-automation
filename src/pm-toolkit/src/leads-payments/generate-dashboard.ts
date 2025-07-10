@@ -1,51 +1,47 @@
 import { extractLeadsData } from "./extract-leads";
-import { LeadsInputRow, LeadsContext } from "./types";
+import { LeadsInputRow } from "./types";
 import { LEADS_COLUMNS, LEADS_KEYS } from "./columns";
+import { generateAndStylizeTableFromRows } from "../utils/table-builder";
+import { LEADS_PAYMENTS_DASHBOARD_SHEET } from "./constants";
 
 export function generateLeadsPaymentsDashboard() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet =
-    ss.getSheetByName("Leads Dashboard") || ss.insertSheet("Leads Dashboard");
+    ss.getSheetByName(LEADS_PAYMENTS_DASHBOARD_SHEET) ||
+    ss.insertSheet(LEADS_PAYMENTS_DASHBOARD_SHEET);
   sheet.clear();
 
   const inputRows: LeadsInputRow[] = extractLeadsData();
 
-  const dashboardRows: LeadsContext[] = inputRows.map((row) => {
-    const conversionRate =
-      row.totalLeads > 0 ? row.signedProposals / row.totalLeads : 0;
+  const dashboardRows = inputRows.map((row) => ({
+    COL_LEADS_YEAR: row.year,
+    COL_LEADS_MONTH: row.month,
+    COL_TOTAL_LEADS: row.totalLeads,
+    COL_SIGNED_PROPOSALS: row.signedProposals,
+    COL_APPROVED_REVENUE: row.approvedRevenue,
+    COL_CONVERSION_RATE:
+      row.totalLeads > 0 ? row.signedProposals / row.totalLeads : 0,
+  }));
 
-    return {
-      rowData: {
-        COL_LEADS_YEAR: row.year,
-        COL_LEADS_MONTH: row.month,
-        COL_TOTAL_LEADS: row.totalLeads,
-        COL_SIGNED_PROPOSALS: row.signedProposals,
-        COL_APPROVED_REVENUE: row.approvedRevenue,
-        COL_CONVERSION_RATE: conversionRate,
-      },
-    };
-  });
-
-  // Header
-  const headers = LEADS_COLUMNS.map((col) => col.label);
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-
-  // Data rows
-  const values = dashboardRows.map((ctx) =>
-    LEADS_COLUMNS.map((col) => (col.valueFn ? col.valueFn(ctx) : ""))
+  const tableInfo = generateAndStylizeTableFromRows(
+    sheet,
+    dashboardRows,
+    1,
+    1,
+    "📈 Leads — Monthly Breakdown",
+    LEADS_COLUMNS,
+    [LEADS_KEYS.REVENUE],
+    [LEADS_KEYS.CONVERSION_RATE]
   );
-
-  if (values.length > 0) {
-    sheet.getRange(2, 1, values.length, headers.length).setValues(values);
-  }
 
   // Group by quarter
   type QuarterKey = `${number}-Q${number}`;
-  const grouped = new Map<QuarterKey, LeadsContext[]>();
+  type DashboardRow = (typeof dashboardRows)[number];
+  const grouped = new Map<QuarterKey, DashboardRow[]>();
 
   for (const row of dashboardRows) {
-    const q = Math.ceil(Number(row.rowData[LEADS_KEYS.MONTH]) / 3);
-    const key = `${row.rowData[LEADS_KEYS.YEAR]}-Q${q}` as QuarterKey;
+    const q = Math.ceil(Number(row[LEADS_KEYS.MONTH]) / 3);
+    const key = `${row[LEADS_KEYS.YEAR]}-Q${q}` as QuarterKey;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(row);
   }
@@ -59,7 +55,10 @@ export function generateLeadsPaymentsDashboard() {
     "Approved Revenue",
     "Avg Conversion Rate (%)",
   ];
-  const quarterStartRow = values.length + 4;
+
+  const quarterStartRow = tableInfo.summaryRow
+    ? tableInfo.summaryRow + 4
+    : tableInfo.dataEndRow + 4;
   sheet
     .getRange(quarterStartRow, 1, 1, quarterHeaders.length)
     .setValues([quarterHeaders]);
@@ -67,15 +66,15 @@ export function generateLeadsPaymentsDashboard() {
   const quarterValues = Array.from(grouped.entries()).map(([key, rows]) => {
     const [year, qStr] = key.split("-Q");
     const totalLeads = rows.reduce(
-      (sum, r) => sum + Number(r.rowData[LEADS_KEYS.TOTAL_LEADS]),
+      (sum, r) => sum + Number(r[LEADS_KEYS.TOTAL_LEADS]),
       0
     );
     const signed = rows.reduce(
-      (sum, r) => sum + Number(r.rowData[LEADS_KEYS.SIGNED]),
+      (sum, r) => sum + Number(r[LEADS_KEYS.SIGNED]),
       0
     );
     const revenue = rows.reduce(
-      (sum, r) => sum + Number(r.rowData[LEADS_KEYS.REVENUE]),
+      (sum, r) => sum + Number(r[LEADS_KEYS.REVENUE]),
       0
     );
     const avgConversion = totalLeads > 0 ? signed / totalLeads : 0;

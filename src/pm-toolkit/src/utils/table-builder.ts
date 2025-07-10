@@ -12,45 +12,43 @@ export type TableInfo = {
   summaryRow?: number;
 };
 
-export function generateAndStylizeTable<
+export function generateAndStylizeTableFromRows<
   RowType extends Record<string, any>,
   T extends string
 >(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  tabs: GoogleAppsScript.Spreadsheet.Sheet[],
+  rows: RowType[],
   startRow: number,
   startCol: number,
   title: string,
   columns: BaseColumn<any, any, any>[],
   keysToSum: string[],
-  getRowData: (tab: GoogleAppsScript.Spreadsheet.Sheet) => RowType,
-  colorKeys: readonly T[]
+  colorKeys: readonly T[] = []
 ): TableInfo {
-  const table = generateTable(
+  const table = generateTableFromRows(
     sheet,
-    tabs,
+    rows,
     startRow,
     startCol,
     title,
     columns,
-    keysToSum,
-    getRowData
+    keysToSum
   );
+
   const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
   stylizeTable(sheet, table, columns, keyToIndex, colorKeys);
 
   return table;
 }
 
-function generateTable<RowType extends Record<string, any>, T extends string>(
+function generateTableFromRows<RowType extends Record<string, any>>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  tabs: GoogleAppsScript.Spreadsheet.Sheet[],
+  rows: RowType[],
   startRow: number,
   startCol: number,
   title: string,
   columns: BaseColumn<any, any, any>[],
-  keysToSum: string[],
-  getRowData: (tab: GoogleAppsScript.Spreadsheet.Sheet) => RowType
+  keysToSum: string[]
 ): TableInfo {
   let rowIndex = startRow;
 
@@ -65,14 +63,15 @@ function generateTable<RowType extends Record<string, any>, T extends string>(
   const descriptionRow = headerRow + 1;
   const dataStartRow = descriptionRow + 1;
 
-  const dataEndRow = addTableRows(
-    sheet,
-    tabs,
-    dataStartRow,
-    startCol,
-    columns,
-    getRowData
-  );
+  // Write data rows
+  const values = rows.map((row) => columns.map((col) => row[col.key] ?? ""));
+  const dataEndRow = dataStartRow + values.length - 1;
+
+  if (values.length > 0) {
+    sheet
+      .getRange(dataStartRow, startCol, values.length, columns.length)
+      .setValues(values);
+  }
 
   const summaryRow =
     keysToSum.length > 0
@@ -121,37 +120,6 @@ function addTableHeaders(
 ) {
   const labels = columns.map((col) => col.label);
   sheet.getRange(row, col, 1, labels.length).setValues([labels]);
-}
-
-function addTableRows<RowType extends Record<string, any>>(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  tabs: GoogleAppsScript.Spreadsheet.Sheet[],
-  startRow: number,
-  startCol: number,
-  columns: BaseColumn<any, any, any>[],
-  getRowData: (tab: GoogleAppsScript.Spreadsheet.Sheet) => RowType
-): number {
-  if (tabs.length === 0) return startRow - 1;
-
-  let rowIndex = startRow;
-
-  for (const tab of tabs) {
-    const rowData = getRowData(tab);
-    const rowValues = columns.map((col) => rowData[col.key]);
-    sheet
-      .getRange(rowIndex, startCol, 1, rowValues.length)
-      .setValues([rowValues]);
-    rowIndex++;
-  }
-
-  const numRows = rowIndex - startRow;
-  if (numRows > 0) {
-    sheet
-      .getRange(startRow, startCol, numRows, columns.length)
-      .sort({ column: startCol, ascending: IS_ASCENDING_ORDER });
-  }
-
-  return rowIndex - 1;
 }
 
 function addTableSummaryRow(

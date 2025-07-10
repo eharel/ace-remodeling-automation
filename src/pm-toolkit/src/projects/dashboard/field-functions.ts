@@ -5,19 +5,29 @@ import { getFieldValue } from "./utils";
 import { toNumber } from "../../utils/helpers";
 import { EXPECTED_PROFIT_PERCENTAGE } from "../../constants";
 import { getValueFromNamedOrLegacy } from "./utils";
-import { DASHBOARD_KEYS as KEYS } from "./project-columns";
+import { DASHBOARD_KEYS as KEYS } from "./columns";
 
-export function getProjectNumber({
-  sheet,
-  namedRangeMap,
-}: ProjectContext): string {
-  const nr = namedRangeMap.get(NR.NR_PROJECT_NUMBER);
-  if (nr) return nr.getValue();
-
-  const name = sheet.getName();
-  const match = name.trim().match(/^(\d+)\s+/);
-  return match ? match[1] : "N/A";
+export function getProjectNumberFromRow(
+  rowData: Record<string, unknown>
+): string {
+  return String(rowData[KEYS.PROJECT_NO] ?? "N/A");
 }
+
+export function getClientNameFromRow(rowData: Record<string, unknown>): string {
+  return String(rowData[KEYS.CLIENT_NAME] ?? "N/A");
+}
+
+// export function getProjectNumber({
+//   sheet,
+//   namedRangeMap,
+// }: ProjectContext): string {
+//   const nr = namedRangeMap.get(NR.NR_PROJECT_NUMBER);
+//   if (nr) return nr.getValue();
+
+//   const name = sheet.getName();
+//   const match = name.trim().match(/^(\d+)\s+/);
+//   return match ? match[1] : "N/A";
+// }
 
 export function getClientName({
   sheet,
@@ -67,16 +77,28 @@ export function getExpenses({
   );
 }
 
-export function getMaxAdvance({ rowData }: ProjectContext): number | string {
-  // TODO: Do I need to consider legacy cells here?
+// export function getMaxAdvance({ rowData }: ProjectContext): number | string {
+//   // TODO: Do I need to consider legacy cells here?
 
-  const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
-  const changeOrders = toNumber(getFieldValue(rowData, KEYS.CHANGE_ORDERS));
+//   const contractPrice = toNumber(getFieldValue(rowData, KEYS.CONTRACT_PRICE));
+//   const changeOrders = toNumber(getFieldValue(rowData, KEYS.CHANGE_ORDERS));
 
-  if (typeof contractPrice !== "number" || typeof changeOrders !== "number")
-    return "N/A";
+//   if (typeof contractPrice !== "number" || typeof changeOrders !== "number")
+//     return "N/A";
 
-  return calculateAdvanceMax(contractPrice, changeOrders);
+//   return calculateAdvanceMax(contractPrice, changeOrders);
+// }
+
+export function getMaxAdvance({
+  namedRangeMap,
+  directValueMap,
+}: ProjectContext): number | string {
+  return getValueFromNamedOrLegacy(
+    namedRangeMap,
+    directValueMap,
+    NR.NR_ADVANCE_MAX,
+    KEYS.MAX_ADVANCE
+  );
 }
 
 export function getTotalAdvance({

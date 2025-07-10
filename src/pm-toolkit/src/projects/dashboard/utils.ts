@@ -1,5 +1,5 @@
 import { MAX_ADVANCE_PERCENTAGE } from "../../constants";
-import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./project-columns";
+import { DASHBOARD_COLUMNS, DashboardColumnKey } from "./columns";
 import { ProjectDashboardRow } from "./types";
 import { getNamedRange } from "../../utils/helpers";
 

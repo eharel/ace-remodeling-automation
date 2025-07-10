@@ -9,6 +9,7 @@ import {
   applyBorders,
   resizeColumns,
   applySummaryRowStyle,
+  applyAlignment,
 } from "./";
 
 export type TableInfo = {
@@ -69,6 +70,7 @@ export function stylizeTable<T extends string>(
     colorKeys
   );
   applyBorders(sheet, headerRow, startCol, totalTableRows, columns);
+  applyAlignment(table, sheet, columns);
   resizeColumns(sheet, startCol, columns);
 
   if (summaryRow !== undefined) {

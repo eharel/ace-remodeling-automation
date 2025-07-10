@@ -1,5 +1,5 @@
 import { BaseColumn } from "../../columns";
-import { DashboardColumnKey, DashboardColumnLabel } from "./project-columns";
+import { DashboardColumnKey, DashboardColumnLabel } from "./columns";
 
 export type ProjectDashboardRow = {
   [key in DashboardColumnKey]?: any;

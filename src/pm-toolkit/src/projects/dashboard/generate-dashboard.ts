@@ -5,63 +5,98 @@ import {
   COL_GAP_BETWEEN_TABLES,
 } from "../../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
-import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./project-columns";
-import { generateAndStylizeTable } from "../../utils";
+import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
+import { generateAndStylizeTableFromRows } from "../../utils";
 import { getProjectRowData } from "./project-data";
 import { addTimestamp } from "../../styles";
 
 export function generateProjectDashboard() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const dashboardSheet = getOrCreateDashboardSheet(ss);
-  const { activeSheets, closedSheets } = getCategorizedProjectSheets(ss);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const dashboardSheet = getOrCreateDashboardSheet(ss);
+    dashboardSheet.activate();
 
-  const startRow = 1;
-  const startColActive = 1;
-  const startColClosed = DASHBOARD_COLUMNS.length + COL_GAP_BETWEEN_TABLES;
+    // ⏳ Initial status message
+    setDashboardStatus(dashboardSheet, "⏳ Generating dashboard...");
 
-  // Columns to sum in the dashboard summary row
-  const PROJECT_KEYS_TO_SUM = [
-    DASHBOARD_KEYS.CONTRACT_PRICE,
-    DASHBOARD_KEYS.CHANGE_ORDERS,
-    DASHBOARD_KEYS.MAX_ADVANCE,
-    DASHBOARD_KEYS.TOTAL_ADVANCE,
-    DASHBOARD_KEYS.ADVANCE_BALANCE,
-  ];
+    const { activeSheets, closedSheets } = getCategorizedProjectSheets(ss);
 
-  const PROJECT_COLOR_KEYS = [
-    DASHBOARD_KEYS.EXPECTED_PROFIT,
-    DASHBOARD_KEYS.ADVANCE_BALANCE,
-    DASHBOARD_KEYS.PM_AFTER_ADVANCE,
-  ] as const;
+    Logger.log(`Found ${activeSheets.length} active sheets`);
+    Logger.log(`Found ${closedSheets.length} closed sheets`);
 
-  generateAndStylizeTable(
-    dashboardSheet,
-    activeSheets,
-    startRow,
-    startColActive,
-    "🟢 Active Projects",
-    DASHBOARD_COLUMNS,
-    PROJECT_KEYS_TO_SUM,
-    getProjectRowData,
-    PROJECT_COLOR_KEYS
-  );
+    const startRow = 1;
+    const startColActive = 1;
+    const startColClosed = DASHBOARD_COLUMNS.length + COL_GAP_BETWEEN_TABLES;
 
-  generateAndStylizeTable(
-    dashboardSheet,
-    closedSheets,
-    startRow,
-    startColClosed,
-    "🔴 Closed Projects",
-    DASHBOARD_COLUMNS,
-    PROJECT_KEYS_TO_SUM,
-    getProjectRowData,
-    PROJECT_COLOR_KEYS
-  );
+    const PROJECT_KEYS_TO_SUM = [
+      DASHBOARD_KEYS.CONTRACT_PRICE,
+      DASHBOARD_KEYS.CHANGE_ORDERS,
+      DASHBOARD_KEYS.MAX_ADVANCE,
+      DASHBOARD_KEYS.TOTAL_ADVANCE,
+      DASHBOARD_KEYS.ADVANCE_BALANCE,
+    ];
 
-  // Add timestamp just below the title of Active Projects
-  const lastRow =
-    Math.max(activeSheets.length, closedSheets.length) + startRow + 5;
-  addTimestamp(dashboardSheet, lastRow, 1, "Dashboard last updated:");
+    const PROJECT_COLOR_KEYS = [
+      DASHBOARD_KEYS.EXPECTED_PROFIT,
+      DASHBOARD_KEYS.ADVANCE_BALANCE,
+      DASHBOARD_KEYS.PM_AFTER_ADVANCE,
+    ] as const;
+
+    const activeRows = activeSheets.map((s) => {
+      const row = getProjectRowData(s);
+      Logger.log(
+        `Active project row for ${s.getName()}: ${JSON.stringify(row)}`
+      );
+      return row;
+    });
+
+    setDashboardStatus(dashboardSheet, "📊 Generating Active Projects...");
+    Logger.log("Generating Active Projects table...");
+    generateAndStylizeTableFromRows(
+      dashboardSheet,
+      activeRows,
+      startRow,
+      startColActive,
+      "🟢 Active Projects",
+      DASHBOARD_COLUMNS,
+      PROJECT_KEYS_TO_SUM,
+      PROJECT_COLOR_KEYS
+    );
+
+    const closedRows = closedSheets.map((s) => {
+      const row = getProjectRowData(s);
+      Logger.log(
+        `Closed project row for ${s.getName()}: ${JSON.stringify(row)}`
+      );
+      return row;
+    });
+
+    setDashboardStatus(dashboardSheet, "📊 Generating Closed Projects...");
+    Logger.log("Generating Closed Projects table...");
+    generateAndStylizeTableFromRows(
+      dashboardSheet,
+      closedRows,
+      startRow,
+      startColClosed,
+      "🔴 Closed Projects",
+      DASHBOARD_COLUMNS,
+      PROJECT_KEYS_TO_SUM,
+      PROJECT_COLOR_KEYS
+    );
+
+    const lastRow =
+      Math.max(activeSheets.length, activeSheets.length) + startRow + 5;
+    addTimestamp(dashboardSheet, lastRow, 1, "Dashboard last updated:");
+
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      "Dashboard ready ✅",
+      "Ace Toolkit"
+    );
+  } catch (err) {
+    Logger.log("⚠️ Error in generateProjectDashboard:");
+    Logger.log((err as Error).message);
+    Logger.log((err as Error).stack);
+  }
 }
 
 function getOrCreateDashboardSheet(
@@ -90,4 +125,12 @@ function getCategorizedProjectSheets(
   }
 
   return { activeSheets, closedSheets };
+}
+
+function setDashboardStatus(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  message: string
+) {
+  sheet.getRange("A1").setValue(message);
+  SpreadsheetApp.flush();
 }

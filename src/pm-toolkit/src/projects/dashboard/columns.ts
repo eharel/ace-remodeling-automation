@@ -43,22 +43,21 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
     label: DASHBOARD_LABELS.PROJECT_NO,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getProjectNumber(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getProjectNumberFromRow(ctx.rowData),
     format: "text",
+    align: "center",
   },
   {
     key: DASHBOARD_KEYS.CLIENT_NAME,
     label: DASHBOARD_LABELS.CLIENT_NAME,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getClientName(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getClientNameFromRow(ctx.rowData),
     format: "text",
+    align: "left",
   },
   {
     key: DASHBOARD_KEYS.CONTRACT_PRICE,
     label: DASHBOARD_LABELS.CONTRACT_PRICE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getContractPrice(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getContractPrice(ctx),
     description: "CP",
     format: "currency",
     legacyCell: "M2",
@@ -66,8 +65,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.CHANGE_ORDERS,
     label: DASHBOARD_LABELS.CHANGE_ORDERS,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getChangeOrders(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getChangeOrders(ctx),
     description: "CO",
     format: "currency",
     legacyCell: "M7",
@@ -76,26 +74,23 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
     label: DASHBOARD_LABELS.EXPECTED_PROFIT,
     description: `${EXPECTED_PROFIT_PERCENTAGE}% of (CP + COs)`,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getExpectedProfit(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getExpectedProfit(ctx),
     help: "What the PM is expected to keep after all subs and materials are paid",
     format: "currency",
   },
   {
     key: DASHBOARD_KEYS.MAX_ADVANCE,
     label: DASHBOARD_LABELS.MAX_ADVANCE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getMaxAdvance(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getMaxAdvance(ctx),
     description: `${MAX_ADVANCE_PERCENTAGE}% of (CP + COs)`,
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
     format: "currency",
-    legacyCell: "M19",
+    legacyCell: "I15",
   },
   {
     key: DASHBOARD_KEYS.TOTAL_ADVANCE,
     label: DASHBOARD_LABELS.TOTAL_ADVANCE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getTotalAdvance(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getTotalAdvance(ctx),
     format: "currency",
     legacyCell: "I21",
   },
