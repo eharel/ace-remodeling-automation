@@ -26,7 +26,7 @@ export const DASHBOARD_LABELS = {
   CHANGE_ORDERS: "Change Orders",
   EXPENSES: "Expenses",
   MAX_ADVANCE: "Max Advance",
-  TOTAL_ADVANCE: "Total Advance",
+  TOTAL_ADVANCE: "Advance So Far",
   ADVANCE_BALANCE: "Advance Balance",
   PM_AFTER_ADVANCE: "PM After Advance",
   EXPECTED_PROFIT: "Expected Profit",
@@ -97,29 +97,29 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.ADVANCE_BALANCE,
     label: DASHBOARD_LABELS.ADVANCE_BALANCE,
-    description: "Max Advance - Total Advance",
+    description: "Max Advance - Advance So Far",
     help: "Remaining room before exceeding the allowed advance limit",
     valueFn: (projectContext: ProjectContext) =>
       GF.getAdvanceBalance(projectContext),
     format: "currency",
   },
-  {
-    key: DASHBOARD_KEYS.EXPENSES,
-    label: DASHBOARD_LABELS.EXPENSES,
-    description: "Bills / PO",
-    valueFn: (projectContext: ProjectContext) => GF.getExpenses(projectContext),
-    format: "currency",
-    legacyCell: "M13",
-  },
-  {
-    key: DASHBOARD_KEYS.PROFIT_AFTER_ADVANCE,
-    label: DASHBOARD_LABELS.PROFIT_AFTER_ADVANCE,
-    description: "Expected Profit - Total Advance",
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getProfitAfterAdvance(projectContext),
-    format: "currency",
-    help: "Expected profit once the advance is paid out",
-  },
+  // {
+  //   key: DASHBOARD_KEYS.EXPENSES,
+  //   label: DASHBOARD_LABELS.EXPENSES,
+  //   description: "Bills / PO",
+  //   valueFn: (projectContext: ProjectContext) => GF.getExpenses(projectContext),
+  //   format: "currency",
+  //   legacyCell: "M13",
+  // },
+  // {
+  //   key: DASHBOARD_KEYS.PROFIT_AFTER_ADVANCE,
+  //   label: DASHBOARD_LABELS.PROFIT_AFTER_ADVANCE,
+  //   description: "Expected Profit - Total Advance",
+  //   valueFn: (projectContext: ProjectContext) =>
+  //     GF.getProfitAfterAdvance(projectContext),
+  //   format: "currency",
+  //   help: "Expected profit once the advance is paid out",
+  // },
   {
     key: DASHBOARD_KEYS.PM_AFTER_ADVANCE,
     label: DASHBOARD_LABELS.PM_AFTER_ADVANCE,
