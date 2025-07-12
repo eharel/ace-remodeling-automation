@@ -1,9 +1,9 @@
 import type { ProjectContext } from "./types";
-import * as NR from "../../constants/named-ranges";
+import * as NR from "../../../constants/named-ranges";
 import { calculateAdvanceMax } from "./utils";
 import { getFieldValue } from "./utils";
-import { toNumber } from "../../utils/helpers";
-import { EXPECTED_PROFIT_PERCENTAGE } from "../../constants";
+import { toNumber } from "../../../utils/helpers";
+import { EXPECTED_PROFIT_PERCENTAGE } from "../../../constants";
 import { getValueFromNamedOrLegacy } from "./utils";
 import { DASHBOARD_KEYS as KEYS } from "./columns";
 

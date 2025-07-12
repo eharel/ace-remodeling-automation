@@ -1,16 +1,6 @@
 import { BaseColumn } from "../columns";
 import { stylizeTable } from "../styles";
-import { IS_ASCENDING_ORDER } from "../constants";
-
-export type TableInfo = {
-  title?: string;
-  startRow: number;
-  startCol: number;
-  headerRow: number;
-  dataStartRow: number;
-  dataEndRow: number;
-  summaryRow?: number;
-};
+import { StylizeOptions, TableInfo } from "../types";
 
 export function generateAndStylizeTableFromRows<
   RowType extends Record<string, any>,
@@ -23,7 +13,7 @@ export function generateAndStylizeTableFromRows<
   title: string,
   columns: BaseColumn<any, any, any>[],
   keysToSum: string[],
-  colorKeys: readonly T[] = []
+  options: StylizeOptions<T> = {}
 ): TableInfo {
   const table = generateTableFromRows(
     sheet,
@@ -32,11 +22,16 @@ export function generateAndStylizeTableFromRows<
     startCol,
     title,
     columns,
-    keysToSum
+    keysToSum,
+    options
   );
 
   const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
-  stylizeTable(sheet, table, columns, keyToIndex, colorKeys);
+  stylizeTable(sheet, table, columns, keyToIndex, options);
+
+  for (const stylizer of options.customStylizers ?? []) {
+    stylizer(sheet, table);
+  }
 
   return table;
 }
@@ -48,7 +43,8 @@ function generateTableFromRows<RowType extends Record<string, any>>(
   startCol: number,
   title: string,
   columns: BaseColumn<any, any, any>[],
-  keysToSum: string[]
+  keysToSum: string[],
+  options?: StylizeOptions
 ): TableInfo {
   let rowIndex = startRow;
 
@@ -60,17 +56,31 @@ function generateTableFromRows<RowType extends Record<string, any>>(
   const headerRow = rowIndex;
   addTableHeaders(sheet, headerRow, startCol, columns);
 
+  const hasDescription = options?.showDescription ?? true;
   const descriptionRow = headerRow + 1;
-  const dataStartRow = descriptionRow + 1;
+  const dataStartRow = hasDescription ? descriptionRow + 1 : headerRow + 1;
 
-  // Write data rows
+  const rowSpan = options?.rowSpan ?? 1;
+
   const values = rows.map((row) => columns.map((col) => row[col.key] ?? ""));
-  const dataEndRow = dataStartRow + values.length - 1;
+  const dataEndRow = dataStartRow + values.length * rowSpan - 1;
 
+  // Write values and merge rows if needed
   if (values.length > 0) {
-    sheet
-      .getRange(dataStartRow, startCol, values.length, columns.length)
-      .setValues(values);
+    for (let i = 0; i < values.length; i++) {
+      const rowValues = values[i];
+      const start = dataStartRow + i * rowSpan;
+      sheet.getRange(start, startCol, 1, columns.length).setValues([rowValues]);
+
+      if (rowSpan > 1) {
+        for (let j = 0; j < columns.length; j++) {
+          sheet
+            .getRange(start, startCol + j, rowSpan, 1)
+            .mergeVertically()
+            .setVerticalAlignment("middle");
+        }
+      }
+    }
   }
 
   const summaryRow =
@@ -93,6 +103,8 @@ function generateTableFromRows<RowType extends Record<string, any>>(
     dataStartRow,
     dataEndRow,
     summaryRow,
+    endRow: summaryRow ?? dataEndRow,
+    endCol: startCol + columns.length - 1,
   };
 }
 

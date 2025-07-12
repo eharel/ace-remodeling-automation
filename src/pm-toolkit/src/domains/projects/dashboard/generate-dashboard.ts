@@ -3,14 +3,14 @@
 import {
   PROJECT_DASHBOARD_SHEET_NAME,
   COL_GAP_BETWEEN_TABLES,
-} from "../../constants";
+} from "../../../constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
-import { generateAndStylizeTableFromRows } from "../../utils";
+import { generateAndStylizeTableFromRows } from "../../../utils";
 import { getProjectRowData } from "./project-data";
-import { addTimestamp } from "../../styles";
+import { addTimestamp } from "../../../styles";
 import { ProjectDashboardRow } from "./types";
-import { toA1Notation } from "../../utils/helpers";
+import { toA1Notation } from "../../../utils/helpers";
 
 export function generateProjectDashboard() {
   try {
@@ -70,7 +70,7 @@ export function generateProjectDashboard() {
       "🟢 Active Projects",
       DASHBOARD_COLUMNS,
       PROJECT_KEYS_TO_SUM,
-      PROJECT_COLOR_KEYS
+      { colorKeys: PROJECT_COLOR_KEYS }
     );
 
     // 🔴 Closed Projects Table
@@ -98,7 +98,7 @@ export function generateProjectDashboard() {
       "🔴 Closed Projects",
       DASHBOARD_COLUMNS,
       PROJECT_KEYS_TO_SUM,
-      PROJECT_COLOR_KEYS
+      { colorKeys: PROJECT_COLOR_KEYS }
     );
 
     // ✅ Done

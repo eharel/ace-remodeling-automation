@@ -1,7 +1,7 @@
 import {
   EXPECTED_PROFIT_PERCENTAGE,
   MAX_ADVANCE_PERCENTAGE,
-} from "../../constants";
+} from "../../../constants";
 import * as GF from "./field-functions";
 import { ProjectColumn, ProjectContext } from "./types";
 
@@ -131,7 +131,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   },
 ];
 
-import { buildLabelKeyMaps } from "../../columns/utils";
+import { buildLabelKeyMaps } from "../../../columns/utils";
 
 const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
   DASHBOARD_COLUMNS

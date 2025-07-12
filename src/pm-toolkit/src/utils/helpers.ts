@@ -1,3 +1,6 @@
+import { BaseColumn } from "../columns/types";
+import { MONTH_NAMES } from "../constants";
+
 export function toNumber(value: string) {
   const num = Number(value);
   return isNaN(num) ? 0 : num;
@@ -43,9 +46,7 @@ export function getNamedRange(
 }
 
 export function formatPercent(numerator: number, denominator: number): number {
-  return denominator > 0
-    ? Math.round((numerator / denominator) * 10000) / 100
-    : 0;
+  return denominator > 0 ? numerator / denominator : 0;
 }
 
 export function toA1Notation(col: number, row: number): string {
@@ -56,4 +57,46 @@ export function toA1Notation(col: number, row: number): string {
     col = Math.floor((col - mod) / 26);
   }
   return `${letter}${row}`;
+}
+
+// 📁 src/utils/mapInputToDashboardRows.ts
+
+export function mapInputToDashboardRows<
+  TContext extends { rowData: any },
+  TDashboardRow extends Record<string, unknown>
+>(
+  inputRows: TContext["rowData"][],
+  columns: BaseColumn<TContext, keyof TDashboardRow & string, string>[]
+): TDashboardRow[] {
+  return inputRows.map((input) => {
+    const ctx = { rowData: input } as TContext;
+    const result: Partial<TDashboardRow> = {};
+
+    for (const col of columns) {
+      result[col.key] = col.valueFn(ctx);
+    }
+
+    return result as TDashboardRow;
+  });
+}
+
+export function getColumnIndicesByLabels(
+  headerRow: string[],
+  expectedLabels: string[]
+): Record<string, number> {
+  const labelToIndex: Record<string, number> = {};
+
+  for (const label of expectedLabels) {
+    const idx = headerRow.indexOf(label);
+    if (idx === -1) {
+      throw new Error(`Missing expected column: "${label}"`);
+    }
+    labelToIndex[label] = idx;
+  }
+
+  return labelToIndex;
+}
+
+export function getMonthName(monthNumber: number): string {
+  return MONTH_NAMES[monthNumber - 1];
 }
