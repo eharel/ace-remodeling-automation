@@ -1,4 +1,4 @@
-import { BaseColumn } from "../columns";
+import { Alignment, BaseColumn } from "../columns";
 
 export function applyCurrencyFormatting(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
@@ -97,9 +97,26 @@ export function applySummaryRowStyle(
     const cell = sheet.getRange(row, startCol + i);
 
     if (col.format === "currency") {
-      cell.setNumberFormat("$#,##0.00").setHorizontalAlignment("right");
-    } else if (col.format !== "text") {
-      cell.setHorizontalAlignment("right");
+      cell.setNumberFormat("$#,##0.00");
+    }
+
+    const align: Alignment =
+      col.align ?? (col.format === "text" ? "left" : "right");
+    cell.setHorizontalAlignment(align);
+  });
+}
+
+export function applyPercentFormatting(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  startCol: number,
+  columns: BaseColumn<any, any, any>[],
+  numRows: number
+) {
+  columns.forEach((col, i) => {
+    if (col.format === "percent") {
+      const range = sheet.getRange(startRow, startCol + i, numRows);
+      range.setNumberFormat("0.00%");
     }
   });
 }

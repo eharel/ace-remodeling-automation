@@ -1,14 +1,17 @@
 import { BaseColumn } from "../columns";
+import { StylizeOptions } from "../types";
 import {
   applyTitleStyle,
   applyHeaderStyle,
   applyDescriptionRow,
   applyZebraStriping,
   applyCurrencyFormatting,
+  applyPercentFormatting,
   applyConditionalFormatting,
   applyBorders,
   resizeColumns,
   applySummaryRowStyle,
+  applyAlignment,
 } from "./";
 
 export type TableInfo = {
@@ -24,13 +27,13 @@ export function stylizeDashboard<T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   tableInfoArray: TableInfo[],
   columns: BaseColumn<any, any, any>[],
-  colorKeys: T[] = []
+  options: StylizeOptions<T> = {}
 ) {
   // Build key→index map once
   const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
 
   for (const table of tableInfoArray) {
-    stylizeTable(sheet, table, columns, keyToIndex, colorKeys);
+    stylizeTable(sheet, table, columns, keyToIndex, options);
   }
 }
 
@@ -39,7 +42,7 @@ export function stylizeTable<T extends string>(
   table: TableInfo,
   columns: BaseColumn<any, any, any>[],
   keyToIndex: Map<string, number>,
-  colorKeys: readonly T[] = []
+  options: StylizeOptions<T> = {}
 ) {
   const {
     startRow,
@@ -50,6 +53,8 @@ export function stylizeTable<T extends string>(
     summaryRow,
   } = table;
 
+  const { zebra = true, colorKeys = [], showDescription = true } = options;
+
   const numRows = dataEndRow - dataStartRow + 1;
   const zebraStart = dataStartRow - 1;
   const zebraRows = dataEndRow - zebraStart + 1;
@@ -57,9 +62,11 @@ export function stylizeTable<T extends string>(
 
   applyTitleStyle(sheet, startRow, startCol, columns);
   applyHeaderStyle(sheet, headerRow, startCol, columns);
-  applyDescriptionRow(sheet, headerRow + 1, startCol, columns);
-  applyZebraStriping(sheet, zebraStart, startCol, zebraRows, columns);
+  showDescription &&
+    applyDescriptionRow(sheet, headerRow + 1, startCol, columns);
+  zebra && applyZebraStriping(sheet, zebraStart, startCol, zebraRows, columns);
   applyCurrencyFormatting(sheet, dataStartRow, startCol, columns, numRows);
+  applyPercentFormatting(sheet, dataStartRow, startCol, columns, numRows);
   applyConditionalFormatting(
     sheet,
     dataStartRow,
@@ -69,6 +76,7 @@ export function stylizeTable<T extends string>(
     colorKeys
   );
   applyBorders(sheet, headerRow, startCol, totalTableRows, columns);
+  applyAlignment(table, sheet, columns);
   resizeColumns(sheet, startCol, columns);
 
   if (summaryRow !== undefined) {

@@ -1,5 +1,5 @@
 export type ColumnFormat = "currency" | "text" | "number" | "percent" | "date";
-export type ColumnAlignment = "left" | "center" | "right";
+export type Alignment = "left" | "center" | "right";
 
 /**
  * A generic base column that enforces domain-specific key and label types.
@@ -11,9 +11,9 @@ export type BaseColumn<
 > = {
   key: TKey;
   label: TLabel;
-  valueFn?: (ctx: TContext) => any;
+  valueFn: (ctx: TContext) => any;
   format?: ColumnFormat;
-  align?: ColumnAlignment;
+  align?: Alignment;
   description?: string;
   help?: string;
 };

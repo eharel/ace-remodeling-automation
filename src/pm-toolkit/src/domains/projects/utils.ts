@@ -1,4 +1,4 @@
-import { INACTIVE_STATUSES } from "../constants";
+import { INACTIVE_STATUSES } from "../../constants";
 import { getOrCreateProjectStatusSheet } from "./close-project";
 
 export function startsWithProjectNumber(name: string) {

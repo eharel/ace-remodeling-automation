@@ -1,9 +1,9 @@
 import {
   EXPECTED_PROFIT_PERCENTAGE,
   MAX_ADVANCE_PERCENTAGE,
-} from "../../constants";
+} from "../../../constants";
 import * as GF from "./field-functions";
-import { ProjectContext } from "./types";
+import { ProjectColumn, ProjectContext } from "./types";
 
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
@@ -26,7 +26,7 @@ export const DASHBOARD_LABELS = {
   CHANGE_ORDERS: "Change Orders",
   EXPENSES: "Expenses",
   MAX_ADVANCE: "Max Advance",
-  TOTAL_ADVANCE: "Total Advance",
+  TOTAL_ADVANCE: "Advance So Far",
   ADVANCE_BALANCE: "Advance Balance",
   PM_AFTER_ADVANCE: "PM After Advance",
   EXPECTED_PROFIT: "Expected Profit",
@@ -39,36 +39,25 @@ export type DashboardColumnLabel =
 export type DashboardColumnKey =
   (typeof DASHBOARD_KEYS)[keyof typeof DASHBOARD_KEYS];
 
-export type DashboardColumn = {
-  key: DashboardColumnKey;
-  label: string;
-  description?: string;
-  help?: string;
-  valueFn?: (projectContext: ProjectContext) => any;
-  format?: "currency" | "text";
-  legacyCell?: string;
-};
-
-export const DASHBOARD_COLUMNS: DashboardColumn[] = [
+export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
     label: DASHBOARD_LABELS.PROJECT_NO,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getProjectNumber(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getProjectNumberFromRow(ctx.rowData),
     format: "text",
+    align: "center",
   },
   {
     key: DASHBOARD_KEYS.CLIENT_NAME,
     label: DASHBOARD_LABELS.CLIENT_NAME,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getClientName(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getClientNameFromRow(ctx.rowData),
     format: "text",
+    align: "left",
   },
   {
     key: DASHBOARD_KEYS.CONTRACT_PRICE,
     label: DASHBOARD_LABELS.CONTRACT_PRICE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getContractPrice(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getContractPrice(ctx),
     description: "CP",
     format: "currency",
     legacyCell: "M2",
@@ -76,8 +65,7 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   {
     key: DASHBOARD_KEYS.CHANGE_ORDERS,
     label: DASHBOARD_LABELS.CHANGE_ORDERS,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getChangeOrders(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getChangeOrders(ctx),
     description: "CO",
     format: "currency",
     legacyCell: "M7",
@@ -86,55 +74,52 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
     label: DASHBOARD_LABELS.EXPECTED_PROFIT,
     description: `${EXPECTED_PROFIT_PERCENTAGE}% of (CP + COs)`,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getExpectedProfit(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getExpectedProfit(ctx),
     help: "What the PM is expected to keep after all subs and materials are paid",
     format: "currency",
   },
   {
     key: DASHBOARD_KEYS.MAX_ADVANCE,
     label: DASHBOARD_LABELS.MAX_ADVANCE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getMaxAdvance(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getMaxAdvance(ctx),
     description: `${MAX_ADVANCE_PERCENTAGE}% of (CP + COs)`,
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
     format: "currency",
-    legacyCell: "M19",
+    legacyCell: "I15",
   },
   {
     key: DASHBOARD_KEYS.TOTAL_ADVANCE,
     label: DASHBOARD_LABELS.TOTAL_ADVANCE,
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getTotalAdvance(projectContext),
+    valueFn: (ctx: ProjectContext) => GF.getTotalAdvance(ctx),
     format: "currency",
     legacyCell: "I21",
   },
   {
     key: DASHBOARD_KEYS.ADVANCE_BALANCE,
     label: DASHBOARD_LABELS.ADVANCE_BALANCE,
-    description: "Max Advance - Total Advance",
+    description: "Max Advance - Advance So Far",
     help: "Remaining room before exceeding the allowed advance limit",
     valueFn: (projectContext: ProjectContext) =>
       GF.getAdvanceBalance(projectContext),
     format: "currency",
   },
-  {
-    key: DASHBOARD_KEYS.EXPENSES,
-    label: DASHBOARD_LABELS.EXPENSES,
-    description: "Bills / PO",
-    valueFn: (projectContext: ProjectContext) => GF.getExpenses(projectContext),
-    format: "currency",
-    legacyCell: "M13",
-  },
-  {
-    key: DASHBOARD_KEYS.PROFIT_AFTER_ADVANCE,
-    label: DASHBOARD_LABELS.PROFIT_AFTER_ADVANCE,
-    description: "Expected Profit - Total Advance",
-    valueFn: (projectContext: ProjectContext) =>
-      GF.getProfitAfterAdvance(projectContext),
-    format: "currency",
-    help: "Expected profit once the advance is paid out",
-  },
+  // {
+  //   key: DASHBOARD_KEYS.EXPENSES,
+  //   label: DASHBOARD_LABELS.EXPENSES,
+  //   description: "Bills / PO",
+  //   valueFn: (projectContext: ProjectContext) => GF.getExpenses(projectContext),
+  //   format: "currency",
+  //   legacyCell: "M13",
+  // },
+  // {
+  //   key: DASHBOARD_KEYS.PROFIT_AFTER_ADVANCE,
+  //   label: DASHBOARD_LABELS.PROFIT_AFTER_ADVANCE,
+  //   description: "Expected Profit - Total Advance",
+  //   valueFn: (projectContext: ProjectContext) =>
+  //     GF.getProfitAfterAdvance(projectContext),
+  //   format: "currency",
+  //   help: "Expected profit once the advance is paid out",
+  // },
   {
     key: DASHBOARD_KEYS.PM_AFTER_ADVANCE,
     label: DASHBOARD_LABELS.PM_AFTER_ADVANCE,
@@ -146,18 +131,10 @@ export const DASHBOARD_COLUMNS: DashboardColumn[] = [
   },
 ];
 
-export const COLUMN_LABELS_BY_KEY: Record<
-  DashboardColumnKey,
-  DashboardColumnLabel
-> = DASHBOARD_COLUMNS.reduce((acc, col) => {
-  acc[col.key] = col.label as DashboardColumnLabel;
-  return acc;
-}, {} as Record<DashboardColumnKey, DashboardColumnLabel>);
+import { buildLabelKeyMaps } from "../../../columns/utils";
 
-export const COLUMN_KEYS_BY_LABEL: Record<
-  DashboardColumnLabel,
-  DashboardColumnKey
-> = DASHBOARD_COLUMNS.reduce((acc, col) => {
-  acc[col.label as DashboardColumnLabel] = col.key;
-  return acc;
-}, {} as Record<DashboardColumnLabel, DashboardColumnKey>);
+const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
+  DASHBOARD_COLUMNS
+);
+export const COLUMN_LABELS_BY_KEY = labelMaps.labelsByKey;
+export const COLUMN_KEYS_BY_LABEL = labelMaps.keysByLabel;

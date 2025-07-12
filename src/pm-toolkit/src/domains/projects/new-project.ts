@@ -6,9 +6,9 @@ import {
   TEMPLATE_PROJECT_TAB_NAME,
   NR_ADVANCE_MAX,
   ADVANCE_MAX_FORMULA,
-} from "../constants";
-import { TEMPLATE_SPREADSHEET_ID } from "../constants";
-import { setNamedValue } from "../utils/helpers";
+} from "../../constants";
+import { TEMPLATE_SPREADSHEET_ID } from "../../constants";
+import { setNamedValue } from "../../utils/helpers";
 
 export function promptForNewProject() {
   const ui = SpreadsheetApp.getUi();

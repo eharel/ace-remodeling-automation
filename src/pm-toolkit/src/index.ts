@@ -5,10 +5,10 @@ import { showStructureHelp, showFirstTimeSetup } from "./menu/modals";
 import {
   closeActiveProject,
   promptProjectToClose,
-} from "./projects/close-project";
-import { generateProjectDashboard } from "./projects/dashboard";
-import { promptForNewProject } from "./projects/new-project";
-import { generateLeadsPaymentsDashboard } from "./leads-payments";
+} from "./domains/projects/close-project";
+import { generateProjectDashboard } from "./domains/projects/dashboard";
+import { promptForNewProject } from "./domains/projects/new-project";
+import { generateLeadsDashboard } from "./domains/leads";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
@@ -19,7 +19,7 @@ declare global {
   var promptProjectToClose: () => void;
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
-  var generateLeadsPaymentsDashboard: () => void;
+  var generateLeadsDashboard: () => void;
 }
 
 registerGlobals({
@@ -31,5 +31,5 @@ registerGlobals({
   promptProjectToClose,
   generateProjectDashboard,
   promptForNewProject,
-  generateLeadsPaymentsDashboard,
+  generateLeadsDashboard,
 });

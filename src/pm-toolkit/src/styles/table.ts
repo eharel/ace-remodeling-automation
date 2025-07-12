@@ -1,4 +1,5 @@
 import { BaseColumn } from "../columns";
+import { TableInfo } from "./stylize-dashboard";
 
 export function applyTitleStyle(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
@@ -12,6 +13,24 @@ export function applyTitleStyle(
     .setFontSize(12)
     .setHorizontalAlignment("center")
     .setBackground("#e0e0e0");
+}
+
+export function applyAlignment(
+  table: TableInfo,
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columns: BaseColumn<any, any, any>[]
+) {
+  // Apply horizontal alignment based on col.align
+  columns.forEach((col, i) => {
+    if (!col.align) return;
+
+    const range = sheet.getRange(
+      table.dataStartRow,
+      table.startCol + i,
+      table.dataEndRow - table.dataStartRow + 1
+    );
+    range.setHorizontalAlignment(col.align);
+  });
 }
 
 export function applyHeaderStyle(

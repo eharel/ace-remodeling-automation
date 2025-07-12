@@ -13,8 +13,8 @@ export function buildMainMenu(ui: GoogleAppsScript.Base.Ui) {
       `${LIB_IDENTIFIER}.generateProjectDashboard`
     )
     .addItem(
-      "Update Leads/Payments Dashboard",
-      `${LIB_IDENTIFIER}.generateLeadsPaymentsDashboard`
+      "Update Leads Dashboard",
+      `${LIB_IDENTIFIER}.generateLeadsDashboard`
     )
     .addItem("Add New Project", `${LIB_IDENTIFIER}.promptForNewProject`)
     .addSubMenu(closeSubMenu)

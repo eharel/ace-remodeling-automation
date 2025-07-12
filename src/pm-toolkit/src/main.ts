@@ -1,6 +1,6 @@
 import { buildMainMenu } from "./menu/main-menu";
-import { generateProjectDashboard } from "./projects/dashboard";
-import { startsWithProjectNumber } from "./projects/utils";
+import { generateProjectDashboard } from "./domains/projects/dashboard";
+import { startsWithProjectNumber } from "./domains/projects/utils";
 import { PROJECT_DASHBOARD_SHEET_NAME } from "./constants";
 
 export function onOpen() {
