@@ -1,10 +1,15 @@
-import { extractLeadsData } from "./extract-leads";
+import {
+  extractLeadsData,
+  extractMonthlyRevenueGoalsFromNamedRange,
+} from "./extract-leads";
 import { LeadsInputRow, QuarterDashboardRow } from "./types";
 import { LEADS_COLUMNS } from "./columns-months";
 import { generateAndStylizeTableFromRows } from "../../utils/table-builder";
 import {
   BLANK_SHEET_TEMPLATE,
   LEADS_DASHBOARD_SHEET,
+  NR_LEADS_MONTHLY_DASHBOARD_TABLE,
+  NR_LEADS_MONTHLY_GOALS,
   QUARTER_KEYS,
   QUARTER_LABELS,
 } from "./constants";
@@ -15,30 +20,38 @@ import { applyQuarterBorders, applyQuarterColoring } from "./styles";
 import { getQuarterFromMonth } from "./utils";
 import { QUARTER_COLUMNS, QuarterColumnKey } from "./columns-quarters";
 import { TableInfo } from "../../types";
+import { setNamedRange } from "../../utils/helpers";
+
+const QUARTERS_ROW_SPAN = 3;
+const SHOW_DESCRIPTION = false;
 
 export function generateLeadsDashboard() {
-  const quartersRowSpan = 3;
-  // const existingGoals = extractExistingRevenueGoals(sheet, monthlyTableInfo);
-  const existingGoals = new Map<string, number>();
+  const year = getYearFilter();
   const sheet = getOrCreateLeadsDashboardSheet();
+  const existingGoals = extractMonthlyRevenueGoalsFromNamedRange(
+    NR_LEADS_MONTHLY_GOALS
+  );
+  sheet.clear();
   const inputRows: LeadsInputRow[] = extractLeadsData();
-  const monthlyRows = createMonthlyDashboardRows(inputRows);
+  const monthlyRows = createMonthlyDashboardRows(inputRows, existingGoals);
 
+  const startingRow = createHeader(sheet, year, 1);
   const monthlyTableInfo = generateAndStylizeTableFromRows(
     sheet,
     monthlyRows,
-    1,
+    startingRow,
     1,
     "📈 Leads — Monthly Breakdown",
     LEADS_COLUMNS,
     [LEADS_KEYS.REVENUE, LEADS_KEYS.TOTAL_LEADS, LEADS_KEYS.SIGNED],
-    { zebra: false, showDescription: false }
+    { zebra: false, showDescription: SHOW_DESCRIPTION }
   );
 
+  handleMonthlyGoalsNamedRange(sheet, monthlyTableInfo);
   applyQuarterColoring(sheet, monthlyTableInfo, LEADS_COLUMNS);
   applyQuarterBorders(sheet, monthlyTableInfo, LEADS_COLUMNS, LEADS_KEYS.MONTH);
 
-  const quarterRows = createQuarterlyDashboardRows(inputRows, existingGoals);
+  const quarterRows = createQuarterlyDashboardRows(inputRows);
   const quarterStartRow = monthlyTableInfo.startRow;
   const quarterStartCol = monthlyTableInfo.endCol + 1;
 
@@ -50,28 +63,28 @@ export function generateLeadsDashboard() {
     "📈 Leads — Quarterly Breakdown",
     QUARTER_COLUMNS,
     [QUARTER_KEYS.REVENUE, QUARTER_KEYS.TOTAL_LEADS, QUARTER_KEYS.SIGNED],
-    { zebra: false, showDescription: false, rowSpan: quartersRowSpan }
+    { zebra: false, showDescription: false, rowSpan: QUARTERS_ROW_SPAN }
   );
 
   applyQuarterColoring(
     sheet,
     quarterTableInfo,
     QUARTER_COLUMNS,
-    quartersRowSpan
+    QUARTERS_ROW_SPAN
   );
   applyQuarterBorders(
     sheet,
     quarterTableInfo,
     QUARTER_COLUMNS,
     QUARTER_KEYS.QUARTER,
-    quartersRowSpan
+    QUARTERS_ROW_SPAN
   );
 }
 
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const existing = ss.getSheetByName(LEADS_DASHBOARD_SHEET);
-  if (existing) return existing.clear(), existing;
+  if (existing) return existing;
 
   const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
   const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
@@ -84,8 +97,7 @@ function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
 }
 
 export function createQuarterlyDashboardRows(
-  inputRows: LeadsInputRow[],
-  existingGoals: Map<string, number>
+  inputRows: LeadsInputRow[]
 ): QuarterDashboardRow[] {
   type QuarterKey = `${number}-Q${number}`;
   const grouped = new Map<QuarterKey, LeadsInputRow[]>();
@@ -109,7 +121,7 @@ export function createQuarterlyDashboardRows(
     const revenue = sum(group, LEADS_KEYS.REVENUE);
     const conversionRate = totalLeads > 0 ? signed / totalLeads : 0;
 
-    const goal = existingGoals.get(key) ?? "";
+    const goal = "";
     const diff = typeof goal === "number" ? revenue - goal : "";
 
     const fullRow: Partial<Record<QuarterColumnKey, string | number>> = {
@@ -184,4 +196,53 @@ function extractExistingRevenueGoals(
   }
 
   return goals;
+}
+
+function getYearFilter(): number {
+  return 2025;
+}
+
+function createHeader(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  year: number,
+  startCol: number
+): number {
+  const headerTitle = `${year} Leads Breakdown`;
+  const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
+  // Write the title in row 1, spanning `colSpan` columns
+  const titleRange = sheet.getRange(1, startCol, 2, totalTableWidth);
+  titleRange.merge();
+  titleRange.setValue(headerTitle);
+  titleRange.setFontWeight("bold");
+  titleRange.setFontSize(14);
+  titleRange.setFontColor("white");
+  titleRange.setBackground("#1A237E");
+  titleRange.setHorizontalAlignment("center");
+  titleRange.setVerticalAlignment("middle");
+
+  // Return the row after the header (row 3)
+  return 3;
+}
+
+export function handleMonthlyGoalsNamedRange(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  monthlyTableInfo: TableInfo
+) {
+  if (!sheet) throw new Error("Leads dashboard sheet not found.");
+
+  const goalColOffset = LEADS_COLUMNS.findIndex(
+    (col) => col.key === LEADS_KEYS.REVENUE_GOAL
+  );
+
+  if (goalColOffset === -1)
+    throw new Error("Revenue Goal column not found in LEADS_COLUMNS");
+
+  const goalRange = sheet.getRange(
+    monthlyTableInfo.dataStartRow,
+    monthlyTableInfo.startCol + goalColOffset,
+    monthlyTableInfo.dataEndRow - monthlyTableInfo.dataStartRow + 1,
+    1
+  );
+
+  setNamedRange(sheet, NR_LEADS_MONTHLY_GOALS, goalRange);
 }

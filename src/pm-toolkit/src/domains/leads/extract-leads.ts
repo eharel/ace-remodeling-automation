@@ -35,3 +35,37 @@ export function extractLeadsData(): LeadsInputRow[] {
         Number(row[columnIndexByLabel[LEADS_LABELS.PROP_NOT_SENT]]) || 0,
     }));
 }
+
+export function extractMonthlyRevenueGoalsFromNamedRange(
+  namedRangeName: string
+): Map<string, number> {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const range = ss.getRangeByName(namedRangeName);
+  if (!range) throw new Error(`Named range "${namedRangeName}" not found`);
+
+  const sheet = range.getSheet();
+  const numRows = range.getNumRows();
+  const numCols = range.getNumColumns();
+  if (numRows < 2) return new Map(); // must have at least header + one data row
+
+  const [headers, ...rows] = range.getValues();
+
+  const monthColIdx = headers.findIndex((val) => val === LEADS_LABELS.MONTH);
+  const goalColIdx = headers.findIndex(
+    (val) => val === LEADS_LABELS.REVENUE_GOAL
+  );
+
+  if (monthColIdx === -1 || goalColIdx === -1) return new Map();
+
+  const goals = new Map<string, number>();
+
+  for (const row of rows) {
+    const month = String(row[monthColIdx]);
+    const goal = row[goalColIdx];
+    if (month && typeof goal === "number" && !isNaN(goal)) {
+      goals.set(month, goal);
+    }
+  }
+
+  return goals;
+}

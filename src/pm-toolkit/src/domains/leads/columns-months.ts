@@ -54,6 +54,19 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.REVENUE],
     format: "currency",
   },
+  {
+    key: LEADS_KEYS.REVENUE_GOAL,
+    label: LEADS_LABELS.REVENUE_GOAL,
+    // valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.REVENUE_GOAL],
+    valueFn: ({ rowData }: LeadsContext) => "666",
+    format: "currency",
+  },
+  {
+    key: LEADS_KEYS.REVENUE_DIFF,
+    label: LEADS_LABELS.REVENUE_DIFF,
+    valueFn: ({ rowData }: LeadsContext) => "666",
+    format: "currency",
+  },
   // {
   //   key: LEADS_KEYS.PROP_NOT_SENT,
   //   label: LEADS_LABELS.PROP_NOT_SENT,

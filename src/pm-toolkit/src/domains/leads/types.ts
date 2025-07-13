@@ -30,22 +30,23 @@ export type LeadsDashboardRow = Record<LeadsColumnKey, number | string>;
 
 export type QuarterDashboardRow = Record<string, string | number>;
 
-export interface LeadsContext {
-  rowData: LeadsInputRow;
+export interface LeadsRowContext {
+  inputRowData: LeadsInputRow;
+  existingGoals: Map<string, number>;
 }
 
-export interface QuarterContext {
-  rowData: QuarterDashboardRow;
+export interface QuarterRowContext {
+  inputRowData: QuarterDashboardRow;
 }
 
 export type LeadsColumn = BaseColumn<
-  LeadsContext,
+  LeadsRowContext,
   LeadsColumnKey,
   LeadsColumnLabel
 >;
 
 export type LeadsQuarterColumn = BaseColumn<
-  QuarterContext,
+  QuarterRowContext,
   QuarterColumnKey,
   QuarterColumnLabel
 >;

@@ -100,3 +100,14 @@ export function getColumnIndicesByLabels(
 export function getMonthName(monthNumber: number): string {
   return MONTH_NAMES[monthNumber - 1];
 }
+
+export function setNamedRange(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  rangeName: string,
+  range: GoogleAppsScript.Spreadsheet.Range
+) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const existing = ss.getRangeByName(rangeName);
+  if (existing) ss.removeNamedRange(rangeName);
+  ss.setNamedRange(rangeName, range);
+}
