@@ -7,10 +7,25 @@ import {
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 import { generateAndStylizeTableFromRows } from "../../../utils";
-import { getProjectRowData } from "./project-data";
+import { extractAllProjectData } from "./data-extraction";
+import { transformExtractedDataToDashboardRows } from "./data-transformation";
+import { setDashboardStatus } from "./utils";
 import { addTimestamp } from "../../../styles";
-import { ProjectDashboardRow } from "./types";
 import { toA1Notation } from "../../../utils/helpers";
+
+const PROJECT_KEYS_TO_SUM = [
+  DASHBOARD_KEYS.CONTRACT_PRICE,
+  DASHBOARD_KEYS.CHANGE_ORDERS,
+  DASHBOARD_KEYS.MAX_ADVANCE,
+  DASHBOARD_KEYS.TOTAL_ADVANCE,
+  DASHBOARD_KEYS.ADVANCE_BALANCE,
+];
+
+const PROJECT_COLOR_KEYS = [
+  DASHBOARD_KEYS.EXPECTED_PROFIT,
+  DASHBOARD_KEYS.ADVANCE_BALANCE,
+  DASHBOARD_KEYS.PM_AFTER_ADVANCE,
+] as const;
 
 export function generateProjectDashboard() {
   try {
@@ -20,102 +35,94 @@ export function generateProjectDashboard() {
     setDashboardStatus(dashboardSheet, "⏳ Generating dashboard...");
 
     const { activeSheets, closedSheets } = getCategorizedProjectSheets(ss);
-    const namedRangesBySheet = groupNamedRangesBySheet(ss.getNamedRanges());
-
-    Logger.log(`Found ${activeSheets.length} active sheets`);
-    Logger.log(`Found ${closedSheets.length} closed sheets`);
+    const namedRangesBySheet = mapNamedRangesBySheet(ss.getNamedRanges());
 
     const startRow = 1;
     const startColActive = 1;
     const startColClosed = DASHBOARD_COLUMNS.length + COL_GAP_BETWEEN_TABLES;
 
-    const PROJECT_KEYS_TO_SUM = [
-      DASHBOARD_KEYS.CONTRACT_PRICE,
-      DASHBOARD_KEYS.CHANGE_ORDERS,
-      DASHBOARD_KEYS.MAX_ADVANCE,
-      DASHBOARD_KEYS.TOTAL_ADVANCE,
-      DASHBOARD_KEYS.ADVANCE_BALANCE,
-    ];
-
-    const PROJECT_COLOR_KEYS = [
-      DASHBOARD_KEYS.EXPECTED_PROFIT,
-      DASHBOARD_KEYS.ADVANCE_BALANCE,
-      DASHBOARD_KEYS.PM_AFTER_ADVANCE,
-    ] as const;
-
-    // 🟢 Active Projects Table
-    setDashboardStatus(dashboardSheet, "📊 Generating Active Projects...");
-    const activeRows: ProjectDashboardRow[] = [];
-    let beginningRow = startRow;
-    let beginningCol = startColActive;
-    for (let i = 0; i < activeSheets.length; i++) {
-      const sheet = activeSheets[i];
-      setDashboardStatus(
-        dashboardSheet,
-        `📊 Generating Active Projects... (${i + 1}/${activeSheets.length})`,
-        toA1Notation(beginningCol, beginningRow)
-      );
-      const row = getProjectRowData(
-        sheet,
-        namedRangesBySheet.get(sheet.getName()) ?? []
-      );
-      activeRows.push(row);
-    }
-
-    generateAndStylizeTableFromRows(
+    const activeTableInfo = generateProjectSection({
       dashboardSheet,
-      activeRows,
-      startRow,
-      startColActive,
-      "🟢 Active Projects",
-      DASHBOARD_COLUMNS,
-      PROJECT_KEYS_TO_SUM,
-      { colorKeys: PROJECT_COLOR_KEYS }
-    );
+      projectSheets: activeSheets,
+      namedRangesBySheet,
+      title: "🟢 Active Projects",
+      startingRow: startRow,
+      startingCol: startColActive,
+    });
 
-    // 🔴 Closed Projects Table
-    const closedRows: ProjectDashboardRow[] = [];
-    beginningRow = startRow;
-    beginningCol = startColClosed;
-    for (let i = 0; i < closedSheets.length; i++) {
-      const sheet = closedSheets[i];
-      setDashboardStatus(
-        dashboardSheet,
-        `📊 Generating Closed Projects... (${i + 1}/${closedSheets.length})`,
-        toA1Notation(beginningCol, beginningRow)
-      );
-      const row = getProjectRowData(
-        sheet,
-        namedRangesBySheet.get(sheet.getName()) ?? []
-      );
-      closedRows.push(row);
-    }
-    generateAndStylizeTableFromRows(
+    const closedTableInfo = generateProjectSection({
       dashboardSheet,
-      closedRows,
-      startRow,
-      startColClosed,
-      "🔴 Closed Projects",
-      DASHBOARD_COLUMNS,
-      PROJECT_KEYS_TO_SUM,
-      { colorKeys: PROJECT_COLOR_KEYS }
-    );
+      projectSheets: closedSheets,
+      namedRangesBySheet,
+      title: "🔴 Closed Projects",
+      startingRow: startRow,
+      startingCol: startColClosed,
+    });
 
-    // ✅ Done
-    const numActiveRows = activeRows.length;
-    const extraRows = 3; // title, headers, description
-    const lastRow = startRow + numActiveRows + extraRows + 2;
-    addTimestamp(dashboardSheet, lastRow, 1, "Dashboard last updated:");
+    // ✅ Add timestamp two rows below the end of the active table
+    addTimestamp(
+      dashboardSheet,
+      activeTableInfo.endRow + 2,
+      1,
+      "Dashboard last updated:"
+    );
 
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      "Dashboard ready ✅",
+      "Projects Dashboard ready ✅",
       "Ace Toolkit"
     );
   } catch (err) {
-    Logger.log("⚠️ Error in generateProjectDashboard:");
-    Logger.log((err as Error).message);
-    Logger.log((err as Error).stack);
+    // Logger.log("⚠️ Error in generateProjectDashboard:");
+    // Logger.log((err as Error).message);
+    // Logger.log((err as Error).stack);
   }
+}
+
+function generateProjectSection({
+  dashboardSheet,
+  projectSheets,
+  namedRangesBySheet,
+  title,
+  startingRow,
+  startingCol,
+}: {
+  dashboardSheet: GoogleAppsScript.Spreadsheet.Sheet;
+  projectSheets: GoogleAppsScript.Spreadsheet.Sheet[];
+  namedRangesBySheet: Map<
+    string,
+    Map<string, GoogleAppsScript.Spreadsheet.Range>
+  >;
+  title: string;
+  startingRow: number;
+  startingCol: number;
+}) {
+  setDashboardStatus(dashboardSheet, `${title} — extracting project data...`);
+
+  const extractedRows = extractAllProjectData(
+    projectSheets,
+    namedRangesBySheet,
+    dashboardSheet,
+    startingRow,
+    startingCol
+  );
+
+  const dashboardRows = transformExtractedDataToDashboardRows(
+    extractedRows,
+    projectSheets
+  );
+
+  const tableInfo = generateAndStylizeTableFromRows(
+    dashboardSheet,
+    dashboardRows,
+    startingRow,
+    startingCol,
+    title,
+    DASHBOARD_COLUMNS,
+    PROJECT_KEYS_TO_SUM,
+    { colorKeys: PROJECT_COLOR_KEYS }
+  );
+
+  return tableInfo;
 }
 
 function getOrCreateDashboardSheet(
@@ -129,10 +136,7 @@ function getOrCreateDashboardSheet(
 
 function getCategorizedProjectSheets(
   ss: GoogleAppsScript.Spreadsheet.Spreadsheet
-): {
-  activeSheets: GoogleAppsScript.Spreadsheet.Sheet[];
-  closedSheets: GoogleAppsScript.Spreadsheet.Sheet[];
-} {
+) {
   const activeSheets: GoogleAppsScript.Spreadsheet.Sheet[] = [];
   const closedSheets: GoogleAppsScript.Spreadsheet.Sheet[] = [];
 
@@ -146,23 +150,37 @@ function getCategorizedProjectSheets(
   return { activeSheets, closedSheets };
 }
 
-function groupNamedRangesBySheet(
+function mapNamedRangesBySheet(
   namedRanges: GoogleAppsScript.Spreadsheet.NamedRange[]
-): Map<string, GoogleAppsScript.Spreadsheet.NamedRange[]> {
-  const map = new Map<string, GoogleAppsScript.Spreadsheet.NamedRange[]>();
+): Map<string, Map<string, GoogleAppsScript.Spreadsheet.Range>> {
+  const map = new Map<
+    string,
+    Map<string, GoogleAppsScript.Spreadsheet.Range>
+  >();
+
   for (const nr of namedRanges) {
-    const sheetName = nr.getRange().getSheet().getName();
-    if (!map.has(sheetName)) map.set(sheetName, []);
-    map.get(sheetName)!.push(nr);
+    const range = nr.getRange();
+    const sheetName = range.getSheet().getName();
+    const name = nr.getName();
+    const normalizedName = normalizeNamedRange(name);
+
+    if (!map.has(sheetName)) {
+      map.set(sheetName, new Map());
+    }
+
+    map.get(sheetName)!.set(normalizedName, range);
   }
+
   return map;
 }
 
-function setDashboardStatus(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  message: string,
-  cell: string = "A1"
-) {
-  sheet.getRange(cell).setValue(message);
-  SpreadsheetApp.flush();
+function normalizeNamedRange(name: string): string {
+  if (name.includes("!")) {
+    return name.split("!")[1].replace(/^'/, "").replace(/'$/, "");
+  }
+  const doubleUnderscoreIndex = name.indexOf("__");
+  if (doubleUnderscoreIndex > 0) {
+    return name.substring(doubleUnderscoreIndex + 2);
+  }
+  return name;
 }

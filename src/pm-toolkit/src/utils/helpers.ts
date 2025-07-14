@@ -1,9 +1,11 @@
 import { BaseColumn } from "../columns/types";
 import { MONTH_NAMES } from "../constants";
 
-export function toNumber(value: string) {
+export function toNullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+
   const num = Number(value);
-  return isNaN(num) ? 0 : num;
+  return isNaN(num) ? null : num;
 }
 
 export function setNamedValue(
@@ -20,10 +22,10 @@ export function setNamedValue(
     if (range) {
       range.setValue(value);
     } else {
-      Logger.log(`Named range '${rangeName}' not found on ${sheet.getName()}`);
+      // Logger.log(`Named range '${rangeName}' not found on ${sheet.getName()}`);
     }
   } catch (e) {
-    Logger.log(`Error setting named range '${rangeName}': ${e}`);
+    // Logger.log(`Error setting named range '${rangeName}': ${e}`);
   }
 }
 

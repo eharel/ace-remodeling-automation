@@ -2,7 +2,7 @@ import {
   EXPECTED_PROFIT_PERCENTAGE,
   MAX_ADVANCE_PERCENTAGE,
 } from "../../../constants";
-import * as GF from "./field-functions";
+import * as GF from "./transform-functions";
 import { ProjectColumn, ProjectContext } from "./types";
 
 export const DASHBOARD_KEYS = {
@@ -43,14 +43,14 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
     label: DASHBOARD_LABELS.PROJECT_NO,
-    valueFn: (ctx: ProjectContext) => GF.getProjectNumberFromRow(ctx.rowData),
+    valueFn: (ctx: ProjectContext) => GF.getProjectNumber(ctx),
     format: "text",
     align: "center",
   },
   {
     key: DASHBOARD_KEYS.CLIENT_NAME,
     label: DASHBOARD_LABELS.CLIENT_NAME,
-    valueFn: (ctx: ProjectContext) => GF.getClientNameFromRow(ctx.rowData),
+    valueFn: (ctx: ProjectContext) => GF.getClientName(ctx),
     format: "text",
     align: "left",
   },
