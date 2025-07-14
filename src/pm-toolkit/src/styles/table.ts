@@ -1,4 +1,6 @@
 import { BaseColumn } from "../columns";
+import { COLUMN_PADDING } from "../constants";
+import { StylizeOptions } from "../types";
 import { TableInfo } from "./stylize-dashboard";
 
 export function applyTitleStyle(
@@ -118,12 +120,19 @@ export function resizeColumns(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   startCol: number,
   columns: BaseColumn<any, any, any>[],
-  customWidths: Partial<Record<string, number>> = {}
+  customWidths?: StylizeOptions["columnWidths"]
 ) {
   columns.forEach((column, i) => {
     const col = startCol + i;
-    const width = customWidths[column.key] ?? 136;
-    sheet.setColumnWidth(col, width);
+    const customWidth = customWidths?.[column.key as keyof typeof customWidths];
+
+    if (typeof customWidth === "number") {
+      sheet.setColumnWidth(col, customWidth);
+    } else {
+      sheet.autoResizeColumn(col);
+      const currentWidth = sheet.getColumnWidth(col);
+      sheet.setColumnWidth(col, currentWidth + COLUMN_PADDING);
+    }
   });
 }
 

@@ -1,9 +1,8 @@
 import {
   QUARTER_COLORS,
   QUARTER_TO_MONTHS,
-  LEADS_LABELS,
-  QUARTER_KEYS,
-  QUARTER_LABELS,
+  quarterlyKeys,
+  quarterlyLabels,
 } from "./constants";
 import { TableInfo } from "../../types";
 import { BaseColumn } from "../../columns";
@@ -43,7 +42,9 @@ export function applyQuarterColoring(
   const isMonthly = rowSpan === 1;
 
   const targetColIndex = columns.findIndex((c) =>
-    isMonthly ? c.label === LEADS_LABELS.MONTH : c.key === QUARTER_KEYS.QUARTER
+    isMonthly
+      ? c.label === quarterlyLabels.MONTH
+      : c.key === quarterlyKeys.QUARTER
   );
   if (targetColIndex === -1) return;
 
@@ -78,50 +79,119 @@ export function applyQuarterBorders<T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   table: TableInfo,
   columns: BaseColumn<any, any, any>[],
-  monthKey: T,
+  groupKeyField: T,
   rowSpan = 1
 ) {
   const isMonthly = rowSpan === 1;
 
   const targetColIndex = columns.findIndex((c) =>
-    isMonthly ? c.key === monthKey : c.key === QUARTER_KEYS.QUARTER
+    isMonthly ? c.key === groupKeyField : c.key === quarterlyKeys.QUARTER
   );
   if (targetColIndex === -1) return;
 
+  const startRow = table.dataStartRow;
   const rowCount = table.dataEndRow - table.dataStartRow + 1;
   const colCount = columns.length;
-  const startRow = table.dataStartRow;
 
   const rawValues = sheet
     .getRange(startRow, table.startCol + targetColIndex, rowCount, 1)
     .getValues()
-    .map((r) => r[0]);
+    .map((r) => String(r[0]));
 
   const groupMap: Record<string, number[]> = {};
 
   for (let i = 0; i < rawValues.length; i++) {
-    const raw = String(rawValues[i]);
+    const raw = rawValues[i];
+
     const groupKey = isMonthly
-      ? MONTH_NUM_TO_QUARTER[MONTH_NAME_TO_NUMBER[raw] ?? -1] ?? "Other"
+      ? MONTH_NUM_TO_QUARTER[MONTH_NAME_TO_NUMBER[raw] ?? -1]
       : raw;
+
+    if (!groupKey) continue; // Skip ungrouped/malformed entries
 
     if (!groupMap[groupKey]) groupMap[groupKey] = [];
     groupMap[groupKey].push(i);
   }
 
+  // Draw thick outer box around each group — do not touch inner borders
   Object.values(groupMap).forEach((rowIndices) => {
     if (rowIndices.length === 0) return;
-    const start = startRow + rowIndices[0];
-    const end = startRow + rowIndices[rowIndices.length - 1];
-    sheet.getRange(start, table.startCol, end - start + 1, colCount).setBorder(
+
+    const rowStart = startRow + rowIndices[0];
+    const rowEnd = startRow + rowIndices[rowIndices.length - 1];
+
+    sheet
+      .getRange(rowStart, table.startCol, rowEnd - rowStart + 1, colCount)
+      .setBorder(
+        true, // top
+        true, // left
+        true, // bottom
+        true, // right
+        false, // inner horizontal
+        false, // inner vertical
+        "black",
+        SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+      );
+  });
+}
+
+export function applyBorders(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  numRows: number,
+  startCol: number,
+  numCols: number,
+  rowSpan: number = 1
+) {
+  const outerBorderStyle = SpreadsheetApp.BorderStyle.SOLID_MEDIUM;
+  const innerBorderStyle = SpreadsheetApp.BorderStyle.SOLID;
+  const lightGray = "#cccccc";
+
+  for (let r = 0; r < numRows; r += rowSpan) {
+    const range = sheet.getRange(startRow + r, startCol, rowSpan, numCols);
+
+    // Outer border
+    range.setBorder(
       true, // top
       true, // left
       true, // bottom
       true, // right
-      false,
-      false,
+      false, // innerHorizontal
+      false, // innerVertical
       "black",
-      SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+      outerBorderStyle
     );
-  });
+
+    // Inner vertical borders
+    for (let c = 1; c < numCols; c++) {
+      const colRange = sheet.getRange(startRow + r, startCol + c, rowSpan, 1);
+      colRange.setBorder(
+        false,
+        true, // left
+        false,
+        false,
+        false,
+        false,
+        lightGray,
+        innerBorderStyle
+      );
+    }
+
+    // Optional: inner horizontal borders if you want light rows
+    // (Remove or comment if not wanted for monthly table)
+    for (let i = 1; i < rowSpan; i++) {
+      const row = startRow + r + i;
+      const rowRange = sheet.getRange(row, startCol, 1, numCols);
+      rowRange.setBorder(
+        true, // top
+        false,
+        false,
+        false,
+        false,
+        false,
+        lightGray,
+        innerBorderStyle
+      );
+    }
+  }
 }

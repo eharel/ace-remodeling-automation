@@ -64,14 +64,13 @@ export function toA1Notation(col: number, row: number): string {
 // 📁 src/utils/mapInputToDashboardRows.ts
 
 export function mapInputToDashboardRows<
-  TContext extends { rowData: any },
+  TContext,
   TDashboardRow extends Record<string, unknown>
 >(
-  inputRows: TContext["rowData"][],
+  contexts: TContext[],
   columns: BaseColumn<TContext, keyof TDashboardRow & string, string>[]
 ): TDashboardRow[] {
-  return inputRows.map((input) => {
-    const ctx = { rowData: input } as TContext;
+  return contexts.map((ctx) => {
     const result: Partial<TDashboardRow> = {};
 
     for (const col of columns) {

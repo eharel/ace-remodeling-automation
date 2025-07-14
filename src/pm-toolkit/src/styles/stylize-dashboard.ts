@@ -77,7 +77,7 @@ export function stylizeTable<T extends string>(
   );
   applyBorders(sheet, headerRow, startCol, totalTableRows, columns);
   applyAlignment(table, sheet, columns);
-  resizeColumns(sheet, startCol, columns);
+  resizeColumns(sheet, startCol, columns, options.columnWidths);
 
   if (summaryRow !== undefined) {
     applySummaryRowStyle(sheet, summaryRow, startCol, columns);

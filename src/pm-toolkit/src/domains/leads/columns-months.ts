@@ -1,83 +1,92 @@
-// leads/dashboard.ts
-import { LeadsColumn, LeadsContext } from "./types";
+import { LeadsColumn } from "./types";
+import { getMonthName, formatPercent } from "../../utils/helpers";
+import {
+  DashboardKey,
+  DashboardLabel,
+  dashboardKeys,
+  labels,
+  inputKeys,
+} from "./constants";
 import { buildLabelKeyMaps } from "../../columns/utils";
-import { formatPercent } from "../../utils/helpers";
-import { LEADS_KEYS, LEADS_LABELS } from "./constants";
-import { getMonthName } from "../../utils/helpers";
-
-export type LeadsColumnKey = (typeof LEADS_KEYS)[keyof typeof LEADS_KEYS];
-export type LeadsColumnLabel = (typeof LEADS_LABELS)[keyof typeof LEADS_LABELS];
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
   // {
-  //   key: LEADS_KEYS.YEAR,
-  //   label: LEADS_LABELS.YEAR,
-  //   valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.YEAR],
+  //   key: DASHBOARD_KEYS.YEAR,
+  //   label: DASHBOARD_LABELS.YEAR,
+  //   valueFn: ({ inputRowData }: LeadsRowContext) =>
+  //     inputRowData[INPUT_KEYS.YEAR],
   //   format: "number",
   //   align: "center",
   // },
   {
-    key: LEADS_KEYS.MONTH,
-    label: LEADS_LABELS.MONTH,
-    valueFn: ({ rowData }: LeadsContext) =>
-      getMonthName(rowData[LEADS_KEYS.MONTH]),
+    key: dashboardKeys.MONTH,
+    label: labels.MONTH,
+    valueFn: ({ inputRowData }) => getMonthName(inputRowData[inputKeys.MONTH]),
     format: "number",
   },
   {
-    key: LEADS_KEYS.TOTAL_LEADS,
-    label: LEADS_LABELS.TOTAL_LEADS,
-    valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.TOTAL_LEADS],
-    format: "number",
-    align: "center",
-  },
-  {
-    key: LEADS_KEYS.SIGNED,
-    label: LEADS_LABELS.SIGNED,
-    valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.SIGNED],
+    key: dashboardKeys.TOTAL_LEADS,
+    label: labels.TOTAL_LEADS,
+    valueFn: ({ inputRowData }) => inputRowData[inputKeys.TOTAL_LEADS],
     format: "number",
     align: "center",
   },
   {
-    key: LEADS_KEYS.CONVERSION_RATE,
-    label: LEADS_LABELS.CONVERSION_RATE,
-    valueFn: ({ rowData }: LeadsContext) => {
-      const signed = Number(rowData[LEADS_KEYS.SIGNED]) || 0;
-      const total = Number(rowData[LEADS_KEYS.TOTAL_LEADS]) || 0;
+    key: dashboardKeys.SIGNED,
+    label: labels.SIGNED,
+    valueFn: ({ inputRowData }) => inputRowData[inputKeys.SIGNED],
+    format: "number",
+    align: "center",
+  },
+  {
+    key: dashboardKeys.CONVERSION_RATE,
+    label: labels.CONVERSION_RATE,
+    valueFn: ({ inputRowData }) => {
+      const signed = inputRowData[inputKeys.SIGNED] ?? 0;
+      const total = inputRowData[inputKeys.TOTAL_LEADS] ?? 0;
       return formatPercent(signed, total);
     },
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
   },
   {
-    key: LEADS_KEYS.REVENUE,
-    label: LEADS_LABELS.REVENUE,
-    valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.REVENUE],
+    key: dashboardKeys.REVENUE,
+    label: labels.REVENUE,
+    valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE],
     format: "currency",
   },
   {
-    key: LEADS_KEYS.REVENUE_GOAL,
-    label: LEADS_LABELS.REVENUE_GOAL,
-    // valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.REVENUE_GOAL],
-    valueFn: ({ rowData }: LeadsContext) => "666",
+    key: dashboardKeys.REVENUE_GOAL,
+    label: labels.REVENUE_GOAL,
+    description: "Monthly revenue goal",
+    valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE_GOAL] ?? "",
     format: "currency",
   },
   {
-    key: LEADS_KEYS.REVENUE_DIFF,
-    label: LEADS_LABELS.REVENUE_DIFF,
-    valueFn: ({ rowData }: LeadsContext) => "666",
+    key: dashboardKeys.REVENUE_DIFF,
+    label: labels.REVENUE_DIFF,
+    description: "Revenue minus goal",
+    valueFn: ({ inputRowData }) => {
+      const revenue = inputRowData[inputKeys.REVENUE];
+      const goal = inputRowData[inputKeys.REVENUE_GOAL];
+      if (typeof revenue !== "number" || typeof goal !== "number") return "";
+      return revenue - goal;
+    },
     format: "currency",
   },
   // {
-  //   key: LEADS_KEYS.PROP_NOT_SENT,
-  //   label: LEADS_LABELS.PROP_NOT_SENT,
-  //   valueFn: ({ rowData }: LeadsContext) => rowData[LEADS_KEYS.PROP_NOT_SENT],
+  //   key: DASHBOARD_KEYS.PROP_NOT_SENT,
+  //   label: DASHBOARD_LABELS.PROP_NOT_SENT,
+  //   valueFn: ({ inputRowData }) =>
+  //     inputRowData[INPUT_KEYS.PROP_NOT_SENT],
   //   format: "number",
   //   align: "center",
   // },
 ];
 
-const labelMaps = buildLabelKeyMaps<LeadsColumnKey, LeadsColumnLabel>(
+const labelMaps = buildLabelKeyMaps<DashboardKey, DashboardLabel>(
   LEADS_COLUMNS
 );
-export const LEADS_LABELS_BY_KEY = labelMaps.labelsByKey;
-export const LEADS_KEYS_BY_LABEL = labelMaps.keysByLabel;
+
+export const DASHBOARD_LABELS_BY_KEY = labelMaps.labelsByKey;
+export const DASHBOARD_KEYS_BY_LABEL = labelMaps.keysByLabel;

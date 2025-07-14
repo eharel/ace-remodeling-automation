@@ -7,6 +7,7 @@ export type StylizeOptions<T extends string = string> = {
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     table: TableInfo
   ) => void)[];
+  columnWidths?: Partial<Record<string, number>>;
 };
 
 export type TableInfo = {
