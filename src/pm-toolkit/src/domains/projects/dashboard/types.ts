@@ -1,5 +1,6 @@
 import { BaseColumn } from "../../../columns";
 import { DashboardColumnKey, DashboardColumnLabel } from "./columns";
+import { PROJECT_DATA_FIELDS } from "./fields";
 
 export type ProjectDashboardRow = {
   [key in DashboardColumnKey]?: any;
@@ -7,9 +8,7 @@ export type ProjectDashboardRow = {
 
 export interface ProjectContext {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
-  namedRangeMap: Map<string, GoogleAppsScript.Spreadsheet.Range>;
-  directValueMap: Map<string, any>;
-  rowData: ProjectDashboardRow;
+  extractedProjectData: ExtractedProjectData;
 }
 
 export type ProjectColumn = BaseColumn<
@@ -18,4 +17,16 @@ export type ProjectColumn = BaseColumn<
   DashboardColumnLabel
 > & {
   legacyCell?: string;
+};
+
+export interface ProjectTransformContext {
+  rawData: ExtractedProjectData;
+  rowData: ProjectDashboardRow;
+}
+
+// In types.ts
+export type ProjectFieldKey = (typeof PROJECT_DATA_FIELDS)[number]["key"];
+
+export type ExtractedProjectData = {
+  [K in ProjectFieldKey]: number | string | null;
 };

@@ -1,51 +1,38 @@
+import { InputKey, QuarterlyKey, QuarterlyLabel } from "./constants";
 import { BaseColumn } from "../../columns";
-import { LeadsColumnKey, LeadsColumnLabel } from "./columns-months";
-import { LEADS_KEYS } from "./constants";
-import { QuarterColumnKey, QuarterColumnLabel } from "./columns-quarters";
-
-export type PaymentEntry = {
-  date: Date;
-  amount: number;
-  transaction: string;
-};
-
-// export type LeadsInputRow = {
-//   year: number;
-//   month: number;
-//   totalLeads: number;
-//   signedProposals: number;
-//   approvedRevenue: number;
-// };
+import { DashboardKey, DashboardLabel } from "./constants";
 
 export type LeadsInputRow = {
-  [LEADS_KEYS.YEAR]: number;
-  [LEADS_KEYS.MONTH]: number;
-  [LEADS_KEYS.TOTAL_LEADS]: number;
-  [LEADS_KEYS.SIGNED]: number;
-  [LEADS_KEYS.REVENUE]: number;
-  [LEADS_KEYS.PROP_NOT_SENT]: number;
+  [K in InputKey]: number;
 };
 
-export type LeadsDashboardRow = Record<LeadsColumnKey, number | string>;
+// Full dashboard row (input + derived)
+export type LeadsDashboardRow = {
+  [K in DashboardKey]: number | string;
+};
 
+// Aggregated quarterly row
 export type QuarterDashboardRow = Record<string, string | number>;
 
-export interface LeadsContext {
-  rowData: LeadsInputRow;
+// Context passed into valueFn() for each column
+export interface LeadsRowContext {
+  inputRowData: LeadsInputRow;
 }
 
-export interface QuarterContext {
-  rowData: QuarterDashboardRow;
+export interface QuarterRowContext {
+  inputRowData: QuarterDashboardRow;
 }
 
+// Column metadata for monthly dashboard
 export type LeadsColumn = BaseColumn<
-  LeadsContext,
-  LeadsColumnKey,
-  LeadsColumnLabel
+  LeadsRowContext,
+  DashboardKey,
+  DashboardLabel
 >;
 
+// Column metadata for quarterly dashboard
 export type LeadsQuarterColumn = BaseColumn<
-  QuarterContext,
-  QuarterColumnKey,
-  QuarterColumnLabel
+  QuarterRowContext,
+  QuarterlyKey,
+  QuarterlyLabel
 >;

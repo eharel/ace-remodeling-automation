@@ -1,44 +1,97 @@
-import { extractLeadsData } from "./extract-leads";
+import { extractLeadsData } from "./data-extraction";
 import { LeadsInputRow, QuarterDashboardRow } from "./types";
 import { LEADS_COLUMNS } from "./columns-months";
 import { generateAndStylizeTableFromRows } from "../../utils/table-builder";
 import {
   BLANK_SHEET_TEMPLATE,
-  LEADS_DASHBOARD_SHEET,
-  QUARTER_KEYS,
-  QUARTER_LABELS,
+  DASHBOARD_SHEET,
+  dashboardKeys,
+  inputKeys,
+  quarterlyKeys,
+  QUARTERS_ROW_SPAN,
 } from "./constants";
 import { TEMPLATE_SPREADSHEET_ID } from "../../constants";
-import { createMonthlyDashboardRows } from "./data-months";
-import { LEADS_KEYS } from "./constants";
-import { applyQuarterBorders, applyQuarterColoring } from "./styles";
+import { createMonthlyDashboardRows } from "./data-transformation";
+import {
+  applyQuarterBorders,
+  applyQuarterColoring,
+  applyVerticalBorders,
+} from "./styles";
 import { getQuarterFromMonth } from "./utils";
-import { QUARTER_COLUMNS, QuarterColumnKey } from "./columns-quarters";
-import { TableInfo } from "../../types";
+import { QUARTER_COLUMNS } from "./columns-quarters";
+import { QuarterlyKey } from "./constants";
+
+const SHOW_DESCRIPTION = false;
+const stylizeOptionsMonths = {
+  zebra: false,
+  showDescription: SHOW_DESCRIPTION,
+  colorKeys: [dashboardKeys.REVENUE_DIFF],
+  columnWidths: {
+    [inputKeys.MONTH]: 73,
+  },
+};
 
 export function generateLeadsDashboard() {
-  const quartersRowSpan = 3;
-  // const existingGoals = extractExistingRevenueGoals(sheet, monthlyTableInfo);
-  const existingGoals = new Map<string, number>();
+  const year = getYearFilter();
   const sheet = getOrCreateLeadsDashboardSheet();
+
+  sheet.clear();
   const inputRows: LeadsInputRow[] = extractLeadsData();
   const monthlyRows = createMonthlyDashboardRows(inputRows);
+
+  const quarterRowSpanMap = getQuarterRowSpanMap(inputRows);
+
+  const startingRow = createHeader(sheet, year, 1);
+  const stylizeOptionsMonths = {
+    zebra: false,
+    showDescription: false,
+    colorKeys: [dashboardKeys.REVENUE_DIFF],
+    columnWidths: {
+      [inputKeys.MONTH]: 73,
+    },
+    rowSpanMap: quarterRowSpanMap, // ✅ NEW
+  };
 
   const monthlyTableInfo = generateAndStylizeTableFromRows(
     sheet,
     monthlyRows,
-    1,
+    startingRow,
     1,
     "📈 Leads — Monthly Breakdown",
     LEADS_COLUMNS,
-    [LEADS_KEYS.REVENUE, LEADS_KEYS.TOTAL_LEADS, LEADS_KEYS.SIGNED],
-    { zebra: false, showDescription: false }
+    [inputKeys.REVENUE, inputKeys.TOTAL_LEADS, inputKeys.SIGNED],
+    stylizeOptionsMonths
   );
 
-  applyQuarterColoring(sheet, monthlyTableInfo, LEADS_COLUMNS);
-  applyQuarterBorders(sheet, monthlyTableInfo, LEADS_COLUMNS, LEADS_KEYS.MONTH);
+  applyQuarterColoring(
+    sheet,
+    monthlyTableInfo,
+    LEADS_COLUMNS,
+    quarterRowSpanMap
+  );
+  applyVerticalBorders(
+    sheet,
+    monthlyTableInfo.startRow,
+    monthlyTableInfo.endRow - 1,
+    monthlyTableInfo.startCol,
+    monthlyTableInfo.endCol - monthlyTableInfo.startCol + 1
+  );
+  applyQuarterBorders(
+    sheet,
+    monthlyTableInfo,
+    LEADS_COLUMNS,
+    inputKeys.MONTH,
+    { rowSpanMap: quarterRowSpanMap } // ✅ NEW
+  );
 
-  const quarterRows = createQuarterlyDashboardRows(inputRows, existingGoals);
+  const stylizeOptionsQuarters = {
+    ...stylizeOptionsMonths,
+    columnWidths: {
+      [quarterlyKeys.QUARTER]: 60,
+    },
+  };
+
+  const quarterRows = createQuarterlyDashboardRows(inputRows, year);
   const quarterStartRow = monthlyTableInfo.startRow;
   const quarterStartCol = monthlyTableInfo.endCol + 1;
 
@@ -49,50 +102,56 @@ export function generateLeadsDashboard() {
     quarterStartCol,
     "📈 Leads — Quarterly Breakdown",
     QUARTER_COLUMNS,
-    [QUARTER_KEYS.REVENUE, QUARTER_KEYS.TOTAL_LEADS, QUARTER_KEYS.SIGNED],
-    { zebra: false, showDescription: false, rowSpan: quartersRowSpan }
+    [quarterlyKeys.REVENUE, quarterlyKeys.TOTAL_LEADS, quarterlyKeys.SIGNED],
+    stylizeOptionsQuarters
   );
 
   applyQuarterColoring(
     sheet,
     quarterTableInfo,
     QUARTER_COLUMNS,
-    quartersRowSpan
+    quarterRowSpanMap
+  );
+  applyVerticalBorders(
+    sheet,
+    quarterTableInfo.startRow,
+    quarterTableInfo.endRow - 1,
+    quarterTableInfo.startCol,
+    quarterTableInfo.endCol - quarterTableInfo.startCol + 1
   );
   applyQuarterBorders(
     sheet,
     quarterTableInfo,
     QUARTER_COLUMNS,
-    QUARTER_KEYS.QUARTER,
-    quartersRowSpan
+    quarterlyKeys.QUARTER,
+    { rowSpanMap: quarterRowSpanMap } // ✅ NEW
   );
 }
 
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const existing = ss.getSheetByName(LEADS_DASHBOARD_SHEET);
-  if (existing) return existing.clear(), existing;
+  const existing = ss.getSheetByName(DASHBOARD_SHEET);
+  if (existing) return existing;
 
   const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
   const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
   if (!templateSheet) throw new Error("Template sheet not found.");
 
   const copiedSheet = templateSheet.copyTo(ss);
-  copiedSheet.setName(LEADS_DASHBOARD_SHEET);
+  copiedSheet.setName(DASHBOARD_SHEET);
   ss.setActiveSheet(copiedSheet);
   return copiedSheet;
 }
 
 export function createQuarterlyDashboardRows(
   inputRows: LeadsInputRow[],
-  existingGoals: Map<string, number>
+  year: number
 ): QuarterDashboardRow[] {
   type QuarterKey = `${number}-Q${number}`;
   const grouped = new Map<QuarterKey, LeadsInputRow[]>();
 
   for (const row of inputRows) {
-    const year = row[LEADS_KEYS.YEAR];
-    const quarter = getQuarterFromMonth(Number(row[LEADS_KEYS.MONTH]));
+    const quarter = getQuarterFromMonth(Number(row[inputKeys.MONTH]));
     const key = `${year}-Q${quarter}` as QuarterKey;
 
     if (!grouped.has(key)) grouped.set(key, []);
@@ -104,39 +163,38 @@ export function createQuarterlyDashboardRows(
     const year = Number(yearStr);
     const quarter = `Q${qStr}`;
 
-    const totalLeads = sum(group, LEADS_KEYS.TOTAL_LEADS);
-    const signed = sum(group, LEADS_KEYS.SIGNED);
-    const revenue = sum(group, LEADS_KEYS.REVENUE);
+    const totalLeads = sum(group, inputKeys.TOTAL_LEADS);
+    const signed = sum(group, inputKeys.SIGNED);
     const conversionRate = totalLeads > 0 ? signed / totalLeads : 0;
+    const revenue = sum(group, inputKeys.REVENUE);
+    const goal = sum(group, inputKeys.REVENUE_GOAL);
+    const diff = goal - revenue;
 
-    const goal = existingGoals.get(key) ?? "";
-    const diff = typeof goal === "number" ? revenue - goal : "";
-
-    const fullRow: Partial<Record<QuarterColumnKey, string | number>> = {
-      [QUARTER_KEYS.YEAR]: year,
-      [QUARTER_KEYS.QUARTER]: quarter,
-      [QUARTER_KEYS.TOTAL_LEADS]: totalLeads,
-      [QUARTER_KEYS.SIGNED]: signed,
-      [QUARTER_KEYS.REVENUE]: revenue,
-      [QUARTER_KEYS.CONVERSION_RATE]: conversionRate,
-      [QUARTER_KEYS.REVENUE_GOAL]: goal,
-      [QUARTER_KEYS.REVENUE_DIFF]: diff,
+    const fullRow: Partial<Record<QuarterlyKey, string | number>> = {
+      [quarterlyKeys.YEAR]: year,
+      [quarterlyKeys.QUARTER]: quarter,
+      [quarterlyKeys.TOTAL_LEADS]: totalLeads,
+      [quarterlyKeys.SIGNED]: signed,
+      [quarterlyKeys.REVENUE]: revenue,
+      [quarterlyKeys.CONVERSION_RATE]: conversionRate,
+      [quarterlyKeys.REVENUE_GOAL]: goal,
+      [quarterlyKeys.REVENUE_DIFF]: diff,
     };
 
     const filtered = Object.fromEntries(
       QUARTER_COLUMNS.map((col) => [col.key, fullRow[col.key]])
     );
 
-    return filtered as QuarterDashboardRow;
+    return { ...filtered, quarter } as QuarterDashboardRow;
   });
 
   return unsortedRows.sort((a, b) => {
-    const yA = Number(a[QUARTER_KEYS.YEAR]);
-    const yB = Number(b[QUARTER_KEYS.YEAR]);
+    const yA = Number(a[quarterlyKeys.YEAR]);
+    const yB = Number(b[quarterlyKeys.YEAR]);
     if (yA !== yB) return yA - yB;
 
-    const qA = Number(String(a[QUARTER_KEYS.QUARTER]).slice(1));
-    const qB = Number(String(b[QUARTER_KEYS.QUARTER]).slice(1));
+    const qA = Number(String(a[quarterlyKeys.QUARTER]).slice(1));
+    const qB = Number(String(b[quarterlyKeys.QUARTER]).slice(1));
     return qA - qB;
   });
 }
@@ -148,40 +206,43 @@ function sum<K extends keyof LeadsInputRow>(
   return rows.reduce((acc, r) => acc + Number(r[key] || 0), 0);
 }
 
-function extractExistingRevenueGoals(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet
-): Map<string, number> {
-  const goals = new Map<string, number>();
-  const headers = sheet.getRange(2, 1, 1, sheet.getLastColumn()).getValues()[0];
+function getYearFilter(): number {
+  return 2025;
+}
 
-  const yearColIdx = headers.findIndex((val) => val === QUARTER_LABELS.YEAR);
-  const quarterColIdx = headers.findIndex(
-    (val) => val === QUARTER_LABELS.QUARTER
-  );
-  const goalColIdx = headers.findIndex(
-    (val) => val === QUARTER_LABELS.REVENUE_GOAL
-  );
+function createHeader(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  year: number,
+  startCol: number
+): number {
+  const headerTitle = `${year} Leads Breakdown`;
+  const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
+  // Write the title in row 1, spanning `colSpan` columns
+  const titleRange = sheet.getRange(1, startCol, 2, totalTableWidth);
+  titleRange.merge();
+  titleRange.setValue(headerTitle);
+  titleRange.setFontWeight("bold");
+  titleRange.setFontSize(14);
+  titleRange.setFontColor("white");
+  titleRange.setBackground("#1A237E");
+  titleRange.setHorizontalAlignment("center");
+  titleRange.setVerticalAlignment("middle");
 
-  if (yearColIdx === -1 || quarterColIdx === -1 || goalColIdx === -1)
-    return goals;
+  // Return the row after the header (row 3)
+  return 3;
+}
 
-  const dataRange = sheet.getRange(
-    3,
-    1,
-    sheet.getLastRow() - 2,
-    sheet.getLastColumn()
-  );
-  const values = dataRange.getValues();
+function getQuarterRowSpanMap(
+  monthlyRows: LeadsInputRow[]
+): Record<string, number> {
+  const map: Record<string, number> = {};
 
-  for (const row of values) {
-    const year = row[yearColIdx];
-    const quarter = row[quarterColIdx];
-    const goal = row[goalColIdx];
-
-    if (year && quarter && typeof goal === "number" && !isNaN(goal)) {
-      goals.set(`${year}-${quarter}`, goal);
-    }
+  for (const row of monthlyRows) {
+    const month = Number(row[inputKeys.MONTH]);
+    const quarter = getQuarterFromMonth(month);
+    const key = `Q${quarter}`;
+    map[key] = (map[key] ?? 0) + 1;
   }
 
-  return goals;
+  return map;
 }

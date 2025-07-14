@@ -1,9 +1,11 @@
 import { BaseColumn } from "../columns/types";
 import { MONTH_NAMES } from "../constants";
 
-export function toNumber(value: string) {
+export function toNullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+
   const num = Number(value);
-  return isNaN(num) ? 0 : num;
+  return isNaN(num) ? null : num;
 }
 
 export function setNamedValue(
@@ -20,10 +22,10 @@ export function setNamedValue(
     if (range) {
       range.setValue(value);
     } else {
-      Logger.log(`Named range '${rangeName}' not found on ${sheet.getName()}`);
+      // Logger.log(`Named range '${rangeName}' not found on ${sheet.getName()}`);
     }
   } catch (e) {
-    Logger.log(`Error setting named range '${rangeName}': ${e}`);
+    // Logger.log(`Error setting named range '${rangeName}': ${e}`);
   }
 }
 
@@ -62,14 +64,13 @@ export function toA1Notation(col: number, row: number): string {
 // 📁 src/utils/mapInputToDashboardRows.ts
 
 export function mapInputToDashboardRows<
-  TContext extends { rowData: any },
+  TContext,
   TDashboardRow extends Record<string, unknown>
 >(
-  inputRows: TContext["rowData"][],
+  contexts: TContext[],
   columns: BaseColumn<TContext, keyof TDashboardRow & string, string>[]
 ): TDashboardRow[] {
-  return inputRows.map((input) => {
-    const ctx = { rowData: input } as TContext;
+  return contexts.map((ctx) => {
     const result: Partial<TDashboardRow> = {};
 
     for (const col of columns) {
@@ -99,4 +100,15 @@ export function getColumnIndicesByLabels(
 
 export function getMonthName(monthNumber: number): string {
   return MONTH_NAMES[monthNumber - 1];
+}
+
+export function setNamedRange(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  rangeName: string,
+  range: GoogleAppsScript.Spreadsheet.Range
+) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const existing = ss.getRangeByName(rangeName);
+  if (existing) ss.removeNamedRange(rangeName);
+  ss.setNamedRange(rangeName, range);
 }

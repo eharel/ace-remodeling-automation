@@ -1,26 +1,28 @@
-import { LEADS_COLUMNS } from "./columns-months";
+// 📄 SHEET INFO
+export const INPUT_SHEET = "(WIP) Leads Input";
+export const INPUT_ANCHOR = "A1";
 
-export const PAYMENTS_INPUT_SHEET = "(WIP) Payments Input";
-export const PAYMENTS_INPUT_TABLE_ANCHOR = "A1";
+export const DASHBOARD_SHEET = "(WIP) Leads Dashboard";
 
-export const LEADS_INPUT_SHEET = "(WIP) Leads Input";
-export const LEADS_INPUT_TABLE_ANCHOR = "A1";
+// 📌 NAMED RANGES
+export const NR_MONTHLY_GOALS = "leads_monthly_goals";
+export const NR_MONTHLY_TABLE = "leads_monthly_dashboard_table";
+export const NR_QUARTERLY_TABLE = "leads_quarterly_dashboard_table";
 
-export const LEADS_DASHBOARD_SHEET = "(WIP) Leads Dashboard";
+export const QUARTERS_ROW_SPAN = 3;
 
-export const NR_LEADS_INPUT_TABLE = "leads_input_table";
-
+// 🧾 TEMPLATE
 export const BLANK_SHEET_TEMPLATE = "Blank Sheet Template";
 
-// Softer quarterly color coding for dashboard visualization
+// 🌈 QUARTER COLORS
 export const QUARTER_COLORS = {
-  Q1: "#D2E3FC", // Soft Blue for Q1 (Winter)
-  Q2: "#D9F5DD", // Soft Green for Q2 (Spring)
-  Q3: "#FEF3C0", // Soft Yellow for Q3 (Summer)
-  Q4: "#FAD2CF", // Soft Red for Q4 (Fall)
+  Q1: "#D2E3FC",
+  Q2: "#D9F5DD",
+  Q3: "#FEF3C0",
+  Q4: "#FAD2CF",
 };
 
-// Quarter to month mapping
+// 🔢 QUARTER → MONTH
 export const QUARTER_TO_MONTHS = {
   Q1: [1, 2, 3],
   Q2: [4, 5, 6],
@@ -28,36 +30,60 @@ export const QUARTER_TO_MONTHS = {
   Q4: [10, 11, 12],
 };
 
-export const LEADS_KEYS = {
-  YEAR: "COL_LEADS_YEAR",
-  MONTH: "COL_LEADS_MONTH",
-  TOTAL_LEADS: "COLs_TOTAL_LEADS",
-  SIGNED: "COL_SIGNED_PROPOSALS",
-  REVENUE: "COL_APPROVED_REVENUE",
-  CONVERSION_RATE: "COL_CONVERSION_RATE",
-  PROP_NOT_SENT: "COL_PROP_NOT_SENT",
+// 🔑 INPUT TABLE KEYS
+export const inputKeys = {
+  YEAR: "YEAR",
+  MONTH: "MONTH",
+  TOTAL_LEADS: "TOTAL_LEADS",
+  SIGNED: "SIGNED",
+  REVENUE: "REVENUE",
+  REVENUE_GOAL: "REVENUE_GOAL",
+  PROP_NOT_SENT: "PROP_NOT_SENT",
 } as const;
 
-export const LEADS_LABELS = {
+// 🔑 DASHBOARD KEYS (input + derived)
+export const dashboardKeys = {
+  ...inputKeys,
+  REVENUE_DIFF: "REVENUE_DIFF",
+  CONVERSION_RATE: "CONVERSION_RATE",
+} as const;
+
+// 🔖 HUMAN-FRIENDLY LABELS
+export const labels: Record<keyof typeof dashboardKeys, string> = {
   YEAR: "Year",
   MONTH: "Month",
   TOTAL_LEADS: "Total Leads",
   SIGNED: "Signed Proposals",
   REVENUE: "Approved Revenue",
-  CONVERSION_RATE: "Conversion Rate (%)",
-  PROP_NOT_SENT: "Proposals Not Sent",
-} as const;
-
-export const QUARTER_KEYS = {
-  ...LEADS_KEYS,
-  QUARTER: "COL_QUARTER",
-  REVENUE_GOAL: "COL_REVENUE_GOAL",
-  REVENUE_DIFF: "COL_REVENUE_DIFF",
-} as const;
-
-export const QUARTER_LABELS = {
-  ...LEADS_LABELS,
-  QUARTER: "Quarter",
   REVENUE_GOAL: "Revenue Goal",
   REVENUE_DIFF: "Revenue Difference",
+  CONVERSION_RATE: "Conversion Rate (%)",
+  PROP_NOT_SENT: "Prop. Not Sent",
+};
+
+// ➕ FOR QUARTERLY
+export const quarterlyKeys = {
+  ...dashboardKeys,
+  QUARTER: "QUARTER",
 } as const;
+
+export const quarterlyLabels = {
+  ...labels,
+  QUARTER: "Quarter",
+};
+
+// 🧠 TYPE ALIASES
+export type InputKey = keyof typeof inputKeys;
+export type DashboardKey = keyof typeof dashboardKeys;
+export type DashboardLabel = (typeof labels)[DashboardKey];
+
+// 🔁 MAPPINGS
+export const KEYS_BY_LABEL: Record<DashboardLabel, DashboardKey> =
+  Object.fromEntries(Object.entries(labels).map(([k, v]) => [v, k])) as Record<
+    DashboardLabel,
+    DashboardKey
+  >;
+
+export const LABELS_BY_KEY: Record<DashboardKey, DashboardLabel> = labels;
+export type QuarterlyKey = keyof typeof quarterlyKeys;
+export type QuarterlyLabel = (typeof quarterlyLabels)[QuarterlyKey];

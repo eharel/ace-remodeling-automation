@@ -13,7 +13,7 @@ export const LIB_IDENTIFIER = "AceRemodelingPMToolkit";
 export const MAX_ADVANCE_PERCENTAGE = 10;
 export const EXPECTED_PROFIT_PERCENTAGE = 20;
 export const IS_ASCENDING_ORDER = false;
-export const COLUMN_PADDING = 5;
+export const COLUMN_PADDING = 10;
 
 export const LABEL_COLUMN_INDEX = 11;
 export const VALUE_COLUMN_INDEX = 13;

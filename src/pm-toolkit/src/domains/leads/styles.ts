@@ -1,9 +1,8 @@
 import {
   QUARTER_COLORS,
   QUARTER_TO_MONTHS,
-  LEADS_LABELS,
-  QUARTER_KEYS,
-  QUARTER_LABELS,
+  quarterlyKeys,
+  quarterlyLabels,
 } from "./constants";
 import { TableInfo } from "../../types";
 import { BaseColumn } from "../../columns";
@@ -37,40 +36,23 @@ export function applyQuarterColoring(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   table: TableInfo,
   columns: BaseColumn<any, any, any>[],
-  rowSpan = 1
+  rowSpanMap: Record<string, number>
 ) {
-  const { dataStartRow, dataEndRow, startCol } = table;
-  const isMonthly = rowSpan === 1;
-
-  const targetColIndex = columns.findIndex((c) =>
-    isMonthly ? c.label === LEADS_LABELS.MONTH : c.key === QUARTER_KEYS.QUARTER
+  const { dataStartRow, startCol } = table;
+  const targetColIndex = columns.findIndex(
+    (c) => c.key === quarterlyKeys.QUARTER || c.key === quarterlyKeys.MONTH
   );
   if (targetColIndex === -1) return;
 
-  if (isMonthly) {
-    for (let row = dataStartRow; row <= dataEndRow; row++) {
-      const cell = sheet.getRange(row, startCol + targetColIndex);
-      const monthName = String(cell.getValue());
-      const monthNum = MONTH_NAME_TO_NUMBER[monthName];
-      const quarter = MONTH_NUM_TO_QUARTER[monthNum];
-      const color = quarter && QUARTER_COLORS[quarter];
-      if (color) cell.setBackground(color);
+  let currentRow = dataStartRow;
+  for (const [quarter, span] of Object.entries(rowSpanMap)) {
+    const color = QUARTER_COLORS[quarter as keyof typeof QUARTER_COLORS];
+    if (color) {
+      sheet
+        .getRange(currentRow, startCol + targetColIndex, span, 1)
+        .setBackground(color);
     }
-  } else {
-    const numGroups = Math.floor((dataEndRow - dataStartRow + 1) / rowSpan);
-    for (let i = 0; i < numGroups; i++) {
-      const rowStart = dataStartRow + i * rowSpan;
-      const cell = sheet.getRange(rowStart, startCol + targetColIndex);
-      const quarterLabel = String(
-        cell.getValue()
-      ) as keyof typeof QUARTER_COLORS;
-      const color = QUARTER_COLORS[quarterLabel];
-      if (color) {
-        sheet
-          .getRange(rowStart, startCol + targetColIndex, rowSpan, 1)
-          .setBackground(color);
-      }
-    }
+    currentRow += span;
   }
 }
 
@@ -78,50 +60,143 @@ export function applyQuarterBorders<T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   table: TableInfo,
   columns: BaseColumn<any, any, any>[],
-  monthKey: T,
-  rowSpan = 1
-) {
-  const isMonthly = rowSpan === 1;
+  groupKeyField: T,
+  opts: { rowSpanMap: Record<string, number> }
+): void {
+  const { rowSpanMap } = opts;
 
-  const targetColIndex = columns.findIndex((c) =>
-    isMonthly ? c.key === monthKey : c.key === QUARTER_KEYS.QUARTER
-  );
+  const targetColIndex = findGroupingColumnIndex(columns, groupKeyField);
   if (targetColIndex === -1) return;
 
+  const startRow = table.dataStartRow;
   const rowCount = table.dataEndRow - table.dataStartRow + 1;
   const colCount = columns.length;
-  const startRow = table.dataStartRow;
 
-  const rawValues = sheet
-    .getRange(startRow, table.startCol + targetColIndex, rowCount, 1)
+  const rawValues = extractGroupingValues(
+    sheet,
+    startRow,
+    table.startCol + targetColIndex,
+    rowCount
+  );
+
+  const groupMap = groupRowsByQuarter(rawValues);
+
+  applyGroupBordersWithMap(
+    sheet,
+    startRow,
+    table.startCol,
+    colCount,
+    groupMap,
+    rowSpanMap
+  );
+}
+
+function applyGroupBordersWithMap(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  tableStartCol: number,
+  colCount: number,
+  groupMap: Record<string, number[]>,
+  rowSpanMap: Record<string, number>
+): void {
+  const outerStyle = SpreadsheetApp.BorderStyle.SOLID_MEDIUM;
+
+  for (const [groupKey, rowIndices] of Object.entries(groupMap)) {
+    if (rowIndices.length === 0) continue;
+
+    const rowSpan = rowSpanMap[groupKey] ?? 1;
+    const rowStart = startRow + rowIndices[0];
+    const firstCol = tableStartCol;
+    const lastCol = tableStartCol + colCount - 1;
+
+    sheet
+      .getRange(rowStart, firstCol, rowSpan, colCount)
+      .setBorder(true, null, null, null, null, null, "black", outerStyle);
+
+    sheet
+      .getRange(rowStart + rowSpan - 1, firstCol, 1, colCount)
+      .setBorder(null, null, true, null, null, null, "black", outerStyle);
+
+    sheet
+      .getRange(rowStart, firstCol, rowSpan, 1)
+      .setBorder(null, true, null, null, null, null, "black", outerStyle);
+
+    sheet
+      .getRange(rowStart, lastCol, rowSpan, 1)
+      .setBorder(null, null, null, true, null, null, "black", outerStyle);
+  }
+}
+
+export function applyVerticalBorders(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  endRow: number,
+  startCol: number,
+  numCols: number
+) {
+  clearBordersInRange(sheet, startRow, endRow, startCol, numCols);
+
+  const innerBorderStyle = SpreadsheetApp.BorderStyle.SOLID;
+  const lightGray = "#cccccc";
+  const numRows = endRow - startRow + 1;
+
+  for (let c = 1; c < numCols; c++) {
+    const colRange = sheet.getRange(startRow, startCol + c, numRows, 1);
+    colRange.setBorder(
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      lightGray,
+      innerBorderStyle
+    );
+  }
+}
+
+export function clearBordersInRange(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  endRow: number,
+  startCol: number,
+  numCols: number
+) {
+  const numRows = endRow - startRow + 1;
+  const range = sheet.getRange(startRow, startCol, numRows, numCols);
+  range.setBorder(false, false, false, false, false, false);
+}
+
+function findGroupingColumnIndex<T extends string>(
+  columns: BaseColumn<any, any, any>[],
+  groupKeyField: T
+): number {
+  return columns.findIndex((c) => c.key === groupKeyField);
+}
+
+function extractGroupingValues(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  startRow: number,
+  startCol: number,
+  rowCount: number
+): string[] {
+  return sheet
+    .getRange(startRow, startCol, rowCount, 1)
     .getValues()
-    .map((r) => r[0]);
+    .map((r) => String(r[0]));
+}
 
+function groupRowsByQuarter(rawValues: string[]): Record<string, number[]> {
   const groupMap: Record<string, number[]> = {};
-
   for (let i = 0; i < rawValues.length; i++) {
-    const raw = String(rawValues[i]);
-    const groupKey = isMonthly
-      ? MONTH_NUM_TO_QUARTER[MONTH_NAME_TO_NUMBER[raw] ?? -1] ?? "Other"
-      : raw;
+    const raw = rawValues[i];
+    const monthNum = MONTH_NAME_TO_NUMBER[raw];
+    const groupKey =
+      monthNum !== undefined ? MONTH_NUM_TO_QUARTER[monthNum] : raw;
 
+    if (!groupKey) continue;
     if (!groupMap[groupKey]) groupMap[groupKey] = [];
     groupMap[groupKey].push(i);
   }
-
-  Object.values(groupMap).forEach((rowIndices) => {
-    if (rowIndices.length === 0) return;
-    const start = startRow + rowIndices[0];
-    const end = startRow + rowIndices[rowIndices.length - 1];
-    sheet.getRange(start, table.startCol, end - start + 1, colCount).setBorder(
-      true, // top
-      true, // left
-      true, // bottom
-      true, // right
-      false,
-      false,
-      "black",
-      SpreadsheetApp.BorderStyle.SOLID_MEDIUM
-    );
-  });
+  return groupMap;
 }
