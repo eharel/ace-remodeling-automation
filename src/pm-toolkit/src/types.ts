@@ -3,6 +3,7 @@ export type StylizeOptions<T extends string = string> = {
   zebra?: boolean;
   showDescription?: boolean;
   rowSpan?: number;
+  rowSpanMap?: Record<string, number>;
   customStylizers?: ((
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     table: TableInfo

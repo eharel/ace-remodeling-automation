@@ -30,13 +30,6 @@ const stylizeOptionsMonths = {
     [inputKeys.MONTH]: 73,
   },
 };
-const stylizeOptionsQuarters = {
-  ...stylizeOptionsMonths,
-  rowSpan: QUARTERS_ROW_SPAN,
-  columnWidths: {
-    [quarterlyKeys.QUARTER]: 60,
-  },
-};
 
 export function generateLeadsDashboard() {
   const year = getYearFilter();
@@ -46,7 +39,19 @@ export function generateLeadsDashboard() {
   const inputRows: LeadsInputRow[] = extractLeadsData();
   const monthlyRows = createMonthlyDashboardRows(inputRows);
 
+  const quarterRowSpanMap = getQuarterRowSpanMap(inputRows);
+
   const startingRow = createHeader(sheet, year, 1);
+  const stylizeOptionsMonths = {
+    zebra: false,
+    showDescription: false,
+    colorKeys: [dashboardKeys.REVENUE_DIFF],
+    columnWidths: {
+      [inputKeys.MONTH]: 73,
+    },
+    rowSpanMap: quarterRowSpanMap, // ✅ NEW
+  };
+
   const monthlyTableInfo = generateAndStylizeTableFromRows(
     sheet,
     monthlyRows,
@@ -58,15 +63,33 @@ export function generateLeadsDashboard() {
     stylizeOptionsMonths
   );
 
-  applyQuarterColoring(sheet, monthlyTableInfo, LEADS_COLUMNS);
+  applyQuarterColoring(
+    sheet,
+    monthlyTableInfo,
+    LEADS_COLUMNS,
+    quarterRowSpanMap
+  );
   applyVerticalBorders(
     sheet,
     monthlyTableInfo.startRow,
-    monthlyTableInfo.endRow - 1, // Exclude summary row
+    monthlyTableInfo.endRow - 1,
     monthlyTableInfo.startCol,
     monthlyTableInfo.endCol - monthlyTableInfo.startCol + 1
   );
-  applyQuarterBorders(sheet, monthlyTableInfo, LEADS_COLUMNS, inputKeys.MONTH);
+  applyQuarterBorders(
+    sheet,
+    monthlyTableInfo,
+    LEADS_COLUMNS,
+    inputKeys.MONTH,
+    { rowSpanMap: quarterRowSpanMap } // ✅ NEW
+  );
+
+  const stylizeOptionsQuarters = {
+    ...stylizeOptionsMonths,
+    columnWidths: {
+      [quarterlyKeys.QUARTER]: 60,
+    },
+  };
 
   const quarterRows = createQuarterlyDashboardRows(inputRows, year);
   const quarterStartRow = monthlyTableInfo.startRow;
@@ -87,7 +110,7 @@ export function generateLeadsDashboard() {
     sheet,
     quarterTableInfo,
     QUARTER_COLUMNS,
-    QUARTERS_ROW_SPAN
+    quarterRowSpanMap
   );
   applyVerticalBorders(
     sheet,
@@ -101,7 +124,7 @@ export function generateLeadsDashboard() {
     quarterTableInfo,
     QUARTER_COLUMNS,
     quarterlyKeys.QUARTER,
-    QUARTERS_ROW_SPAN
+    { rowSpanMap: quarterRowSpanMap } // ✅ NEW
   );
 }
 
@@ -162,7 +185,7 @@ export function createQuarterlyDashboardRows(
       QUARTER_COLUMNS.map((col) => [col.key, fullRow[col.key]])
     );
 
-    return filtered as QuarterDashboardRow;
+    return { ...filtered, quarter } as QuarterDashboardRow;
   });
 
   return unsortedRows.sort((a, b) => {
@@ -207,4 +230,19 @@ function createHeader(
 
   // Return the row after the header (row 3)
   return 3;
+}
+
+function getQuarterRowSpanMap(
+  monthlyRows: LeadsInputRow[]
+): Record<string, number> {
+  const map: Record<string, number> = {};
+
+  for (const row of monthlyRows) {
+    const month = Number(row[inputKeys.MONTH]);
+    const quarter = getQuarterFromMonth(month);
+    const key = `Q${quarter}`;
+    map[key] = (map[key] ?? 0) + 1;
+  }
+
+  return map;
 }

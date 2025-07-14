@@ -60,28 +60,41 @@ function generateTableFromRows<RowType extends Record<string, any>>(
   const descriptionRow = headerRow + 1;
   const dataStartRow = hasDescription ? descriptionRow + 1 : headerRow + 1;
 
-  const rowSpan = options?.rowSpan ?? 1;
+  const fallbackRowSpan = options?.rowSpan ?? 1;
+  const rowSpanMap = options?.rowSpanMap;
 
   const values = rows.map((row) => columns.map((col) => row[col.key] ?? ""));
-  const dataEndRow = dataStartRow + values.length * rowSpan - 1;
 
-  // Write values and merge rows if needed
-  if (values.length > 0) {
-    for (let i = 0; i < values.length; i++) {
-      const rowValues = values[i];
-      const start = dataStartRow + i * rowSpan;
-      sheet.getRange(start, startCol, 1, columns.length).setValues([rowValues]);
+  // 1. Determine span per row
+  const rowSpans = rows.map((row) => {
+    const key = row.quarter ?? row.groupKey ?? ""; // fallback logic
+    return rowSpanMap?.[key] ?? fallbackRowSpan;
+  });
 
-      if (rowSpan > 1) {
-        for (let j = 0; j < columns.length; j++) {
-          sheet
-            .getRange(start, startCol + j, rowSpan, 1)
-            .mergeVertically()
-            .setVerticalAlignment("middle");
-        }
+  // 2. Write rows using cumulative row index
+  let currentRow = dataStartRow;
+  for (let i = 0; i < values.length; i++) {
+    const rowValues = values[i];
+    const span = rowSpans[i];
+
+    sheet
+      .getRange(currentRow, startCol, 1, columns.length)
+      .setValues([rowValues]);
+
+    if (span > 1) {
+      for (let j = 0; j < columns.length; j++) {
+        sheet
+          .getRange(currentRow, startCol + j, span, 1)
+          .mergeVertically()
+          .setVerticalAlignment("middle");
       }
     }
+
+    currentRow += span;
   }
+
+  // 3. Final row after all written values
+  const dataEndRow = currentRow - 1;
 
   const summaryRow =
     keysToSum.length > 0
