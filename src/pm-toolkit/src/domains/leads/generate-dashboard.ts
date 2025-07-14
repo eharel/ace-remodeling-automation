@@ -8,19 +8,19 @@ import {
   dashboardKeys,
   inputKeys,
   quarterlyKeys,
+  QUARTERS_ROW_SPAN,
 } from "./constants";
 import { TEMPLATE_SPREADSHEET_ID } from "../../constants";
 import { createMonthlyDashboardRows } from "./data-transformation";
 import {
-  applyBorders,
   applyQuarterBorders,
   applyQuarterColoring,
+  applyVerticalBorders,
 } from "./styles";
 import { getQuarterFromMonth } from "./utils";
 import { QUARTER_COLUMNS } from "./columns-quarters";
 import { QuarterlyKey } from "./constants";
 
-const QUARTERS_ROW_SPAN = 3;
 const SHOW_DESCRIPTION = false;
 const stylizeOptionsMonths = {
   zebra: false,
@@ -59,13 +59,13 @@ export function generateLeadsDashboard() {
   );
 
   applyQuarterColoring(sheet, monthlyTableInfo, LEADS_COLUMNS);
-  // applyBorders(
-  //   sheet,
-  //   monthlyTableInfo.startRow,
-  //   monthlyTableInfo.endRow,
-  //   monthlyTableInfo.startCol,
-  //   monthlyTableInfo.endCol
-  // );
+  applyVerticalBorders(
+    sheet,
+    monthlyTableInfo.startRow,
+    monthlyTableInfo.endRow - 1, // Exclude summary row
+    monthlyTableInfo.startCol,
+    monthlyTableInfo.endCol - monthlyTableInfo.startCol + 1
+  );
   applyQuarterBorders(sheet, monthlyTableInfo, LEADS_COLUMNS, inputKeys.MONTH);
 
   const quarterRows = createQuarterlyDashboardRows(inputRows, year);
@@ -88,6 +88,13 @@ export function generateLeadsDashboard() {
     quarterTableInfo,
     QUARTER_COLUMNS,
     QUARTERS_ROW_SPAN
+  );
+  applyVerticalBorders(
+    sheet,
+    quarterTableInfo.startRow,
+    quarterTableInfo.endRow - 1,
+    quarterTableInfo.startCol,
+    quarterTableInfo.endCol - quarterTableInfo.startCol + 1
   );
   applyQuarterBorders(
     sheet,

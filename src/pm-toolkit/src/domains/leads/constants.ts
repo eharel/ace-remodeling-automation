@@ -9,6 +9,8 @@ export const NR_MONTHLY_GOALS = "leads_monthly_goals";
 export const NR_MONTHLY_TABLE = "leads_monthly_dashboard_table";
 export const NR_QUARTERLY_TABLE = "leads_quarterly_dashboard_table";
 
+export const QUARTERS_ROW_SPAN = 3;
+
 // 🧾 TEMPLATE
 export const BLANK_SHEET_TEMPLATE = "Blank Sheet Template";
 
