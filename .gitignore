@@ -20,6 +20,12 @@ node_modules/
 build/
 **/build/
 
+# TypeScript cache files
+*.tsbuildinfo
+**/*.tsbuildinfo
+
 # Build output (optional, if bundling later)
 dist/
 **/dist/
+
+src/sandbox/
