@@ -143,16 +143,20 @@ export function addTimestamp(
   label = "Last updated:"
 ) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const timezone = ss.getSpreadsheetTimeZone();
+  const timezone = ss.getSpreadsheetTimeZone(); // e.g. "America/Chicago"
   const formatted = Utilities.formatDate(
     new Date(),
     timezone,
     "yyyy-MM-dd HH:mm"
   );
 
+  const tzLabel = timezone.includes("/")
+    ? timezone.split("/")[1].replace("_", " ")
+    : timezone;
+
   sheet
     .getRange(row, col)
-    .setValue(`${label} ${formatted}`)
+    .setValue(`${label} ${formatted} (${tzLabel})`)
     .setFontStyle("italic")
     .setFontSize(9)
     .setFontColor("#555")

@@ -20,6 +20,8 @@ import {
 import { getQuarterFromMonth } from "./utils";
 import { QUARTER_COLUMNS } from "./columns-quarters";
 import { QuarterlyKey } from "./constants";
+import { addTimestamp } from "../../styles";
+import { generateCharts } from "./charts";
 
 const SHOW_DESCRIPTION = false;
 const stylizeOptionsMonths = {
@@ -126,6 +128,20 @@ export function generateLeadsDashboard() {
     quarterlyKeys.QUARTER,
     { rowSpanMap: quarterRowSpanMap } // ✅ NEW
   );
+
+  generateCharts(sheet, monthlyTableInfo, quarterTableInfo);
+
+  // ⌚️ Add timestamp to the right of the quarters table
+  addTimestamp(sheet, 1, quarterTableInfo.endCol + 1);
+
+  // Add a toast to notify the user that the dashboard is ready
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    "Leads Dashboard ready ✅",
+    "Ace Toolkit"
+  );
+
+  // ✅ Freeze the row of the table titles so they stay visible while scrolling
+  sheet.setFrozenRows(3);
 }
 
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {

@@ -96,14 +96,19 @@ function generateProjectSection({
   startingRow: number;
   startingCol: number;
 }) {
-  setDashboardStatus(dashboardSheet, `${title} — extracting project data...`);
+  setDashboardStatus(
+    dashboardSheet,
+    `${title} — extracting project data...`,
+    toA1Notation(startingCol, startingRow)
+  );
 
   const extractedRows = extractAllProjectData(
     projectSheets,
     namedRangesBySheet,
     dashboardSheet,
     startingRow,
-    startingCol
+    startingCol,
+    title
   );
 
   const dashboardRows = transformExtractedDataToDashboardRows(

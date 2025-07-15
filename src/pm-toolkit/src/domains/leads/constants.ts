@@ -14,14 +14,6 @@ export const QUARTERS_ROW_SPAN = 3;
 // 🧾 TEMPLATE
 export const BLANK_SHEET_TEMPLATE = "Blank Sheet Template";
 
-// 🌈 QUARTER COLORS
-export const QUARTER_COLORS = {
-  Q1: "#D2E3FC",
-  Q2: "#D9F5DD",
-  Q3: "#FEF3C0",
-  Q4: "#FAD2CF",
-};
-
 // 🔢 QUARTER → MONTH
 export const QUARTER_TO_MONTHS = {
   Q1: [1, 2, 3],

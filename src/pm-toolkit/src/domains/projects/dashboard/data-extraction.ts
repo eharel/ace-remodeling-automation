@@ -17,7 +17,8 @@ export function extractAllProjectData(
   >,
   dashboardSheet: GoogleAppsScript.Spreadsheet.Sheet,
   beginningRow: number,
-  beginningCol: number
+  beginningCol: number,
+  extractionEntityName: string = "Active Projects"
 ): ExtractedProjectData[] {
   const extractedRows: ExtractedProjectData[] = [];
 
@@ -25,7 +26,9 @@ export function extractAllProjectData(
     const sheet = activeSheets[i];
     setDashboardStatus(
       dashboardSheet,
-      `📊 Extracting Active Projects... (${i + 1}/${activeSheets.length})`,
+      `📊 Extracting ${extractionEntityName}... (${i + 1}/${
+        activeSheets.length
+      })`,
       toA1Notation(beginningCol, beginningRow)
     );
 
