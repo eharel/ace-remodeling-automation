@@ -1,0 +1,54 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+// Clean up build directory
+console.log('Cleaning build directory...');
+if (fs.existsSync('./build')) {
+  fs.rmSync('./build', { recursive: true, force: true });
+}
+fs.mkdirSync('./build', { recursive: true });
+
+// Copy appsscript.json
+console.log('Copying appsscript.json...');
+if (fs.existsSync('./src/appsscript.json')) {
+  fs.copyFileSync('./src/appsscript.json', './build/appsscript.json');
+} else {
+  console.log('Warning: appsscript.json not found in src directory');
+  // Create a basic appsscript.json if it doesn't exist
+  fs.writeFileSync('./build/appsscript.json', JSON.stringify({
+    "timeZone": "America/Denver",
+    "dependencies": {},
+    "exceptionLogging": "STACKDRIVER",
+    "runtimeVersion": "V8"
+  }, null, 2));
+}
+
+// Run the build process using the parent project's build script
+console.log('Building project...');
+try {
+  execSync('cd ../.. && npm run build:pm', { stdio: 'inherit' });
+  console.log('Build completed successfully');
+} catch (error) {
+  console.error('Build failed:', error);
+  process.exit(1);
+}
+
+// Remove all .d.ts files from build directory
+console.log('Removing TypeScript declaration files...');
+const removeDtsFiles = (dir) => {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    
+    if (entry.isDirectory()) {
+      removeDtsFiles(fullPath);
+    } else if (entry.name.endsWith('.d.ts')) {
+      fs.unlinkSync(fullPath);
+    }
+  }
+};
+
+removeDtsFiles('./build');
+console.log('Build preparation complete. Ready for clasp push.');

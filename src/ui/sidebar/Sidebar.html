@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      nav {
+        display: flex;
+        gap: 6px;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        background-color: #f6f6f6;
+      }
+
+      nav button {
+        padding: 6px 10px;
+        font-size: 13px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      nav button:hover {
+        background-color: #eee;
+      }
+
+      main {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <button onclick="loadModule('tab-search')">Tabs</button>
+      <!-- future buttons go here -->
+    </nav>
+
+    <main id="module-container">Loading…</main>
+
+    <script>
+      function loadModule(moduleName) {
+        google.script.run
+          .withSuccessHandler(function (html) {
+            document.getElementById("module-container").innerHTML = html;
+          })
+          .loadSidebarModule(moduleName);
+      }
+
+      // Load default module on open
+      loadModule("tab-search");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "ace-remodeling",
+  "version": "1.0.0",
+  "description": "Ace Remodeling Project Management Tools",
+  "main": "index.js",
+  "scripts": {
+    "clean:all": "rimraf src/*/build",
+    "clean:pm": "rimraf src/pm-toolkit/build",
+    "build:all": "node esbuild.config.js",
+    "build:pm": "cross-env DOMAIN=pm-toolkit node esbuild.config.js && copyfiles -u 3 'src/pm-toolkit/src/appsscript.json' src/pm-toolkit/build/",
+    "push:pm": "npm run build:pm && (cd src/pm-toolkit && npm run push:raw)",
+    "clean": "npm run clean:all",
+    "build": "npm run build:all",
+    "push": "npm run push:pm",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "googleapis": "^150.0.1"
+  },
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.99",
+    "chalk": "^5.4.1",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.25.5",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  },
+  "workspaces": [
+    "src/pm-toolkit",
+    "src/ui",
+    "src/utils"
+  ]
+}

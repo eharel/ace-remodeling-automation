@@ -1,4 +1,4 @@
-import { registerGlobals } from "./register-globals";
+import { registerGlobals } from "@utils/register-globals";
 
 import { onOpen, onEdit } from "./main";
 import { showStructureHelp, showFirstTimeSetup } from "./menu/modals";

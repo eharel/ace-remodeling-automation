@@ -1,8 +1,8 @@
 // 📄 SHEET INFO
-export const INPUT_SHEET = "(WIP) Leads Input";
+export const INPUT_SHEET = "Leads Input";
 export const INPUT_ANCHOR = "A1";
 
-export const DASHBOARD_SHEET = "(WIP) Leads Dashboard";
+export const DASHBOARD_SHEET = "Leads Dashboard";
 
 // 📌 NAMED RANGES
 export const NR_MONTHLY_GOALS = "leads_monthly_goals";
