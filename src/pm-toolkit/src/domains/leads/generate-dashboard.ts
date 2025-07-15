@@ -139,6 +139,9 @@ export function generateLeadsDashboard() {
     "Leads Dashboard ready ✅",
     "Ace Toolkit"
   );
+
+  // ✅ Freeze the row of the table titles so they stay visible while scrolling
+  sheet.setFrozenRows(3);
 }
 
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {

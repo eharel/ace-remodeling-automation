@@ -1,0 +1,686 @@
+diff --git a/src/pm-toolkit/src/charts/positioner.ts b/src/pm-toolkit/src/charts/positioner.ts
+index 117bf67..baf0082 100644
+--- a/src/pm-toolkit/src/charts/positioner.ts
++++ b/src/pm-toolkit/src/charts/positioner.ts
+@@ -1,3 +1,5 @@
++export type LayoutType = "grid" | "stacked";
++
+ export type ChartPosition = {
+   row: number;
+   col: number;
+@@ -5,35 +7,65 @@ export type ChartPosition = {
+   offsetY?: number;
+ };
+ 
++export type ChartLayoutConfig = {
++  layoutType?: LayoutType;
++  chartsPerRow?: number;
++  chartWidthPx?: number;
++  chartHeightRows?: number;
++  paddingPx?: number;
++  useOffsetX?: boolean;
++  useOffsetY?: boolean;
++};
++
++export const DEFAULT_CHART_LAYOUT: Required<ChartLayoutConfig> = {
++  layoutType: "grid",
++  chartsPerRow: 3,
++  chartWidthPx: 591,
++  chartHeightRows: 18,
++  paddingPx: 12,
++  useOffsetX: true,
++  useOffsetY: true,
++};
++
++function resolveLayoutConfig(
++  partial: ChartLayoutConfig
++): Required<ChartLayoutConfig> {
++  return { ...DEFAULT_CHART_LAYOUT, ...partial };
++}
++
+ export function createChartPositioner(
+   startRow: number,
+   startCol: number,
+-  chartsPerRow = 3
++  layout: ChartLayoutConfig
+ ) {
++  const {
++    layoutType = "grid",
++    chartsPerRow,
++    chartWidthPx,
++    chartHeightRows,
++    paddingPx,
++    useOffsetX,
++    useOffsetY,
++  } = resolveLayoutConfig(layout);
++
+   let row = startRow;
+   const col = startCol;
+-
+   let chartIndexInRow = 0;
+ 
+-  const CHART_WIDTH_PX = 591;
+-  const PADDING_PX = 12;
+-  const offsetStepX = CHART_WIDTH_PX + PADDING_PX;
+-
+-  const chartHeight = 18;
+-  const offsetY = 0;
++  const offsetStepX = chartWidthPx + paddingPx;
+ 
+   return {
+     nextPosition: (): ChartPosition => ({
+       row,
+       col,
+-      offsetX: chartIndexInRow * offsetStepX,
+-      offsetY,
++      offsetX: useOffsetX ? chartIndexInRow * offsetStepX : undefined,
++      offsetY: useOffsetY ? 0 : undefined,
+     }),
+     advance: () => {
+       chartIndexInRow++;
+       if (chartIndexInRow >= chartsPerRow) {
+         chartIndexInRow = 0;
+-        row += chartHeight;
++        row += chartHeightRows;
+       }
+     },
+   };
+diff --git a/src/pm-toolkit/src/domains/leads/charts/index.ts b/src/pm-toolkit/src/domains/leads/charts/index.ts
+index 3d04cd6..69fe411 100644
+--- a/src/pm-toolkit/src/domains/leads/charts/index.ts
++++ b/src/pm-toolkit/src/domains/leads/charts/index.ts
+@@ -1,37 +1,88 @@
+ import { TableInfo } from "../../../types";
+ import { clearExistingCharts } from "../../../charts";
+-import { createChartPositioner } from "../../../charts";
+-import { addMonthlyRevenueChart } from "./monthly-charts";
+-import { addQuarterlyRevenueComparisonChart } from "./quarterly-charts";
+-import { addMonthlyConversionRateChart } from "./monthly-charts";
+-import { addQuarterlyConversionRateChart } from "./quarterly-charts";
++import {
++  addMonthlyConversionRateChart,
++  addMonthlyRevenueChart,
++} from "./monthly-charts";
++import {
++  addQuarterlyRevenueComparisonChart,
++  addQuarterlyRevenuePieChart,
++} from "./quarterly-charts";
++import {
++  generateGridLayoutCharts,
++  generateStackedLayoutCharts,
++  STACKED_LAYOUT,
++} from "./layouts";
++import type { ChartLayoutConfig } from "../../../charts";
++import type { ChartFunction } from "./types";
+ 
++// -----------------------------
++// 🎯 Choose layout here
++// -----------------------------
++const CHART_LAYOUT: ChartLayoutConfig = STACKED_LAYOUT;
++
++// -----------------------------
++// 📊 Group chart functions
++// -----------------------------
++export const monthlyCharts: ChartFunction[] = [
++  addMonthlyRevenueChart,
++  addMonthlyConversionRateChart,
++];
++
++export const quarterlyCharts: ChartFunction[] = [
++  addQuarterlyRevenueComparisonChart,
++  addQuarterlyRevenuePieChart,
++];
++
++// -----------------------------
++// 🚀 Main chart generation
++// -----------------------------
+ export function generateCharts(
+   sheet: GoogleAppsScript.Spreadsheet.Sheet,
+   monthlyTableInfo: TableInfo,
+-  quarterTableInfo: TableInfo
+-) {
++  quarterlyTableInfo: TableInfo
++): void {
+   clearExistingCharts(sheet);
+ 
+-  const positioner = createChartPositioner(
+-    Math.max(monthlyTableInfo.endRow, quarterTableInfo.endRow) + 1,
+-    monthlyTableInfo.startCol
+-  );
+-
+-  addMonthlyRevenueChart(sheet, positioner.nextPosition(), monthlyTableInfo);
+-  positioner.advance();
+-
+-  addMonthlyConversionRateChart(
+-    sheet,
+-    positioner.nextPosition(),
+-    monthlyTableInfo
+-  );
+-  positioner.advance();
+-
+-  addQuarterlyRevenueComparisonChart(
+-    sheet,
+-    positioner.nextPosition(),
+-    quarterTableInfo
+-  );
+-  positioner.advance();
++  switch (CHART_LAYOUT.layoutType) {
++    case "grid":
++      generateGridLayoutCharts(
++        sheet,
++        [...monthlyCharts, ...quarterlyCharts],
++        monthlyTableInfo,
++        quarterlyTableInfo,
++        CHART_LAYOUT
++      );
++      break;
++
++    case "stacked":
++      generateStackedLayoutCharts(
++        sheet,
++        monthlyCharts,
++        quarterlyCharts,
++        monthlyTableInfo,
++        quarterlyTableInfo,
++        CHART_LAYOUT
++      );
++      break;
++
++    default:
++      throw new Error(`Unknown chart layout type: ${CHART_LAYOUT.layoutType}`);
++  }
++}
++
++// -----------------------------
++// 📐 Utility
++// -----------------------------
++export function getCenteredStartCol(
++  tableStartCol: number,
++  tableEndCol: number,
++  chartWidthPx: number,
++  avgColumnWidthPx = 120
++): number {
++  const tableWidthCols = tableEndCol - tableStartCol + 1;
++  const tableWidthPx = tableWidthCols * avgColumnWidthPx;
++  const offsetPx = Math.max((tableWidthPx - chartWidthPx) / 2, 0);
++  const offsetCols = Math.round(offsetPx / avgColumnWidthPx);
++  return tableStartCol + offsetCols;
+ }
+diff --git a/src/pm-toolkit/src/domains/leads/charts/monthly-charts.ts b/src/pm-toolkit/src/domains/leads/charts/monthly-charts.ts
+index a10dec2..7ccd15b 100644
+--- a/src/pm-toolkit/src/domains/leads/charts/monthly-charts.ts
++++ b/src/pm-toolkit/src/domains/leads/charts/monthly-charts.ts
+@@ -3,6 +3,7 @@ import { TableInfo } from "../../../types";
+ import { LEADS_COLUMNS } from "../columns-months";
+ import { dashboardKeys, inputKeys } from "../constants";
+ import { buildChart } from "../../../charts/build-chart";
++import { CHART_COLORS } from "../colors";
+ 
+ export function addMonthlyRevenueChart(
+   sheet: GoogleAppsScript.Spreadsheet.Sheet,
+@@ -26,6 +27,16 @@ export function addMonthlyRevenueChart(
+     ],
+     options: {
+       legend: { position: "none" },
++      vAxis: { format: "$#,###" },
++      colors: [CHART_COLORS.ACTUAL],
++      annotations: {
++        alwaysOutside: true,
++        textStyle: { fontSize: 10, color: "#333" },
++      },
++      tooltip: {
++        trigger: "focus",
++        textStyle: { fontSize: 12 },
++      },
+     },
+   });
+ }
+@@ -53,8 +64,16 @@ export function addMonthlyConversionRateChart(
+       { startRow, endRowInclusive, startCol: convRateCol, numCols: 1 },
+     ],
+     options: {
+-      legend: { position: "none" },
+-      vAxis: { format: "percent" },
++      legend: { position: "bottom" },
++      colors: [CHART_COLORS.ACTUAL],
++      vAxis: { format: "percent", minValue: 0 },
++      annotations: {
++        textStyle: { fontSize: 10, color: "#333" },
++      },
++      tooltip: {
++        trigger: "focus",
++        textStyle: { fontSize: 12 },
++      },
+     },
+   });
+ }
+diff --git a/src/pm-toolkit/src/domains/leads/charts/quarterly-charts.ts b/src/pm-toolkit/src/domains/leads/charts/quarterly-charts.ts
+index 2adf86a..1b8598e 100644
+--- a/src/pm-toolkit/src/domains/leads/charts/quarterly-charts.ts
++++ b/src/pm-toolkit/src/domains/leads/charts/quarterly-charts.ts
+@@ -3,6 +3,8 @@ import { TableInfo } from "../../../types";
+ import { QUARTER_COLUMNS } from "../columns-quarters";
+ import { quarterlyKeys } from "../constants";
+ import { buildChart } from "../../../charts/build-chart";
++import { CHART_COLORS, QUARTER_COLORS } from "../colors";
++import { ChartFunction } from "./types";
+ 
+ export function addQuarterlyRevenueComparisonChart(
+   sheet: GoogleAppsScript.Spreadsheet.Sheet,
+@@ -33,7 +35,7 @@ export function addQuarterlyRevenueComparisonChart(
+     ],
+     options: {
+       legend: { position: "bottom" },
+-      colors: ["#2196f3", "#4caf50"], // blue (actual), green (goal)
++      colors: [CHART_COLORS.ACTUAL, CHART_COLORS.GOAL],
+       series: {
+         0: { labelInLegend: "Actual" },
+         1: { labelInLegend: "Goal" },
+@@ -72,6 +74,60 @@ export function addQuarterlyConversionRateChart(
+     options: {
+       legend: { position: "none" },
+       vAxis: { format: "percent" },
++      colors: [CHART_COLORS.CONVERSION],
+     },
+   });
+ }
++
++export const addQuarterlyRevenuePieChart: ChartFunction = (
++  sheet,
++  position,
++  _monthlyInfo,
++  quarterlyInfo
++) => {
++  const { dataStartRow, dataEndRow, startCol, endCol } = quarterlyInfo;
++
++  // Get static column positions from QUARTER_COLUMNS
++  const quarterColOffset = QUARTER_COLUMNS.findIndex(
++    (c) => c.key === quarterlyKeys.QUARTER
++  );
++  const revenueColOffset = QUARTER_COLUMNS.findIndex(
++    (c) => c.key === quarterlyKeys.REVENUE
++  );
++
++  if (quarterColOffset === -1 || revenueColOffset === -1) return;
++
++  const numRows = dataEndRow - dataStartRow + 1;
++
++  const quarterRange = sheet.getRange(
++    dataStartRow,
++    startCol + quarterColOffset,
++    numRows,
++    1
++  );
++
++  const revenueRange = sheet.getRange(
++    dataStartRow,
++    startCol + revenueColOffset,
++    numRows,
++    1
++  );
++
++  const chart = sheet
++    .newChart()
++    .setChartType(Charts.ChartType.PIE)
++    .addRange(quarterRange) // Labels
++    .addRange(revenueRange) // Values
++    .setPosition(
++      position.row,
++      position.col,
++      position.offsetX ?? 0,
++      position.offsetY ?? 0
++    )
++    .setOption("title", "Quarterly Revenue Breakdown")
++    .setOption("pieHole", 0.3)
++    .setOption("colors", Object.values(QUARTER_COLORS))
++    .build();
++
++  sheet.insertChart(chart);
++};
+diff --git a/src/pm-toolkit/src/domains/leads/constants.ts b/src/pm-toolkit/src/domains/leads/constants.ts
+index 1aecb56..77061f6 100644
+--- a/src/pm-toolkit/src/domains/leads/constants.ts
++++ b/src/pm-toolkit/src/domains/leads/constants.ts
+@@ -14,14 +14,6 @@ export const QUARTERS_ROW_SPAN = 3;
+ // 🧾 TEMPLATE
+ export const BLANK_SHEET_TEMPLATE = "Blank Sheet Template";
+ 
+-// 🌈 QUARTER COLORS
+-export const QUARTER_COLORS = {
+-  Q1: "#D2E3FC",
+-  Q2: "#D9F5DD",
+-  Q3: "#FEF3C0",
+-  Q4: "#FAD2CF",
+-};
+-
+ // 🔢 QUARTER → MONTH
+ export const QUARTER_TO_MONTHS = {
+   Q1: [1, 2, 3],
+diff --git a/src/pm-toolkit/src/domains/leads/generate-dashboard.ts b/src/pm-toolkit/src/domains/leads/generate-dashboard.ts
+index 22e6962..94064ac 100644
+--- a/src/pm-toolkit/src/domains/leads/generate-dashboard.ts
++++ b/src/pm-toolkit/src/domains/leads/generate-dashboard.ts
+@@ -139,6 +139,9 @@ export function generateLeadsDashboard() {
+     "Leads Dashboard ready ✅",
+     "Ace Toolkit"
+   );
++
++  // ✅ Freeze the row of the table titles so they stay visible while scrolling
++  sheet.setFrozenRows(3);
+ }
+ 
+ function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
+diff --git a/src/pm-toolkit/src/domains/leads/styles copy.ts b/src/pm-toolkit/src/domains/leads/styles copy.ts
+deleted file mode 100644
+index c2bf34f..0000000
+--- a/src/pm-toolkit/src/domains/leads/styles copy.ts	
++++ /dev/null
+@@ -1,280 +0,0 @@
+-import {
+-  QUARTER_COLORS,
+-  QUARTER_TO_MONTHS,
+-  quarterlyKeys,
+-  quarterlyLabels,
+-  QUARTERS_ROW_SPAN,
+-} from "./constants";
+-import { TableInfo } from "../../types";
+-import { BaseColumn } from "../../columns";
+-
+-// Month name to number
+-const MONTH_NAME_TO_NUMBER: Record<string, number> = {
+-  January: 1,
+-  February: 2,
+-  March: 3,
+-  April: 4,
+-  May: 5,
+-  June: 6,
+-  July: 7,
+-  August: 8,
+-  September: 9,
+-  October: 10,
+-  November: 11,
+-  December: 12,
+-};
+-
+-// Month number to quarter (reverse of QUARTER_TO_MONTHS)
+-const MONTH_NUM_TO_QUARTER: Record<number, keyof typeof QUARTER_COLORS> =
+-  Object.entries(QUARTER_TO_MONTHS)
+-    .flatMap(([q, months]) => months.map((m) => [m, q]))
+-    .reduce(
+-      (acc, [m, q]) => ({ ...acc, [m]: q }),
+-      {} as Record<number, keyof typeof QUARTER_COLORS>
+-    );
+-
+-export function applyQuarterColoring(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  table: TableInfo,
+-  columns: BaseColumn<any, any, any>[],
+-  rowSpan = 1
+-) {
+-  const { dataStartRow, dataEndRow, startCol } = table;
+-  const isMonthly = rowSpan === 1;
+-
+-  const targetColIndex = columns.findIndex((c) =>
+-    isMonthly
+-      ? c.label === quarterlyLabels.MONTH
+-      : c.key === quarterlyKeys.QUARTER
+-  );
+-  if (targetColIndex === -1) return;
+-
+-  if (isMonthly) {
+-    for (let row = dataStartRow; row <= dataEndRow; row++) {
+-      const cell = sheet.getRange(row, startCol + targetColIndex);
+-      const monthName = String(cell.getValue());
+-      const monthNum = MONTH_NAME_TO_NUMBER[monthName];
+-      const quarter = MONTH_NUM_TO_QUARTER[monthNum];
+-      const color = quarter && QUARTER_COLORS[quarter];
+-
+-      if (color) {
+-        // Set background
+-        cell.setBackground(color);
+-
+-        // Restore expected light left/right borders
+-        cell.setBorder(
+-          true, // top
+-          true, // left
+-          true, // bottom
+-          true, // right
+-          false,
+-          false,
+-          "#cccccc",
+-          SpreadsheetApp.BorderStyle.SOLID
+-        );
+-      }
+-    }
+-  } else {
+-    const numGroups = Math.floor((dataEndRow - dataStartRow + 1) / rowSpan);
+-    for (let i = 0; i < numGroups; i++) {
+-      const rowStart = dataStartRow + i * rowSpan;
+-      const cell = sheet.getRange(rowStart, startCol + targetColIndex);
+-      const quarterLabel = String(
+-        cell.getValue()
+-      ) as keyof typeof QUARTER_COLORS;
+-      const color = QUARTER_COLORS[quarterLabel];
+-      if (color) {
+-        sheet
+-          .getRange(rowStart, startCol + targetColIndex, rowSpan, 1)
+-          .setBackground(color);
+-      }
+-    }
+-  }
+-}
+-
+-/**
+- * Find the column index for the grouping field (month or quarter)
+- */
+-function findGroupingColumnIndex<T extends string>(
+-  columns: BaseColumn<any, any, any>[],
+-  groupKeyField: T,
+-  isMonthly: boolean
+-): number {
+-  return columns.findIndex((c) =>
+-    isMonthly ? c.key === groupKeyField : c.key === quarterlyKeys.QUARTER
+-  );
+-}
+-
+-/**
+- * Extract raw values from the grouping column
+- */
+-function extractGroupingValues(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  startRow: number,
+-  startCol: number,
+-  rowCount: number
+-): string[] {
+-  return sheet
+-    .getRange(startRow, startCol, rowCount, 1)
+-    .getValues()
+-    .map((r) => String(r[0]));
+-}
+-
+-/**
+- * Group row indices by their quarter
+- */
+-function groupRowsByQuarter(
+-  rawValues: string[],
+-  isMonthly: boolean
+-): Record<string, number[]> {
+-  const groupMap: Record<string, number[]> = {};
+-
+-  for (let i = 0; i < rawValues.length; i++) {
+-    const raw = rawValues[i];
+-
+-    const groupKey = isMonthly
+-      ? MONTH_NUM_TO_QUARTER[MONTH_NAME_TO_NUMBER[raw] ?? -1]
+-      : raw;
+-
+-    if (!groupKey) continue; // Skip ungrouped/malformed entries
+-
+-    if (!groupMap[groupKey]) groupMap[groupKey] = [];
+-    groupMap[groupKey].push(i);
+-  }
+-
+-  return groupMap;
+-}
+-
+-/**
+- * Apply borders around each quarter group in the table
+- */
+-export function applyQuarterBorders<T extends string>(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  table: TableInfo,
+-  columns: BaseColumn<any, any, any>[],
+-  groupKeyField: T,
+-  rowSpan = 1
+-): void {
+-  const isMonthly = rowSpan === 1;
+-
+-  const targetColIndex = findGroupingColumnIndex(
+-    columns,
+-    groupKeyField,
+-    isMonthly
+-  );
+-  if (targetColIndex === -1) return;
+-
+-  const startRow = table.dataStartRow;
+-  const rowCount = table.dataEndRow - table.dataStartRow + 1;
+-  const colCount = columns.length;
+-
+-  const rawValues = extractGroupingValues(
+-    sheet,
+-    startRow,
+-    table.startCol + targetColIndex,
+-    rowCount
+-  );
+-
+-  const groupMap = groupRowsByQuarter(rawValues, isMonthly);
+-
+-  applyGroupBorders(
+-    sheet,
+-    startRow,
+-    table.startCol,
+-    colCount,
+-    groupMap,
+-    rowSpan
+-  );
+-}
+-
+-export function applyVerticalBorders(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  startRow: number,
+-  endRow: number,
+-  startCol: number,
+-  numCols: number
+-) {
+-  clearBordersInRange(sheet, startRow, endRow, startCol, numCols);
+-
+-  const innerBorderStyle = SpreadsheetApp.BorderStyle.SOLID;
+-  const lightGray = "#cccccc";
+-  const numRows = endRow - startRow + 1;
+-
+-  // Apply left border to all columns after the first
+-  for (let c = 1; c < numCols; c++) {
+-    const colRange = sheet.getRange(startRow, startCol + c, numRows, 1);
+-    colRange.setBorder(
+-      false,
+-      true,
+-      false,
+-      false,
+-      false,
+-      false,
+-      lightGray,
+-      innerBorderStyle
+-    );
+-  }
+-}
+-
+-export function clearBordersInRange(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  startRow: number,
+-  endRow: number,
+-  startCol: number,
+-  numCols: number
+-) {
+-  const numRows = endRow - startRow + 1;
+-  const range = sheet.getRange(startRow, startCol, numRows, numCols);
+-  range.setBorder(false, false, false, false, false, false);
+-}
+-
+-function applyGroupBorders(
+-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+-  startRow: number,
+-  tableStartCol: number,
+-  colCount: number,
+-  groupMap: Record<string, number[]>,
+-  rowSpan = 1
+-): void {
+-  const outerStyle = SpreadsheetApp.BorderStyle.SOLID_MEDIUM;
+-
+-  for (const [groupKey, rowIndices] of Object.entries(groupMap)) {
+-    if (rowIndices.length === 0) continue;
+-
+-    const rowStart = startRow + rowIndices[0];
+-    const rowEnd = startRow + rowIndices[rowIndices.length - 1];
+-
+-    const firstCol = tableStartCol;
+-    const lastCol = tableStartCol + colCount - 1;
+-
+-    // Logger.log(\n--- Group: ${groupKey} ---);
+-    // Logger.log(
+-    //   Top:    (${rowStart}, ${firstCol}) height=${rowSpan} width=${colCount}
+-    // );
+-    // Logger.log(
+-    //   Bottom: (${rowEnd}, ${firstCol}) height=${rowSpan} width=${colCount}
+-    // );
+-    // Logger.log(Left:   (${rowStart}, ${firstCol}) height=${rowSpan} width=1);
+-    // Logger.log(Right:  (${rowStart}, ${lastCol}) height=${rowSpan} width=1);
+-
+-    // Top border
+-    sheet
+-      .getRange(rowStart, firstCol, rowSpan, colCount)
+-      .setBorder(true, null, null, null, null, null, "black", outerStyle);
+-
+-    // Bottom border
+-    sheet
+-      .getRange(rowEnd, firstCol, rowSpan, colCount)
+-      .setBorder(null, null, true, null, null, null, "black", outerStyle);
+-
+-    // Left border
+-    sheet
+-      .getRange(rowStart, firstCol, rowSpan, 1)
+-      .setBorder(null, true, null, null, null, null, "black", outerStyle);
+-
+-    // Right border
+-    sheet
+-      .getRange(rowStart, lastCol, rowSpan, 1)
+-      .setBorder(null, null, null, true, null, null, "black", outerStyle);
+-  }
+-}
+diff --git a/src/pm-toolkit/src/domains/leads/styles.ts b/src/pm-toolkit/src/domains/leads/styles.ts
+index ef87fdc..813e365 100644
+--- a/src/pm-toolkit/src/domains/leads/styles.ts
++++ b/src/pm-toolkit/src/domains/leads/styles.ts
+@@ -1,11 +1,7 @@
+-import {
+-  QUARTER_COLORS,
+-  QUARTER_TO_MONTHS,
+-  quarterlyKeys,
+-  quarterlyLabels,
+-} from "./constants";
++import { QUARTER_TO_MONTHS, quarterlyKeys, quarterlyLabels } from "./constants";
+ import { TableInfo } from "../../types";
+ import { BaseColumn } from "../../columns";
++import { QUARTER_COLORS } from "./colors";
+ 
+ // Month name to number
+ const MONTH_NAME_TO_NUMBER: Record<string, number> = {
+diff --git a/src/pm-toolkit/src/domains/leads/utils.ts b/src/pm-toolkit/src/domains/leads/utils.ts
+index c90ac9a..b343bc2 100644
+--- a/src/pm-toolkit/src/domains/leads/utils.ts
++++ b/src/pm-toolkit/src/domains/leads/utils.ts
+@@ -1,4 +1,4 @@
+-import { QUARTER_COLORS } from "./constants";
++import { QUARTER_COLORS } from "./colors";
+ 
+ export const getQuarterFromMonth = (month: number): 1 | 2 | 3 | 4 => {
+   return Math.ceil(month / 3) as 1 | 2 | 3 | 4;

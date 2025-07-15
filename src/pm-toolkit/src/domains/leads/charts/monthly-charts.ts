@@ -3,6 +3,7 @@ import { TableInfo } from "../../../types";
 import { LEADS_COLUMNS } from "../columns-months";
 import { dashboardKeys, inputKeys } from "../constants";
 import { buildChart } from "../../../charts/build-chart";
+import { CHART_COLORS } from "../colors";
 
 export function addMonthlyRevenueChart(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
@@ -26,6 +27,16 @@ export function addMonthlyRevenueChart(
     ],
     options: {
       legend: { position: "none" },
+      vAxis: { format: "$#,###" },
+      colors: [CHART_COLORS.ACTUAL],
+      annotations: {
+        alwaysOutside: true,
+        textStyle: { fontSize: 10, color: "#333" },
+      },
+      tooltip: {
+        trigger: "focus",
+        textStyle: { fontSize: 12 },
+      },
     },
   });
 }
@@ -53,8 +64,16 @@ export function addMonthlyConversionRateChart(
       { startRow, endRowInclusive, startCol: convRateCol, numCols: 1 },
     ],
     options: {
-      legend: { position: "none" },
-      vAxis: { format: "percent" },
+      legend: { position: "bottom" },
+      colors: [CHART_COLORS.ACTUAL],
+      vAxis: { format: "percent", minValue: 0 },
+      annotations: {
+        textStyle: { fontSize: 10, color: "#333" },
+      },
+      tooltip: {
+        trigger: "focus",
+        textStyle: { fontSize: 12 },
+      },
     },
   });
 }

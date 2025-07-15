@@ -1,4 +1,4 @@
-import { QUARTER_COLORS } from "./constants";
+import { QUARTER_COLORS } from "./colors";
 
 export const getQuarterFromMonth = (month: number): 1 | 2 | 3 | 4 => {
   return Math.ceil(month / 3) as 1 | 2 | 3 | 4;

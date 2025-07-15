@@ -3,6 +3,8 @@ import { TableInfo } from "../../../types";
 import { QUARTER_COLUMNS } from "../columns-quarters";
 import { quarterlyKeys } from "../constants";
 import { buildChart } from "../../../charts/build-chart";
+import { CHART_COLORS, QUARTER_COLORS } from "../colors";
+import { ChartFunction } from "./types";
 
 export function addQuarterlyRevenueComparisonChart(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
@@ -33,7 +35,7 @@ export function addQuarterlyRevenueComparisonChart(
     ],
     options: {
       legend: { position: "bottom" },
-      colors: ["#2196f3", "#4caf50"], // blue (actual), green (goal)
+      colors: [CHART_COLORS.ACTUAL, CHART_COLORS.GOAL],
       series: {
         0: { labelInLegend: "Actual" },
         1: { labelInLegend: "Goal" },
@@ -72,6 +74,60 @@ export function addQuarterlyConversionRateChart(
     options: {
       legend: { position: "none" },
       vAxis: { format: "percent" },
+      colors: [CHART_COLORS.CONVERSION],
     },
   });
 }
+
+export const addQuarterlyRevenuePieChart: ChartFunction = (
+  sheet,
+  position,
+  _monthlyInfo,
+  quarterlyInfo
+) => {
+  const { dataStartRow, dataEndRow, startCol, endCol } = quarterlyInfo;
+
+  // Get static column positions from QUARTER_COLUMNS
+  const quarterColOffset = QUARTER_COLUMNS.findIndex(
+    (c) => c.key === quarterlyKeys.QUARTER
+  );
+  const revenueColOffset = QUARTER_COLUMNS.findIndex(
+    (c) => c.key === quarterlyKeys.REVENUE
+  );
+
+  if (quarterColOffset === -1 || revenueColOffset === -1) return;
+
+  const numRows = dataEndRow - dataStartRow + 1;
+
+  const quarterRange = sheet.getRange(
+    dataStartRow,
+    startCol + quarterColOffset,
+    numRows,
+    1
+  );
+
+  const revenueRange = sheet.getRange(
+    dataStartRow,
+    startCol + revenueColOffset,
+    numRows,
+    1
+  );
+
+  const chart = sheet
+    .newChart()
+    .setChartType(Charts.ChartType.PIE)
+    .addRange(quarterRange) // Labels
+    .addRange(revenueRange) // Values
+    .setPosition(
+      position.row,
+      position.col,
+      position.offsetX ?? 0,
+      position.offsetY ?? 0
+    )
+    .setOption("title", "Quarterly Revenue Breakdown")
+    .setOption("pieHole", 0.3)
+    .setOption("colors", Object.values(QUARTER_COLORS))
+    .build();
+
+  sheet.insertChart(chart);
+};
