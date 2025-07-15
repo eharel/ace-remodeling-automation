@@ -10,7 +10,7 @@ export function addQuarterlyRevenueComparisonChart(
   quarterTableInfo: TableInfo
 ) {
   const startRow = quarterTableInfo.dataStartRow;
-  const quarters = quarterTableInfo.dataEndRow - quarterTableInfo.dataStartRow;
+  const endRowInclusive = quarterTableInfo.dataEndRow;
   const startCol = quarterTableInfo.startCol;
 
   const labelCol =
@@ -27,12 +27,21 @@ export function addQuarterlyRevenueComparisonChart(
     chartType: Charts.ChartType.COLUMN,
     title: "Quarterly Revenue vs Goal",
     ranges: [
-      { startRow, startCol: labelCol, numRows: quarters, numCols: 1 },
-      { startRow, startCol: revenueCol, numRows: quarters, numCols: 1 },
-      { startRow, startCol: goalCol, numRows: quarters, numCols: 1 },
+      { startRow, endRowInclusive, startCol: labelCol, numCols: 1 },
+      { startRow, endRowInclusive, startCol: revenueCol, numCols: 1 }, // Actual (first)
+      { startRow, endRowInclusive, startCol: goalCol, numCols: 1 }, // Goal (second)
     ],
     options: {
       legend: { position: "bottom" },
+      colors: ["#2196f3", "#4caf50"], // blue (actual), green (goal)
+      series: {
+        0: { labelInLegend: "Actual" },
+        1: { labelInLegend: "Goal" },
+      },
+      annotations: {
+        alwaysOutside: true,
+        textStyle: { fontSize: 10, color: "black" },
+      },
     },
   });
 }
@@ -43,7 +52,7 @@ export function addQuarterlyConversionRateChart(
   quarterTableInfo: TableInfo
 ) {
   const startRow = quarterTableInfo.dataStartRow;
-  const quarters = quarterTableInfo.dataEndRow - quarterTableInfo.dataStartRow;
+  const endRowInclusive = quarterTableInfo.dataEndRow;
   const startCol = quarterTableInfo.startCol;
 
   const labelCol =
@@ -57,8 +66,8 @@ export function addQuarterlyConversionRateChart(
     chartType: Charts.ChartType.LINE,
     title: "Quarterly Conversion Rate",
     ranges: [
-      { startRow, startCol: labelCol, numRows: quarters, numCols: 1 },
-      { startRow, startCol: convRateCol, numRows: quarters, numCols: 1 },
+      { startRow, endRowInclusive, startCol: labelCol, numCols: 1 },
+      { startRow, endRowInclusive, startCol: convRateCol, numCols: 1 },
     ],
     options: {
       legend: { position: "none" },

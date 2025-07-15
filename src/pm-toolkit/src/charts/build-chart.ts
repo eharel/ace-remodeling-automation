@@ -1,14 +1,17 @@
 import { ChartPosition } from "./positioner";
 
+export interface ChartRange {
+  startRow: number;
+  endRowInclusive?: number; // Preferred: inclusive row range
+  numRows?: number; // Optional fallback for manual control
+  startCol: number;
+  numCols: number;
+}
+
 export interface ChartConfig {
   chartType: GoogleAppsScript.Charts.ChartType;
   title: string;
-  ranges: Array<{
-    startRow: number;
-    startCol: number;
-    numRows: number;
-    numCols: number;
-  }>;
+  ranges: ChartRange[];
   options?: Record<string, any>;
 }
 
@@ -20,13 +23,22 @@ export function buildChart(
   const chartBuilder = sheet.newChart().setChartType(config.chartType);
 
   for (const range of config.ranges) {
+    const numRows =
+      range.numRows ??
+      (range.endRowInclusive !== undefined
+        ? range.endRowInclusive - range.startRow + 1
+        : undefined);
+
+    if (numRows === undefined) {
+      throw new Error(
+        `Chart range is missing both numRows and endRowInclusive: ${JSON.stringify(
+          range
+        )}`
+      );
+    }
+
     chartBuilder.addRange(
-      sheet.getRange(
-        range.startRow,
-        range.startCol,
-        range.numRows,
-        range.numCols
-      )
+      sheet.getRange(range.startRow, range.startCol, numRows, range.numCols)
     );
   }
 

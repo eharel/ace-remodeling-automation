@@ -10,7 +10,7 @@ export function addMonthlyRevenueChart(
   monthlyTableInfo: TableInfo
 ) {
   const startRow = monthlyTableInfo.dataStartRow;
-  const numMonths = monthlyTableInfo.dataEndRow - monthlyTableInfo.dataStartRow;
+  const endRowInclusive = monthlyTableInfo.dataEndRow;
 
   const labelCol =
     LEADS_COLUMNS.findIndex((c) => c.key === inputKeys.MONTH) + 1;
@@ -21,8 +21,8 @@ export function addMonthlyRevenueChart(
     chartType: Charts.ChartType.COLUMN,
     title: "Monthly Revenue",
     ranges: [
-      { startRow, startCol: labelCol, numRows: numMonths, numCols: 1 },
-      { startRow, startCol: revenueCol, numRows: numMonths, numCols: 1 },
+      { startRow, endRowInclusive, startCol: labelCol, numCols: 1 },
+      { startRow, endRowInclusive, startCol: revenueCol, numCols: 1 },
     ],
     options: {
       legend: { position: "none" },
@@ -36,7 +36,7 @@ export function addMonthlyConversionRateChart(
   monthlyTableInfo: TableInfo
 ) {
   const startRow = monthlyTableInfo.dataStartRow;
-  const numMonths = monthlyTableInfo.dataEndRow - monthlyTableInfo.dataStartRow;
+  const endRowInclusive = monthlyTableInfo.dataEndRow;
   const startCol = monthlyTableInfo.startCol;
 
   const labelCol =
@@ -49,8 +49,8 @@ export function addMonthlyConversionRateChart(
     chartType: Charts.ChartType.LINE,
     title: "Monthly Conversion Rate",
     ranges: [
-      { startRow, startCol: labelCol, numRows: numMonths, numCols: 1 },
-      { startRow, startCol: convRateCol, numRows: numMonths, numCols: 1 },
+      { startRow, endRowInclusive, startCol: labelCol, numCols: 1 },
+      { startRow, endRowInclusive, startCol: convRateCol, numCols: 1 },
     ],
     options: {
       legend: { position: "none" },
