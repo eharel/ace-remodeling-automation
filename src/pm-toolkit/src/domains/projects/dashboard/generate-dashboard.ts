@@ -47,9 +47,13 @@ const PROJECT_COLOR_KEYS = [
   DASHBOARD_KEYS.EXPECTED_PROFIT,
   DASHBOARD_KEYS.ADVANCE_BALANCE,
   DASHBOARD_KEYS.PM_AFTER_ADVANCE,
-] as const;
+];
 
-export function generateProjectDashboard() {
+/**
+ * Generates the project dashboard
+ * @param showToast Whether to show a toast notification when complete (default: true)
+ */
+export function generateProjectDashboard(showToast = true) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const dashboardSheet = getOrCreateDashboardSheet(ss);
@@ -88,11 +92,14 @@ export function generateProjectDashboard() {
       1,
       "Dashboard last updated:"
     );
-
-    SpreadsheetApp.getActiveSpreadsheet().toast(
-      "Projects Dashboard ready ✅",
-      "Ace Toolkit"
-    );
+    
+    // Show toast notification if requested
+    if (showToast) {
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        "Projects Dashboard ready ✅",
+        "Ace Toolkit"
+      );
+    }
   } catch (err) {
     // Logger.log("⚠️ Error in generateProjectDashboard:");
     // Logger.log((err as Error).message);
