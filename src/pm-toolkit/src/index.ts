@@ -9,6 +9,7 @@ import {
 import { generateProjectDashboard } from "./domains/projects/dashboard";
 import { promptForNewProject } from "./domains/projects/new-project";
 import { generateLeadsDashboard } from "./domains/leads";
+import { showSidebar } from "../../ui/sidebar/showSidebar";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
@@ -20,6 +21,7 @@ declare global {
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
   var generateLeadsDashboard: () => void;
+  var showSidebar: () => void;
 }
 
 registerGlobals({
@@ -32,4 +34,5 @@ registerGlobals({
   generateProjectDashboard,
   promptForNewProject,
   generateLeadsDashboard,
+  showSidebar,
 });

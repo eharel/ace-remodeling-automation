@@ -51,4 +51,51 @@ const removeDtsFiles = (dir) => {
 };
 
 removeDtsFiles('./build');
+
+// Copy UI files from shared UI directory recursively
+console.log('Copying UI files from shared UI directory...');
+const copyUIFiles = () => {
+  const sourceDir = '../../src/ui';
+  const targetDir = './build/ui';
+  let filesCopied = 0;
+  
+  // Create the target directory if it doesn't exist
+  fs.mkdirSync(targetDir, { recursive: true });
+  
+  // Recursive function to copy files and directories
+  const copyRecursively = (source, target) => {
+    // Get all entries in the current directory
+    const entries = fs.readdirSync(source, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const sourcePath = path.join(source, entry.name);
+      const targetPath = path.join(target, entry.name);
+      
+      if (entry.isDirectory()) {
+        // Create the target directory and copy its contents recursively
+        fs.mkdirSync(targetPath, { recursive: true });
+        copyRecursively(sourcePath, targetPath);
+      } else if (entry.isFile()) {
+        // Only copy HTML and CSS files (add more extensions as needed)
+        const ext = path.extname(entry.name).toLowerCase();
+        if (['.html', '.css'].includes(ext)) {
+          fs.copyFileSync(sourcePath, targetPath);
+          console.log(`✅ Copied ${path.relative(sourceDir, sourcePath)}`);
+          filesCopied++;
+        }
+      }
+    }
+  };
+  
+  // Start the recursive copy
+  copyRecursively(sourceDir, targetDir);
+  
+  if (filesCopied > 0) {
+    console.log(`✅ Successfully copied ${filesCopied} UI files`);
+  } else {
+    console.log('⚠️ No UI files found to copy');
+  }
+}
+
+copyUIFiles();
 console.log('Build preparation complete. Ready for clasp push.');

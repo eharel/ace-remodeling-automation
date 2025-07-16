@@ -19,6 +19,8 @@ export function buildMainMenu(ui: GoogleAppsScript.Base.Ui) {
     .addItem("Add New Project", `${LIB_IDENTIFIER}.promptForNewProject`)
     .addSubMenu(closeSubMenu)
     .addSeparator()
+    .addItem("📂 Open Sidebar", `${LIB_IDENTIFIER}.showSidebar`)
+    .addSeparator()
     .addItem("📄 Structure Help", `${LIB_IDENTIFIER}.showStructureHelp`)
     .addItem("⚙️ First-time Setup", `${LIB_IDENTIFIER}.showFirstTimeSetup`);
 }

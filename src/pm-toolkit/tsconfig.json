@@ -9,7 +9,5 @@
     "rootDir": "src"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../../src/utils" }
-  ]
+  "references": [{ "path": "../../src/utils" }, { "path": "../../src/ui" }]
 }
