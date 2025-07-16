@@ -10,6 +10,8 @@
   },
   "include": ["src/**/*"],
   "references": [
-    { "path": "../../src/utils" }
+    { "path": "../../src/utils" },
+    { "path": "../../src/ui" },
+    { "path": "../../src/globals" }
   ]
 }

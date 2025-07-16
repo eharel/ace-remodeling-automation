@@ -9,6 +9,9 @@ import {
 import { generateProjectDashboard } from "./domains/projects/dashboard";
 import { promptForNewProject } from "./domains/projects/new-project";
 import { generateLeadsDashboard } from "./domains/leads";
+import { showSidebar } from "../../ui/sidebar/showSidebar";
+import { showTabSearchSidebar } from "../../ui/sidebar/modules/tab-search/showTabSearchSidebar";
+import { SHARED_GLOBALS } from "../../globals/global-exports";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
@@ -20,11 +23,17 @@ declare global {
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
   var generateLeadsDashboard: () => void;
+  var showSidebar: () => void;
+  var showTabSearchSidebar: () => void;
 }
 
+// Register all global functions that Apps Script will call directly
 registerGlobals({
+  // Core Apps Script triggers must be registered first
   onOpen,
   onEdit,
+  
+  // Menu functions
   showStructureHelp,
   showFirstTimeSetup,
   closeActiveProject,
@@ -32,4 +41,11 @@ registerGlobals({
   generateProjectDashboard,
   promptForNewProject,
   generateLeadsDashboard,
+  
+  // UI functions
+  showSidebar,
+  showTabSearchSidebar,
+  
+  // Include shared globals (utility functions used by UI)
+  ...SHARED_GLOBALS,
 });
