@@ -22,8 +22,78 @@ import { QUARTER_COLUMNS } from "./columns-quarters";
 import { QuarterlyKey } from "./constants";
 import { addTimestamp } from "../../styles";
 import { generateCharts } from "./charts";
+import { SummaryOperation, SummaryOperationsMap, TableInfo } from "../../types";
 
 const SHOW_DESCRIPTION = false;
+
+// Summary row operations for monthly table
+const MONTHLY_SUMMARY_OPERATIONS: SummaryOperationsMap = {
+  [inputKeys.REVENUE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [inputKeys.REVENUE_GOAL]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [dashboardKeys.REVENUE_DIFF]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [inputKeys.TOTAL_LEADS]: {
+    operation: "sum",
+    format: "number",
+    decimals: 0
+  },
+  [inputKeys.SIGNED]: {
+    operation: "sum",
+    format: "number",
+    decimals: 0
+  },
+  [dashboardKeys.CONVERSION_RATE]: {
+    operation: "avg",
+    format: "percent",
+    decimals: 2
+  },
+};
+
+// Summary row operations for quarterly table
+const QUARTERLY_SUMMARY_OPERATIONS: SummaryOperationsMap = {
+  [quarterlyKeys.REVENUE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [quarterlyKeys.REVENUE_GOAL]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [quarterlyKeys.REVENUE_DIFF]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [quarterlyKeys.TOTAL_LEADS]: {
+    operation: "sum",
+    format: "number",
+    decimals: 0
+  },
+  [quarterlyKeys.SIGNED]: {
+    operation: "sum",
+    format: "number",
+    decimals: 0
+  },
+  [quarterlyKeys.CONVERSION_RATE]: {
+    operation: "avg",
+    format: "percent",
+    decimals: 2
+  },
+};
+
 const stylizeOptionsMonths = {
   zebra: false,
   showDescription: SHOW_DESCRIPTION,
@@ -59,9 +129,9 @@ export function generateLeadsDashboard() {
     monthlyRows,
     startingRow,
     1,
-    "📈 Leads — Monthly Breakdown",
+    "Monthly Breakdown",
     LEADS_COLUMNS,
-    [inputKeys.REVENUE, inputKeys.TOTAL_LEADS, inputKeys.SIGNED],
+    MONTHLY_SUMMARY_OPERATIONS,
     stylizeOptionsMonths
   );
 
@@ -91,6 +161,7 @@ export function generateLeadsDashboard() {
     columnWidths: {
       [quarterlyKeys.QUARTER]: 60,
     },
+    summaryTitle: "", // Empty string for the quarterly summary row since it's side-by-side with monthly table
   };
 
   const quarterRows = createQuarterlyDashboardRows(inputRows, year);
@@ -102,9 +173,9 @@ export function generateLeadsDashboard() {
     quarterRows,
     quarterStartRow,
     quarterStartCol,
-    "📈 Leads — Quarterly Breakdown",
+    "Quarterly Breakdown",
     QUARTER_COLUMNS,
-    [quarterlyKeys.REVENUE, quarterlyKeys.TOTAL_LEADS, quarterlyKeys.SIGNED],
+    QUARTERLY_SUMMARY_OPERATIONS,
     stylizeOptionsQuarters
   );
 
@@ -129,6 +200,8 @@ export function generateLeadsDashboard() {
     { rowSpanMap: quarterRowSpanMap } // ✅ NEW
   );
 
+  addBottomBorderBandaidFix(sheet, quarterTableInfo);
+
   generateCharts(sheet, monthlyTableInfo, quarterTableInfo);
 
   // ⌚️ Add timestamp to the right of the quarters table
@@ -142,6 +215,35 @@ export function generateLeadsDashboard() {
 
   // ✅ Freeze the row of the table titles so they stay visible while scrolling
   sheet.setFrozenRows(3);
+}
+
+// Add a top border to the summary row to separate it from the data rows
+// I was going crazy with figuring out why the bottom border wasn't showing up, so I added this bandaid fix
+// Don't judge me
+function addBottomBorderBandaidFix(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  tableInfo: TableInfo
+) {
+  // Find the summary row (which is right after the data rows)
+  const summaryRow = tableInfo.dataEndRow + 1;
+
+  sheet
+    .getRange(
+      summaryRow,
+      tableInfo.startCol,
+      1,
+      tableInfo.endCol - tableInfo.startCol + 1
+    )
+    .setBorder(
+      true, // top border instead of bottom border
+      null,
+      null,
+      null,
+      null,
+      null,
+      "black",
+      SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+    );
 }
 
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
@@ -231,7 +333,7 @@ function createHeader(
   year: number,
   startCol: number
 ): number {
-  const headerTitle = `${year} Leads Breakdown`;
+  const headerTitle = `📈 ${year} Leads Breakdown`;
   const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
   // Write the title in row 1, spanning `colSpan` columns
   const titleRange = sheet.getRange(1, startCol, 2, totalTableWidth);

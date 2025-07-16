@@ -7,19 +7,41 @@ import {
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
 import { generateAndStylizeTableFromRows } from "../../../utils";
+import { SummaryOperationsMap } from "../../../types";
 import { extractAllProjectData } from "./data-extraction";
 import { transformExtractedDataToDashboardRows } from "./data-transformation";
 import { setDashboardStatus } from "./utils";
 import { addTimestamp } from "../../../styles";
 import { toA1Notation } from "../../../utils/helpers";
 
-const PROJECT_KEYS_TO_SUM = [
-  DASHBOARD_KEYS.CONTRACT_PRICE,
-  DASHBOARD_KEYS.CHANGE_ORDERS,
-  DASHBOARD_KEYS.MAX_ADVANCE,
-  DASHBOARD_KEYS.TOTAL_ADVANCE,
-  DASHBOARD_KEYS.ADVANCE_BALANCE,
-];
+// Summary row operations for project dashboard
+const PROJECT_SUMMARY_OPERATIONS: SummaryOperationsMap = {
+  [DASHBOARD_KEYS.CONTRACT_PRICE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [DASHBOARD_KEYS.CHANGE_ORDERS]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [DASHBOARD_KEYS.MAX_ADVANCE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [DASHBOARD_KEYS.TOTAL_ADVANCE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+  [DASHBOARD_KEYS.ADVANCE_BALANCE]: {
+    operation: "sum",
+    format: "currency",
+    decimals: 0
+  },
+};
 
 const PROJECT_COLOR_KEYS = [
   DASHBOARD_KEYS.EXPECTED_PROFIT,
@@ -123,7 +145,7 @@ function generateProjectSection({
     startingCol,
     title,
     DASHBOARD_COLUMNS,
-    PROJECT_KEYS_TO_SUM,
+    PROJECT_SUMMARY_OPERATIONS,
     { colorKeys: PROJECT_COLOR_KEYS }
   );
 

@@ -47,6 +47,7 @@ export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
     },
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
+    align: "center",
   },
   {
     key: quarterlyKeys.REVENUE,

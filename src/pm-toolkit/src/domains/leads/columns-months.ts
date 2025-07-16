@@ -48,6 +48,7 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     },
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
+    align: "center",
   },
   {
     key: dashboardKeys.REVENUE,
