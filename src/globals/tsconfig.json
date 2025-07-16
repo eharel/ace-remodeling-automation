@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020"],
+    "strict": true,
+    "types": ["google-apps-script"],
+    "typeRoots": ["../../node_modules/@types"],
+    "outDir": "build",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": ".."
+  },
+  "include": ["./**/*", "../ui/**/*"]
+}
