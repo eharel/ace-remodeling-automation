@@ -10,13 +10,21 @@ import { createDebouncedOperation } from "../../utils/debounce";
 const leadsDashboardUpdater = createDebouncedOperation({
   keyPrefix: 'leadsDashboard',
   delayMs: 3000, // 3 seconds
-  operation: () => generateLeadsDashboard()
+  operation: () => generateLeadsDashboard(false), // Don't show toast from generator
+  operationName: 'Leads Dashboard',
+  showToasts: true,
+  scheduledToastDuration: 3,
+  completedToastDuration: 3
 });
 
 const projectDashboardUpdater = createDebouncedOperation({
   keyPrefix: 'projectDashboard',
   delayMs: 3000, // 3 seconds
-  operation: () => generateProjectDashboard()
+  operation: () => generateProjectDashboard(false), // Don't show toast from generator
+  operationName: 'Project Dashboard',
+  showToasts: true,
+  scheduledToastDuration: 3,
+  completedToastDuration: 3
 });
 
 export function onOpen() {

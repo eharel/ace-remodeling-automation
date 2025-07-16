@@ -103,7 +103,11 @@ const stylizeOptionsMonths = {
   },
 };
 
-export function generateLeadsDashboard() {
+/**
+ * Generates the leads dashboard
+ * @param showToast Whether to show a toast notification when complete (default: true)
+ */
+export function generateLeadsDashboard(showToast = true) {
   const year = getYearFilter();
   const sheet = getOrCreateLeadsDashboardSheet();
 
@@ -207,11 +211,13 @@ export function generateLeadsDashboard() {
   // ⌚️ Add timestamp to the right of the quarters table
   addTimestamp(sheet, 1, quarterTableInfo.endCol + 1);
 
-  // Add a toast to notify the user that the dashboard is ready
-  SpreadsheetApp.getActiveSpreadsheet().toast(
-    "Leads Dashboard ready ✅",
-    "Ace Toolkit"
-  );
+  // Show toast notification if requested
+  if (showToast) {
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      "Leads Dashboard ready ✅",
+      "Ace Toolkit"
+    );
+  }
 
   // ✅ Freeze the row of the table titles so they stay visible while scrolling
   sheet.setFrozenRows(3);

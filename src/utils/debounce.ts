@@ -13,6 +13,14 @@ export interface DebounceConfig {
   delayMs: number;
   /** Function to execute when debounce conditions are met */
   operation: () => void;
+  /** Optional friendly name for toast notifications */
+  operationName?: string;
+  /** Whether to show toast notifications (defaults to true) */
+  showToasts?: boolean;
+  /** Duration in seconds to show the scheduled toast (defaults to 3) */
+  scheduledToastDuration?: number;
+  /** Duration in seconds to show the completed toast (defaults to 3) */
+  completedToastDuration?: number;
 }
 
 /**
@@ -25,6 +33,10 @@ export class DebouncedOperation {
   private pendingUpdateKey: string;
   private delayMs: number;
   private operation: () => void;
+  private operationName: string;
+  private showToasts: boolean;
+  private scheduledToastDuration: number;
+  private completedToastDuration: number;
 
   /**
    * Creates a new debounced operation
@@ -35,6 +47,10 @@ export class DebouncedOperation {
     this.pendingUpdateKey = `${config.keyPrefix}_pendingUpdate`;
     this.delayMs = config.delayMs;
     this.operation = config.operation;
+    this.operationName = config.operationName || 'Update';
+    this.showToasts = config.showToasts !== false; // Default to true
+    this.scheduledToastDuration = config.scheduledToastDuration || 3;
+    this.completedToastDuration = config.completedToastDuration || 3;
   }
 
   /**
@@ -50,6 +66,15 @@ export class DebouncedOperation {
     // Always mark that an update is pending when triggered
     props.setProperty(this.pendingUpdateKey, 'true');
     
+    // Show toast notification for scheduled update
+    if (this.showToasts) {
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        `${this.operationName} scheduled. Changes will appear in a few seconds.`,
+        `${this.operationName} Pending`,
+        this.scheduledToastDuration
+      );
+    }
+    
     // Only update if enough time has passed since the last update
     if (now - lastUpdate > this.delayMs) {
       // Store the current timestamp
@@ -60,6 +85,15 @@ export class DebouncedOperation {
       
       // Execute the operation
       this.operation();
+      
+      // Show toast notification for completed update
+      if (this.showToasts) {
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          `${this.operationName} complete.`,
+          `${this.operationName} Complete`,
+          this.completedToastDuration
+        );
+      }
     }
     // Otherwise, do nothing - the pending flag ensures the operation
     // will be executed later when checkPending() is called
@@ -75,6 +109,15 @@ export class DebouncedOperation {
     const pendingUpdate = props.getProperty(this.pendingUpdateKey) === 'true';
     
     if (pendingUpdate) {
+      // Show toast notification for pending update being processed
+      if (this.showToasts) {
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          `Processing pending ${this.operationName.toLowerCase()}...`,
+          `${this.operationName} Update`,
+          this.scheduledToastDuration
+        );
+      }
+      
       // Clear the pending flag
       props.setProperty(this.pendingUpdateKey, 'false');
       
@@ -83,6 +126,16 @@ export class DebouncedOperation {
       
       // Execute the operation
       this.operation();
+      
+      // Show toast notification for completed update
+      if (this.showToasts) {
+        SpreadsheetApp.getActiveSpreadsheet().toast(
+          `${this.operationName} complete.`,
+          `${this.operationName} Complete`,
+          this.completedToastDuration
+        );
+      }
+      
       return true;
     }
     
