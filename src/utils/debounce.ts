@@ -3,14 +3,17 @@
  * Provides a permission-friendly alternative to time-based triggers
  */
 
+// Default debounce period in milliseconds (5 seconds)
+export const DEFAULT_DEBOUNCE_PERIOD_MS = 5000;
+
 /**
  * Configuration for the debounce utility
  */
 export interface DebounceConfig {
   /** Unique key prefix for this operation in PropertiesService */
   keyPrefix: string;
-  /** Delay in milliseconds before allowing another operation */
-  delayMs: number;
+  /** Delay in milliseconds before allowing another operation (defaults to DEFAULT_DEBOUNCE_PERIOD_MS) */
+  delayMs?: number;
   /** Function to execute when debounce conditions are met */
   operation: () => void;
   /** Optional friendly name for toast notifications */
@@ -45,7 +48,7 @@ export class DebouncedOperation {
   constructor(config: DebounceConfig) {
     this.lastUpdateKey = `${config.keyPrefix}_lastUpdate`;
     this.pendingUpdateKey = `${config.keyPrefix}_pendingUpdate`;
-    this.delayMs = config.delayMs;
+    this.delayMs = config.delayMs ?? DEFAULT_DEBOUNCE_PERIOD_MS;
     this.operation = config.operation;
     this.operationName = config.operationName || 'Update';
     this.showToasts = config.showToasts !== false; // Default to true

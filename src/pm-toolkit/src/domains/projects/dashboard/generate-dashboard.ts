@@ -19,27 +19,27 @@ const PROJECT_SUMMARY_OPERATIONS: SummaryOperationsMap = {
   [DASHBOARD_KEYS.CONTRACT_PRICE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [DASHBOARD_KEYS.CHANGE_ORDERS]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [DASHBOARD_KEYS.MAX_ADVANCE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [DASHBOARD_KEYS.TOTAL_ADVANCE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [DASHBOARD_KEYS.ADVANCE_BALANCE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
 };
 
@@ -57,7 +57,7 @@ export function generateProjectDashboard(showToast = true) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const dashboardSheet = getOrCreateDashboardSheet(ss);
-    dashboardSheet.activate();
+    // Removed dashboardSheet.activate() to prevent disrupting user's workflow
     setDashboardStatus(dashboardSheet, "⏳ Generating dashboard...");
 
     const { activeSheets, closedSheets } = getCategorizedProjectSheets(ss);
@@ -92,7 +92,7 @@ export function generateProjectDashboard(showToast = true) {
       1,
       "Dashboard last updated:"
     );
-    
+
     // Show toast notification if requested
     if (showToast) {
       SpreadsheetApp.getActiveSpreadsheet().toast(
@@ -153,7 +153,12 @@ function generateProjectSection({
     title,
     DASHBOARD_COLUMNS,
     PROJECT_SUMMARY_OPERATIONS,
-    { colorKeys: PROJECT_COLOR_KEYS }
+    { 
+      colorKeys: PROJECT_COLOR_KEYS,
+      columnWidths: {
+        [DASHBOARD_KEYS.PROJECT_NO]: 75 // Set project number column width to 75
+      }
+    }
   );
 
   return tableInfo;

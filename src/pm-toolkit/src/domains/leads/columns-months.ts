@@ -66,12 +66,12 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
   {
     key: dashboardKeys.REVENUE_DIFF,
     label: labels.REVENUE_DIFF,
-    description: "Revenue minus goal",
+    description: "Goal minus revenue (gap to target)",
     valueFn: ({ inputRowData }) => {
       const revenue = inputRowData[inputKeys.REVENUE];
       const goal = inputRowData[inputKeys.REVENUE_GOAL];
       if (typeof revenue !== "number" || typeof goal !== "number") return "";
-      return revenue - goal;
+      return goal - revenue;
     },
     format: "currency",
   },

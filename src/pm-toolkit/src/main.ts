@@ -9,7 +9,6 @@ import { createDebouncedOperation } from "../../utils/debounce";
 // Create debounced dashboard updaters
 const leadsDashboardUpdater = createDebouncedOperation({
   keyPrefix: 'leadsDashboard',
-  delayMs: 3000, // 3 seconds
   operation: () => generateLeadsDashboard(false), // Don't show toast from generator
   operationName: 'Leads Dashboard',
   showToasts: true,
@@ -19,7 +18,6 @@ const leadsDashboardUpdater = createDebouncedOperation({
 
 const projectDashboardUpdater = createDebouncedOperation({
   keyPrefix: 'projectDashboard',
-  delayMs: 3000, // 3 seconds
   operation: () => generateProjectDashboard(false), // Don't show toast from generator
   operationName: 'Project Dashboard',
   showToasts: true,

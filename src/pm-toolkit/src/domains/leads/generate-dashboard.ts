@@ -31,32 +31,32 @@ const MONTHLY_SUMMARY_OPERATIONS: SummaryOperationsMap = {
   [inputKeys.REVENUE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [inputKeys.REVENUE_GOAL]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [dashboardKeys.REVENUE_DIFF]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [inputKeys.TOTAL_LEADS]: {
     operation: "sum",
     format: "number",
-    decimals: 0
+    decimals: 0,
   },
   [inputKeys.SIGNED]: {
     operation: "sum",
     format: "number",
-    decimals: 0
+    decimals: 0,
   },
   [dashboardKeys.CONVERSION_RATE]: {
     operation: "avg",
     format: "percent",
-    decimals: 2
+    decimals: 2,
   },
 };
 
@@ -65,32 +65,32 @@ const QUARTERLY_SUMMARY_OPERATIONS: SummaryOperationsMap = {
   [quarterlyKeys.REVENUE]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [quarterlyKeys.REVENUE_GOAL]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [quarterlyKeys.REVENUE_DIFF]: {
     operation: "sum",
     format: "currency",
-    decimals: 0
+    decimals: 0,
   },
   [quarterlyKeys.TOTAL_LEADS]: {
     operation: "sum",
     format: "number",
-    decimals: 0
+    decimals: 0,
   },
   [quarterlyKeys.SIGNED]: {
     operation: "sum",
     format: "number",
-    decimals: 0
+    decimals: 0,
   },
   [quarterlyKeys.CONVERSION_RATE]: {
     operation: "avg",
     format: "percent",
-    decimals: 2
+    decimals: 2,
   },
 };
 
@@ -255,7 +255,11 @@ function addBottomBorderBandaidFix(
 function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const existing = ss.getSheetByName(DASHBOARD_SHEET);
-  if (existing) return existing;
+  if (existing) {
+    // Adding logging
+    Logger.log(`Using existing dashboard sheet: ${DASHBOARD_SHEET}`);
+    return existing;
+  }
 
   const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
   const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
