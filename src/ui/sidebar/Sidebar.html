@@ -45,6 +45,7 @@
 
     <script>
       function loadModule(moduleName) {
+        alert("Loading module: " + moduleName);
         google.script.run
           .withSuccessHandler(function (html) {
             document.getElementById("module-container").innerHTML = html;

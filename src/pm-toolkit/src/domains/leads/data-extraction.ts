@@ -4,6 +4,7 @@ import { inputKeys, labels, INPUT_SHEET, NR_MONTHLY_GOALS } from "./constants";
 
 // 🔠 Extract InputKey union from keys
 type InputKey = keyof typeof inputKeys;
+const BLANKABLE_KEYS = new Set<InputKey>([inputKeys.REVENUE_GOAL]);
 
 export function extractLeadsData(): LeadsInputRow[] {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -40,16 +41,30 @@ export function extractLeadsData(): LeadsInputRow[] {
       const value = row[yearIdx];
       return typeof value === "number" || !isNaN(Number(value));
     })
-    .map((row) => {
+    .map((row, i) => {
       const result: Partial<LeadsInputRow> = {};
 
       for (const key of keys) {
         const label = labels[key];
         const colIndex = columnIndexByLabel[label];
         const raw = row[colIndex];
-        result[key] = typeof raw === "number" ? raw : Number(raw) || 0;
+
+        if (BLANKABLE_KEYS.has(key)) {
+          if (raw === "" || raw === undefined || raw === null) {
+            result[key] = undefined;
+          } else if (typeof raw === "number") {
+            result[key] = raw;
+          } else {
+            const parsed = Number(raw);
+            result[key] = isNaN(parsed) ? undefined : parsed;
+          }
+        } else {
+          const parsed = typeof raw === "number" ? raw : Number(raw);
+          result[key] = isNaN(parsed) ? 0 : parsed;
+        }
       }
 
+      Logger.log(`Row ${i + 2}: ${JSON.stringify(result)}`);
       return result as LeadsInputRow;
     });
 }
