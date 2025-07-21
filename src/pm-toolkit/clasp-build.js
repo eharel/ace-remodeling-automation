@@ -98,4 +98,58 @@ const copyUIFiles = () => {
 }
 
 copyUIFiles();
+
+// Copy local HTML files from src directory
+console.log('Copying local HTML files from src directory...');
+const copyLocalHtmlFiles = () => {
+  const sourceDir = './src';
+  const targetDir = './build';
+  let filesCopied = 0;
+  
+  // Recursive function to copy files and directories
+  const copyRecursively = (source, target, relativePath = '') => {
+    // Get all entries in the current directory
+    const entries = fs.readdirSync(source, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const sourcePath = path.join(source, entry.name);
+      const targetPath = path.join(target, relativePath, entry.name);
+      const newRelativePath = path.join(relativePath, entry.name);
+      
+      if (entry.isDirectory()) {
+        // Skip node_modules and other build directories
+        if (entry.name === 'node_modules' || entry.name === 'build') {
+          continue;
+        }
+        // Create the target directory and copy its contents recursively
+        fs.mkdirSync(path.join(target, newRelativePath), { recursive: true });
+        copyRecursively(sourcePath, target, newRelativePath);
+      } else if (entry.isFile()) {
+        // Only copy HTML and CSS files (add more extensions as needed)
+        const ext = path.extname(entry.name).toLowerCase();
+        if (['.html', '.css'].includes(ext)) {
+          // Create parent directories if they don't exist
+          const targetDir = path.dirname(targetPath);
+          fs.mkdirSync(targetDir, { recursive: true });
+          
+          fs.copyFileSync(sourcePath, targetPath);
+          console.log(`✅ Copied local file: ${newRelativePath}`);
+          filesCopied++;
+        }
+      }
+    }
+  };
+  
+  // Start the recursive copy
+  copyRecursively(sourceDir, targetDir);
+  
+  if (filesCopied > 0) {
+    console.log(`✅ Successfully copied ${filesCopied} local HTML/CSS files`);
+  } else {
+    console.log('⚠️ No local HTML/CSS files found to copy');
+  }
+};
+
+copyLocalHtmlFiles();
+
 console.log('Build preparation complete. Ready for clasp push.');

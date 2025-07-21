@@ -12,7 +12,7 @@ import { loadSidebarModule } from "../../loadSidebarModule";
 export function showTabSearchSidebar() {
   // Load the HTML template for this module
   const html = HtmlService.createTemplateFromFile(
-    "sidebar/modules/tab-search/TabSearchSidebar.html"
+    "ui/sidebar/modules/tab-search/TabSearchSidebar.html"
   )
     .evaluate()
     .setTitle("Tab Search")

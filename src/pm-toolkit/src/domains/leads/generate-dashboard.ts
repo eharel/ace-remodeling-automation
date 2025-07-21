@@ -11,7 +11,7 @@ import {
   QUARTERS_ROW_SPAN,
 } from "./constants";
 import { TEMPLATE_SPREADSHEET_ID } from "../../constants";
-import { createMonthlyDashboardRows } from "./data-transformation";
+import { createMonthlyDashboardRows, createQuarterlyDashboardRows } from "./data-transformation";
 import {
   applyQuarterBorders,
   applyQuarterColoring,
@@ -19,7 +19,6 @@ import {
 } from "./styles";
 import { getQuarterFromMonth } from "./utils";
 import { QUARTER_COLUMNS } from "./columns-quarters";
-import { QuarterlyKey } from "./constants";
 import { addTimestamp } from "../../styles";
 import { generateCharts } from "./charts";
 import { SummaryOperation, SummaryOperationsMap, TableInfo } from "../../types";
@@ -271,68 +270,6 @@ function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
   return copiedSheet;
 }
 
-export function createQuarterlyDashboardRows(
-  inputRows: LeadsInputRow[],
-  year: number
-): QuarterDashboardRow[] {
-  type QuarterKey = `${number}-Q${number}`;
-  const grouped = new Map<QuarterKey, LeadsInputRow[]>();
-
-  for (const row of inputRows) {
-    const quarter = getQuarterFromMonth(Number(row[inputKeys.MONTH]));
-    const key = `${year}-Q${quarter}` as QuarterKey;
-
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(row);
-  }
-
-  const unsortedRows = Array.from(grouped.entries()).map(([key, group]) => {
-    const [yearStr, qStr] = key.split("-Q");
-    const year = Number(yearStr);
-    const quarter = `Q${qStr}`;
-
-    const totalLeads = sum(group, inputKeys.TOTAL_LEADS);
-    const signed = sum(group, inputKeys.SIGNED);
-    const conversionRate = totalLeads > 0 ? signed / totalLeads : 0;
-    const revenue = sum(group, inputKeys.REVENUE);
-    const goal = sum(group, inputKeys.REVENUE_GOAL);
-    const diff = goal - revenue;
-
-    const fullRow: Partial<Record<QuarterlyKey, string | number>> = {
-      [quarterlyKeys.YEAR]: year,
-      [quarterlyKeys.QUARTER]: quarter,
-      [quarterlyKeys.TOTAL_LEADS]: totalLeads,
-      [quarterlyKeys.SIGNED]: signed,
-      [quarterlyKeys.REVENUE]: revenue,
-      [quarterlyKeys.CONVERSION_RATE]: conversionRate,
-      [quarterlyKeys.REVENUE_GOAL]: goal,
-      [quarterlyKeys.REVENUE_DIFF]: diff,
-    };
-
-    const filtered = Object.fromEntries(
-      QUARTER_COLUMNS.map((col) => [col.key, fullRow[col.key]])
-    );
-
-    return { ...filtered, quarter } as QuarterDashboardRow;
-  });
-
-  return unsortedRows.sort((a, b) => {
-    const yA = Number(a[quarterlyKeys.YEAR]);
-    const yB = Number(b[quarterlyKeys.YEAR]);
-    if (yA !== yB) return yA - yB;
-
-    const qA = Number(String(a[quarterlyKeys.QUARTER]).slice(1));
-    const qB = Number(String(b[quarterlyKeys.QUARTER]).slice(1));
-    return qA - qB;
-  });
-}
-
-function sum<K extends keyof LeadsInputRow>(
-  rows: LeadsInputRow[],
-  key: K
-): number {
-  return rows.reduce((acc, r) => acc + Number(r[key] || 0), 0);
-}
 
 function getYearFilter(): number {
   return 2025;
