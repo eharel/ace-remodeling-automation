@@ -1,4 +1,4 @@
-import { getColumnIndicesByLabels } from "../../../utils/helpers";
+import { extractTableData } from "@tables/reader";
 import { LeadsInputRow } from "./types";
 import {
   inputKeys,
@@ -12,66 +12,16 @@ type InputKey = keyof typeof inputKeys;
 const BLANKABLE_KEYS = new Set<InputKey>([inputKeys.REVENUE_GOAL]);
 
 export function extractLeadsData(): LeadsInputRow[] {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(INPUT_SHEET);
-  if (!sheet) throw new Error(`Sheet "${INPUT_SHEET}" not found`);
-
-  const values = sheet.getDataRange().getValues();
-  const [headerRow, ...dataRows] = values;
-  if (!headerRow) return [];
-
-  const normalizedHeader = headerRow.map((label) => String(label).trim());
-
-  // Build label → column index map
-  const columnIndexByLabel: Record<string, number> = {};
-  normalizedHeader.forEach((label, idx) => {
-    columnIndexByLabel[label] = idx;
+  return extractTableData<LeadsInputRow>({
+    sheetName: INPUT_SHEET,
+    labelMap: labels,
+    keyMap: inputKeys,
+    blankableKeys: BLANKABLE_KEYS,
+    rowFilter: (row) => {
+      const year = row[Object.values(labels).indexOf(labels.YEAR)];
+      return typeof year === "number" || !isNaN(Number(year));
+    },
   });
-
-  // 🔐 Strictly verify all required columns are present
-  const keys = Object.keys(inputKeys) as InputKey[];
-  for (const key of keys) {
-    const label = labels[key];
-    if (!(label in columnIndexByLabel)) {
-      throw new Error(
-        `❌ Missing column "${label}" (for key "${inputKeys[key]}") in sheet "${INPUT_SHEET}"`
-      );
-    }
-  }
-
-  // ✅ Build typed input rows
-  return dataRows
-    .filter((row) => {
-      const yearIdx = columnIndexByLabel[labels.YEAR];
-      const value = row[yearIdx];
-      return typeof value === "number" || !isNaN(Number(value));
-    })
-    .map((row, i) => {
-      const result: Partial<LeadsInputRow> = {};
-
-      for (const key of keys) {
-        const label = labels[key];
-        const colIndex = columnIndexByLabel[label];
-        const raw = row[colIndex];
-
-        if (BLANKABLE_KEYS.has(key)) {
-          if (raw === "" || raw === undefined || raw === null) {
-            result[key] = undefined;
-          } else if (typeof raw === "number") {
-            result[key] = raw;
-          } else {
-            const parsed = Number(raw);
-            result[key] = isNaN(parsed) ? undefined : parsed;
-          }
-        } else {
-          const parsed = typeof raw === "number" ? raw : Number(raw);
-          result[key] = isNaN(parsed) ? 0 : parsed;
-        }
-      }
-
-      Logger.log(`Row ${i + 2}: ${JSON.stringify(result)}`);
-      return result as LeadsInputRow;
-    });
 }
 
 export function extractMonthlyRevenueGoalsFromNamedRange(
