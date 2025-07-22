@@ -1,14 +1,13 @@
-import { BaseColumn } from "../columns";
-import { stylizeTable } from "../styles";
+import { BaseColumn } from "@shared/columns";
 import {
   OPERATION_SYMBOLS,
   StylizeOptions,
   SummaryOperation,
   SummaryOperationsMap,
-  SummaryOperationConfig,
   TableInfo,
   ValueFormat,
-} from "../types";
+} from "@shared/styles";
+import { stylizeTable } from "@shared/styles";
 
 export function generateAndStylizeTableFromRows<
   RowType extends Record<string, any>,
@@ -198,7 +197,8 @@ function addTableSummaryRow(
   // Initialize summary row
   const summaryRow = Array(columns.length).fill("");
   // Use the provided summaryTitle or default to "📊 Summary"
-  summaryRow[0] = options?.summaryTitle !== undefined ? options.summaryTitle : "📊 Summary";
+  summaryRow[0] =
+    options?.summaryTitle !== undefined ? options.summaryTitle : "📊 Summary";
 
   // Apply operations to each column based on the specified operation type
   for (const [key, opConfig] of Object.entries(summaryRowOps)) {

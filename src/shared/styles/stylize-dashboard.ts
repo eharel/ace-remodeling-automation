@@ -1,5 +1,5 @@
 import { BaseColumn } from "../columns";
-import { StylizeOptions } from "../types";
+import { StylizeOptions, TableInfo } from "./types";
 import {
   applyTitleStyle,
   applyHeaderStyle,
@@ -13,15 +13,6 @@ import {
   applySummaryRowStyle,
   applyAlignment,
 } from "./";
-
-export type TableInfo = {
-  startRow: number;
-  startCol: number;
-  headerRow: number;
-  dataStartRow: number;
-  dataEndRow: number;
-  summaryRow?: number;
-};
 
 export function stylizeDashboard<T extends string>(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,

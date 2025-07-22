@@ -3,7 +3,7 @@ import {
   QuarterlyKey,
   QuarterlyLabel,
 } from "@pm/domains/leads/core/constants";
-import { BaseColumn } from "@pm/columns";
+import { BaseColumn } from "shared/columns";
 import { DashboardKey, DashboardLabel } from "@pm/domains/leads/core/constants";
 
 export type LeadsInputRow = {

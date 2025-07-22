@@ -1,7 +1,7 @@
 import { extractLeadsData } from "../core/data-extraction";
 import { LeadsInputRow } from "../core/types";
 import { LEADS_COLUMNS } from "../columns";
-import { generateAndStylizeTableFromRows } from "@pm/utils/table-builder";
+import { generateAndStylizeTableFromRows } from "@tables/builder";
 import {
   BLANK_SHEET_TEMPLATE,
   DASHBOARD_SHEET,
@@ -21,9 +21,9 @@ import {
 } from "../styles";
 import { getQuarterFromMonth } from "../core/utils";
 import { QUARTER_COLUMNS } from "../columns";
-import { addTimestamp } from "@pm/styles";
+import { addTimestamp } from "@shared/styles";
 import { generateCharts } from "../charts";
-import { SummaryOperationsMap, TableInfo } from "@pm/types";
+import { SummaryOperationsMap, TableInfo } from "@shared/styles";
 import { getOrCreateLeadsDashboardSheet } from "@pm/utils";
 
 const SHOW_DESCRIPTION = false;

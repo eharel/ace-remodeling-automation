@@ -7,7 +7,7 @@ import {
   labels,
   inputKeys,
 } from "../core/constants";
-import { buildLabelKeyMaps } from "@pm/columns";
+import { buildLabelKeyMaps } from "shared/columns";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
   // {

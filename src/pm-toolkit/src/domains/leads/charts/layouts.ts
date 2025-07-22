@@ -1,7 +1,7 @@
 import { getCenteredStartCol } from ".";
 import type { ChartLayoutConfig } from "../../../charts";
 import { createChartPositioner } from "../../../charts/positioner";
-import { TableInfo } from "../../../types";
+import { TableInfo } from "@shared/styles";
 import { ChartFunction } from "./types";
 
 export const GRID_LAYOUT: ChartLayoutConfig & { layoutType: "grid" } = {

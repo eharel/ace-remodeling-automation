@@ -1,5 +1,5 @@
 import { ChartPosition } from "@pm/charts/positioner";
-import { TableInfo } from "@pm/types";
+import { TableInfo } from "@shared/styles";
 import { LEADS_COLUMNS } from "@pm/domains/leads/columns/columns-months";
 import { dashboardKeys, inputKeys } from "@pm/domains/leads/core/constants";
 import { buildChart } from "@pm/charts/build-chart";

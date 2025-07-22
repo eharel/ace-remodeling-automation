@@ -131,7 +131,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   },
 ];
 
-import { buildLabelKeyMaps } from "../../../columns/utils";
+import { buildLabelKeyMaps } from "../../../../../shared/columns/utils";
 
 const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
   DASHBOARD_COLUMNS

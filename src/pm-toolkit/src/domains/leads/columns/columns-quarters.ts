@@ -5,7 +5,7 @@ import {
   QuarterlyLabel,
 } from "../core/constants";
 import { LeadsQuarterColumn } from "../core/types";
-import { buildLabelKeyMaps } from "@pm/columns";
+import { buildLabelKeyMaps } from "shared/columns";
 import { formatPercent } from "@pm/utils/helpers";
 
 export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [

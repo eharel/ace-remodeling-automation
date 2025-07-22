@@ -1,6 +1,6 @@
 import { QUARTER_TO_MONTHS, quarterlyKeys } from "../core/constants";
-import { TableInfo } from "@pm/types";
-import { BaseColumn } from "@pm/columns";
+import { TableInfo } from "@shared/styles";
+import { BaseColumn } from "@shared/columns";
 import { QUARTER_COLORS } from "../styles/colors";
 
 // Month name to number

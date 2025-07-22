@@ -1,5 +1,5 @@
 import { ChartPosition } from "@pm/charts/positioner";
-import { TableInfo } from "@pm/types";
+import { TableInfo } from "@shared/styles";
 import { QUARTER_COLUMNS } from "@pm/domains/leads/columns/columns-quarters";
 import { quarterlyKeys } from "@pm/domains/leads/core/constants";
 import { buildChart } from "@pm/charts/build-chart";

@@ -1,5 +1,5 @@
 import { BLANK_SHEET_TEMPLATE } from "@pm/domains/leads/core/constants";
-import { BaseColumn } from "../columns/types";
+import { BaseColumn } from "../../../shared/columns/types";
 import { MONTH_NAMES, TEMPLATE_SPREADSHEET_ID } from "../constants";
 
 export function toNullableNumber(value: unknown): number | null {

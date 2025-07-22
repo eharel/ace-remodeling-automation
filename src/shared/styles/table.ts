@@ -1,7 +1,7 @@
 import { BaseColumn } from "../columns";
-import { COLUMN_PADDING } from "../constants";
-import { StylizeOptions } from "../types";
-import { TableInfo } from "./stylize-dashboard";
+import { COLUMN_PADDING } from "./constants";
+import { StylizeOptions } from "./types";
+import { TableInfo } from "./types";
 
 export function applyTitleStyle(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
