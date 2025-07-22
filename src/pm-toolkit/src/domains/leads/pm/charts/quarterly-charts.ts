@@ -1,10 +1,10 @@
 import { ChartPosition } from "@pm/charts/positioner";
 import { TableInfo } from "@shared/styles";
-import { QUARTER_COLUMNS } from "@pm/domains/leads/columns/columns-quarters";
-import { quarterlyKeys } from "@pm/domains/leads/core/constants";
 import { buildChart } from "@pm/charts/build-chart";
-import { CHART_COLORS, QUARTER_COLORS } from "@pm/domains/leads/styles/colors";
 import { ChartFunction } from "./types";
+import { QUARTER_COLUMNS } from "../columns";
+import { quarterlyKeys } from "../../shared/columns";
+import { CHART_COLORS, QUARTER_COLORS } from "../../shared/styles";
 
 export function addQuarterlyRevenueComparisonChart(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,

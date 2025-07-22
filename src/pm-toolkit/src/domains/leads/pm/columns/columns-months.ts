@@ -1,13 +1,14 @@
 import { LeadsColumn } from "../core/types";
 import { getMonthName, formatPercent } from "@pm/utils/helpers";
+
+import { buildLabelKeyMaps } from "shared/columns";
 import {
   DashboardKey,
-  DashboardLabel,
   dashboardKeys,
-  labels,
+  DashboardLabel,
   inputKeys,
-} from "../core/constants";
-import { buildLabelKeyMaps } from "shared/columns";
+} from "../../shared/columns";
+import { dashboardLabels } from "../../shared/columns/labels";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
   // {
@@ -20,27 +21,27 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
   // },
   {
     key: dashboardKeys.MONTH,
-    label: labels.MONTH,
+    label: dashboardLabels.MONTH,
     valueFn: ({ inputRowData }) => getMonthName(inputRowData[inputKeys.MONTH]),
     format: "number",
   },
   {
     key: dashboardKeys.TOTAL_LEADS,
-    label: labels.TOTAL_LEADS,
+    label: dashboardLabels.TOTAL_LEADS,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.TOTAL_LEADS],
     format: "number",
     align: "center",
   },
   {
     key: dashboardKeys.SIGNED,
-    label: labels.SIGNED,
+    label: dashboardLabels.SIGNED,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.SIGNED],
     format: "number",
     align: "center",
   },
   {
     key: dashboardKeys.CONVERSION_RATE,
-    label: labels.CONVERSION_RATE,
+    label: dashboardLabels.CONVERSION_RATE,
     valueFn: ({ inputRowData }) => {
       const signed = inputRowData[inputKeys.SIGNED] ?? 0;
       const total = inputRowData[inputKeys.TOTAL_LEADS] ?? 0;
@@ -52,20 +53,20 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
   },
   {
     key: dashboardKeys.REVENUE,
-    label: labels.REVENUE,
+    label: dashboardLabels.REVENUE,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE],
     format: "currency",
   },
   {
     key: dashboardKeys.REVENUE_GOAL,
-    label: labels.REVENUE_GOAL,
+    label: dashboardLabels.REVENUE_GOAL,
     description: "Monthly revenue goal",
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE_GOAL] ?? "",
     format: "currency",
   },
   {
     key: dashboardKeys.REVENUE_DIFF,
-    label: labels.REVENUE_DIFF,
+    label: dashboardLabels.REVENUE_DIFF,
     description: "Goal minus revenue (gap to target)",
     valueFn: ({ inputRowData }) => {
       const revenue = inputRowData[inputKeys.REVENUE];

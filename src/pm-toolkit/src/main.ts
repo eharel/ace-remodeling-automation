@@ -4,7 +4,7 @@ import { generateProjectDashboard } from "./domains/projects/dashboard";
 import { generateLeadsDashboard } from "./domains/leads";
 import { startsWithProjectNumber } from "./domains/projects/utils";
 import { PROJECT_DASHBOARD_SHEET_NAME } from "./constants";
-import { INPUT_SHEET } from "./domains/leads/core/constants";
+import { INPUT_SHEET } from "./domains/leads/pm/core/constants";
 import { createDebouncedOperation } from "../../utils/debounce";
 import { FILE_IDS } from "./constants/general";
 

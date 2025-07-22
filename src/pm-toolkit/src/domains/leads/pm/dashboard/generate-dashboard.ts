@@ -1,41 +1,38 @@
 import { extractLeadsData } from "../core/data-extraction";
-import { LeadsInputRow } from "../core/types";
 import { LEADS_COLUMNS } from "../columns";
 import { generateAndStylizeTableFromRows } from "@tables/builder";
-import {
-  BLANK_SHEET_TEMPLATE,
-  DASHBOARD_SHEET,
-  dashboardKeys,
-  inputKeys,
-  quarterlyKeys,
-} from "../core/constants";
+
 import { TEMPLATE_SPREADSHEET_ID } from "@pm/constants";
 import {
   createMonthlyDashboardRows,
   createQuarterlyDashboardRows,
 } from "../core/data-transformation";
-import {
-  applyQuarterBorders,
-  applyQuarterColoring,
-  applyVerticalBorders,
-} from "../styles";
+
 import { getQuarterFromMonth } from "../core/utils";
 import { QUARTER_COLUMNS } from "../columns";
 import { addTimestamp } from "@shared/styles";
 import { generateCharts } from "../charts";
 import { SummaryOperationsMap, TableInfo } from "@shared/styles";
 import { getOrCreateLeadsDashboardSheet } from "@pm/utils";
+import { dashboardKeys, inputKeys, quarterlyKeys } from "../../shared/columns";
+import {
+  applyQuarterBorders,
+  applyQuarterColoring,
+  applyVerticalBorders,
+} from "../../shared/styles";
+import { DASHBOARD_SHEET } from "../core";
+import { LeadsInputRow } from "../../shared/rows/types";
 
 const SHOW_DESCRIPTION = false;
 
 // Summary row operations for monthly table
 const MONTHLY_SUMMARY_OPERATIONS: SummaryOperationsMap = {
-  [inputKeys.REVENUE]: {
+  [dashboardKeys.REVENUE]: {
     operation: "sum",
     format: "currency",
     decimals: 0,
   },
-  [inputKeys.REVENUE_GOAL]: {
+  [dashboardKeys.REVENUE_GOAL]: {
     operation: "sum",
     format: "currency",
     decimals: 0,

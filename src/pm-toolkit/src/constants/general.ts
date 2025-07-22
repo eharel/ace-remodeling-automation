@@ -12,7 +12,7 @@ export const FILE_IDS = {
 export const TEMPLATE_SPREADSHEET_ID =
   "1GOAREjnQtBsYu1BXzSDD4xlU_lolOPduBfVVQ40d57I";
 export const TEMPLATE_PROJECT_TAB_NAME = "_projectTemplate";
-export const TEMPLATE_SHEET_NAME = "Blank Sheet Template";
+export const TEMPLATE_BLANK_SHEET = "Blank Sheet Template";
 
 export const LIB_IDENTIFIER = "AceRemodelingPMToolkit";
 export const MAX_ADVANCE_PERCENTAGE = 10;

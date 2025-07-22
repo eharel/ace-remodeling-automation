@@ -1,9 +1,8 @@
+// 📊 Formatting and alignment
 export type ColumnFormat = "currency" | "text" | "number" | "percent" | "date";
 export type Alignment = "left" | "center" | "right";
 
-/**
- * A generic base column that enforces domain-specific key and label types.
- */
+// 📋 A generic base column type
 export type BaseColumn<
   TContext = any,
   TKey extends string = string,
@@ -16,4 +15,9 @@ export type BaseColumn<
   align?: Alignment;
   description?: string;
   help?: string;
+};
+
+// 🧱 A type-safe dashboard row keyed by a specific set of keys
+export type DashboardRow<K extends string> = {
+  [Key in K]: string | number;
 };

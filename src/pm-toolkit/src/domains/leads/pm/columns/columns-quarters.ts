@@ -1,12 +1,12 @@
-import {
-  quarterlyKeys,
-  quarterlyLabels,
-  QuarterlyKey,
-  QuarterlyLabel,
-} from "../core/constants";
 import { LeadsQuarterColumn } from "../core/types";
 import { buildLabelKeyMaps } from "shared/columns";
 import { formatPercent } from "@pm/utils/helpers";
+import {
+  QuarterlyKey,
+  quarterlyKeys,
+  QuarterlyLabel,
+  quarterlyLabels,
+} from "../../shared/columns/labels";
 
 export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
   // {

@@ -1,14 +1,13 @@
-import {
-  LeadsInputRow,
-  LeadsDashboardRow,
-  LeadsRowContext,
-  QuarterDashboardRow,
-} from "./types";
+import { inputKeys, QuarterlyKey, quarterlyKeys } from "../../shared/columns";
+import { LeadsInputRow } from "../../shared/rows/types";
 import { LEADS_COLUMNS } from "../columns";
 import { QUARTER_COLUMNS } from "../columns";
-import { mapInputToDashboardRows } from "../../../utils/helpers";
-import { inputKeys, QuarterlyKey, quarterlyKeys } from "../core/constants";
 import { getQuarterFromMonth } from "./utils";
+import { mapInputToDashboardRows } from "../../../../utils/helpers";
+import { LeadsRowContext } from "../../shared/rows/types";
+import { QuarterRowContext } from "../../shared/rows/types";
+import { LeadsDashboardRow } from "./types";
+import { QuarterDashboardRow } from "../../shared/rows/types";
 
 /**
  * Creates monthly dashboard rows from input data
@@ -85,10 +84,16 @@ export function createQuarterlyDashboardRows(
     };
 
     const filtered = Object.fromEntries(
-      QUARTER_COLUMNS.map((col) => [col.key, fullRow[col.key]])
+      QUARTER_COLUMNS.map((col) => [
+        col.key,
+        fullRow[col.key as keyof typeof fullRow],
+      ])
     );
 
-    return { ...filtered, quarter } as QuarterDashboardRow;
+    return {
+      ...filtered,
+      quarter, // helper field, not part of the visible table
+    } as QuarterDashboardRow & { quarter: string };
   });
 
   return unsortedRows.sort((a, b) => {

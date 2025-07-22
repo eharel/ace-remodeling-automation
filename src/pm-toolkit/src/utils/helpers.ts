@@ -1,6 +1,9 @@
-import { BLANK_SHEET_TEMPLATE } from "@pm/domains/leads/core/constants";
-import { BaseColumn } from "../../../shared/columns/types";
-import { MONTH_NAMES, TEMPLATE_SPREADSHEET_ID } from "../constants";
+import { BaseColumn } from "@shared/columns/types";
+import {
+  MONTH_NAMES,
+  TEMPLATE_BLANK_SHEET,
+  TEMPLATE_SPREADSHEET_ID,
+} from "../constants";
 
 export function toNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
@@ -126,7 +129,7 @@ export function getOrCreateLeadsDashboardSheet(
   }
 
   const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
-  const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
+  const templateSheet = templateFile.getSheetByName(TEMPLATE_BLANK_SHEET);
   if (!templateSheet) throw new Error("Template sheet not found.");
 
   const copiedSheet = templateSheet.copyTo(ss);

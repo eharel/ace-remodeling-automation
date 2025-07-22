@@ -1,5 +1,5 @@
-import { TableInfo } from "../../../types";
-import { clearExistingCharts } from "../../../charts";
+import { TableInfo } from "@shared/styles";
+import { clearExistingCharts } from "@pm/charts";
 import {
   addMonthlyConversionRateChart,
   addMonthlyRevenueChart,
@@ -13,7 +13,7 @@ import {
   generateStackedLayoutCharts,
   STACKED_LAYOUT,
 } from "./layouts";
-import type { ChartLayoutConfig } from "../../../charts";
+import type { ChartLayoutConfig } from "@pm/charts";
 import type { ChartFunction } from "./types";
 
 // -----------------------------
