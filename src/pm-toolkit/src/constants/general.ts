@@ -3,17 +3,21 @@ import { NR_CONTRACT_PRICE, NR_CHANGE_ORDER_TOTAL } from "./named-ranges";
 // === Regex ===
 export const PROJECT_TAB_NAME_REGEX = /^\d{3,4}\s/;
 
+// === File IDs ===
+export const FILE_IDS = {
+  MANAGER_FILE: "1h351NGo2pJnA-dcI5wvDXTkDCImNFTxJJpVh3shy_Zg", // Manager dashboard file
+};
+
 // === General Config ===
 export const TEMPLATE_SPREADSHEET_ID =
   "1GOAREjnQtBsYu1BXzSDD4xlU_lolOPduBfVVQ40d57I";
 export const TEMPLATE_PROJECT_TAB_NAME = "_projectTemplate";
-export const TEMPLATE_SHEET_NAME = "Blank Sheet Template";
+export const TEMPLATE_BLANK_SHEET = "Blank Sheet Template";
 
 export const LIB_IDENTIFIER = "AceRemodelingPMToolkit";
 export const MAX_ADVANCE_PERCENTAGE = 10;
 export const EXPECTED_PROFIT_PERCENTAGE = 20;
 export const IS_ASCENDING_ORDER = false;
-export const COLUMN_PADDING = 10;
 
 export const LABEL_COLUMN_INDEX = 11;
 export const VALUE_COLUMN_INDEX = 13;

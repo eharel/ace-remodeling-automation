@@ -8,10 +8,17 @@
     "sourceMap": true,
     "rootDir": "src"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../tables/builder.ts",
+    "../shared/columns",
+    "../shared/styles",
+    "../shared/styles"
+  ],
   "references": [
     { "path": "../../src/utils" },
     { "path": "../../src/ui" },
-    { "path": "../../src/globals" }
+    { "path": "../../src/globals" },
+    { "path": "../../src/tables" }
   ]
 }

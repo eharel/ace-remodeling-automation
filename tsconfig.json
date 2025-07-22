@@ -1,4 +1,12 @@
 {
+  "files": [],
+  "references": [
+    { "path": "src/shared" },
+    { "path": "src/tables" },
+    { "path": "src/pm-toolkit" },
+    { "path": "src/ui" },
+    { "path": "src/utils" }
+  ],
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
@@ -10,9 +18,11 @@
     "rootDir": "src",
     "baseUrl": "src",
     "paths": {
+      "@shared/*": ["shared/*"],
       "@pm/*": ["pm-toolkit/src/*"],
       "@ui/*": ["ui/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@tables/*": ["tables/*"]
     }
   },
   "include": ["src/**/*"],

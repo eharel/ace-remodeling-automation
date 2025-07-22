@@ -3,16 +3,16 @@
 import {
   PROJECT_DASHBOARD_SHEET_NAME,
   COL_GAP_BETWEEN_TABLES,
-} from "../../../constants";
+} from "@pm/constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
-import { generateAndStylizeTableFromRows } from "../../../utils";
-import { SummaryOperationsMap } from "../../../types";
+import { generateAndStylizeTableFromRows } from "@tables/builder";
+import { SummaryOperationsMap } from "@shared/styles";
 import { extractAllProjectData } from "./data-extraction";
 import { transformExtractedDataToDashboardRows } from "./data-transformation";
 import { setDashboardStatus } from "./utils";
-import { addTimestamp } from "../../../styles";
-import { toA1Notation } from "../../../utils/helpers";
+import { addTimestamp } from "@shared/styles";
+import { toA1Notation } from "@pm/utils/helpers";
 
 // Summary row operations for project dashboard
 const PROJECT_SUMMARY_OPERATIONS: SummaryOperationsMap = {
@@ -153,11 +153,11 @@ function generateProjectSection({
     title,
     DASHBOARD_COLUMNS,
     PROJECT_SUMMARY_OPERATIONS,
-    { 
+    {
       colorKeys: PROJECT_COLOR_KEYS,
       columnWidths: {
-        [DASHBOARD_KEYS.PROJECT_NO]: 75 // Set project number column width to 75
-      }
+        [DASHBOARD_KEYS.PROJECT_NO]: 75, // Set project number column width to 75
+      },
     }
   );
 

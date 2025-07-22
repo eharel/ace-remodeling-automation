@@ -7,17 +7,12 @@ import {
   promptProjectToClose,
 } from "./domains/projects/close-project";
 import { generateProjectDashboard } from "./domains/projects/dashboard";
+import { generateOverviewDashboard } from "./domains/leads/master/dashboard/generate-overview-dashboard";
 import { promptForNewProject } from "./domains/projects/new-project";
 import { generateLeadsDashboard } from "./domains/leads";
 import { showSidebar } from "../../ui/sidebar/showSidebar";
 import { showTabSearchSidebar } from "../../ui/sidebar/modules/tab-search/showTabSearchSidebar";
 import { SHARED_GLOBALS } from "../../globals/global-exports";
-import {
-  showTabSearchSidebarLocal,
-  getAllTabsLocal,
-  activateTabLocal,
-  getAllTabsLocalTest,
-} from "./tab-search";
 
 declare global {
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
@@ -29,12 +24,9 @@ declare global {
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
   var generateLeadsDashboard: () => void;
+  var generateOverviewDashboard: () => void;
   var showSidebar: () => void;
   var showTabSearchSidebar: () => void;
-  var showTabSearchSidebarLocal: () => void;
-  var getAllTabsLocal: () => { name: string; index: number }[];
-  var activateTabLocal: (tabName: string) => void;
-  var getAllTabsLocalTest: () => { name: string; index: number }[];
 }
 
 // Register all global functions that Apps Script will call directly
@@ -51,14 +43,11 @@ registerGlobals({
   generateProjectDashboard,
   promptForNewProject,
   generateLeadsDashboard,
+  generateOverviewDashboard,
 
   // UI functions
   showSidebar,
   showTabSearchSidebar,
-  showTabSearchSidebarLocal,
-  getAllTabsLocal,
-  activateTabLocal,
-  getAllTabsLocalTest,
 
   // Include shared globals (utility functions used by UI)
   ...SHARED_GLOBALS,
