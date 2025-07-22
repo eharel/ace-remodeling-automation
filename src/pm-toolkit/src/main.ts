@@ -1,34 +1,46 @@
-import { buildMainMenu } from "./menu/main-menu";
+import { buildMainMenu } from "./menu";
+import { buildManagerMenu } from "./menu";
 import { generateProjectDashboard } from "./domains/projects/dashboard";
 import { generateLeadsDashboard } from "./domains/leads";
 import { startsWithProjectNumber } from "./domains/projects/utils";
 import { PROJECT_DASHBOARD_SHEET_NAME } from "./constants";
-import { INPUT_SHEET } from "./domains/leads/constants";
+import { INPUT_SHEET } from "./domains/leads/core/constants";
 import { createDebouncedOperation } from "../../utils/debounce";
+import { FILE_IDS } from "./constants/general";
 
 // Create debounced dashboard updaters
 const leadsDashboardUpdater = createDebouncedOperation({
-  keyPrefix: 'leadsDashboard',
+  keyPrefix: "leadsDashboard",
   operation: () => generateLeadsDashboard(false), // Don't show toast from generator
-  operationName: 'Leads Dashboard',
+  operationName: "Leads Dashboard",
   showToasts: true,
   scheduledToastDuration: 3,
-  completedToastDuration: 3
+  completedToastDuration: 3,
 });
 
 const projectDashboardUpdater = createDebouncedOperation({
-  keyPrefix: 'projectDashboard',
+  keyPrefix: "projectDashboard",
   operation: () => generateProjectDashboard(false), // Don't show toast from generator
-  operationName: 'Project Dashboard',
+  operationName: "Project Dashboard",
   showToasts: true,
   scheduledToastDuration: 3,
-  completedToastDuration: 3
+  completedToastDuration: 3,
 });
 
 export function onOpen() {
+  Logger.log("🚀 onOpen triggered");
+
   const ui = SpreadsheetApp.getUi();
-  const menu = buildMainMenu(ui);
-  menu.addToUi();
+  const fileId = SpreadsheetApp.getActiveSpreadsheet().getId();
+  Logger.log(`📄 File ID: ${fileId}`);
+
+  if (fileId === FILE_IDS.MANAGER_FILE) {
+    Logger.log("🧠 Loading Manager menu");
+    buildManagerMenu(ui);
+  } else {
+    Logger.log("🛠️ Loading PM menu");
+    buildMainMenu(ui).addToUi();
+  }
 }
 
 export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {

@@ -1,7 +1,7 @@
-import { QUARTER_TO_MONTHS, quarterlyKeys, quarterlyLabels } from "./constants";
-import { TableInfo } from "../../types";
-import { BaseColumn } from "../../columns";
-import { QUARTER_COLORS } from "./colors";
+import { QUARTER_TO_MONTHS, quarterlyKeys } from "../core/constants";
+import { TableInfo } from "@pm/types";
+import { BaseColumn } from "@pm/columns";
+import { QUARTER_COLORS } from "../styles/colors";
 
 // Month name to number
 const MONTH_NAME_TO_NUMBER: Record<string, number> = {

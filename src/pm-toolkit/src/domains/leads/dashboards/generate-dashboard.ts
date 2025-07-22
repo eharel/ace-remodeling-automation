@@ -1,27 +1,30 @@
-import { extractLeadsData } from "./data-extraction";
-import { LeadsInputRow, QuarterDashboardRow } from "./types";
-import { LEADS_COLUMNS } from "./columns-months";
-import { generateAndStylizeTableFromRows } from "../../utils/table-builder";
+import { extractLeadsData } from "../core/data-extraction";
+import { LeadsInputRow } from "../core/types";
+import { LEADS_COLUMNS } from "../columns";
+import { generateAndStylizeTableFromRows } from "@pm/utils/table-builder";
 import {
   BLANK_SHEET_TEMPLATE,
   DASHBOARD_SHEET,
   dashboardKeys,
   inputKeys,
   quarterlyKeys,
-  QUARTERS_ROW_SPAN,
-} from "./constants";
-import { TEMPLATE_SPREADSHEET_ID } from "../../constants";
-import { createMonthlyDashboardRows, createQuarterlyDashboardRows } from "./data-transformation";
+} from "../core/constants";
+import { TEMPLATE_SPREADSHEET_ID } from "@pm/constants";
+import {
+  createMonthlyDashboardRows,
+  createQuarterlyDashboardRows,
+} from "../core/data-transformation";
 import {
   applyQuarterBorders,
   applyQuarterColoring,
   applyVerticalBorders,
-} from "./styles";
-import { getQuarterFromMonth } from "./utils";
-import { QUARTER_COLUMNS } from "./columns-quarters";
-import { addTimestamp } from "../../styles";
-import { generateCharts } from "./charts";
-import { SummaryOperation, SummaryOperationsMap, TableInfo } from "../../types";
+} from "../styles";
+import { getQuarterFromMonth } from "../core/utils";
+import { QUARTER_COLUMNS } from "../columns";
+import { addTimestamp } from "@pm/styles";
+import { generateCharts } from "../charts";
+import { SummaryOperationsMap, TableInfo } from "@pm/types";
+import { getOrCreateLeadsDashboardSheet } from "@pm/utils";
 
 const SHOW_DESCRIPTION = false;
 
@@ -108,7 +111,7 @@ const stylizeOptionsMonths = {
  */
 export function generateLeadsDashboard(showToast = true) {
   const year = getYearFilter();
-  const sheet = getOrCreateLeadsDashboardSheet();
+  const sheet = getOrCreateLeadsDashboardSheet(DASHBOARD_SHEET);
 
   sheet.clear();
   const inputRows: LeadsInputRow[] = extractLeadsData();
@@ -250,26 +253,6 @@ function addBottomBorderBandaidFix(
       SpreadsheetApp.BorderStyle.SOLID_MEDIUM
     );
 }
-
-function getOrCreateLeadsDashboardSheet(): GoogleAppsScript.Spreadsheet.Sheet {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const existing = ss.getSheetByName(DASHBOARD_SHEET);
-  if (existing) {
-    // Adding logging
-    Logger.log(`Using existing dashboard sheet: ${DASHBOARD_SHEET}`);
-    return existing;
-  }
-
-  const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
-  const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
-  if (!templateSheet) throw new Error("Template sheet not found.");
-
-  const copiedSheet = templateSheet.copyTo(ss);
-  copiedSheet.setName(DASHBOARD_SHEET);
-  ss.setActiveSheet(copiedSheet);
-  return copiedSheet;
-}
-
 
 function getYearFilter(): number {
   return 2025;

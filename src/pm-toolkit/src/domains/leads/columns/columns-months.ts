@@ -1,13 +1,13 @@
-import { LeadsColumn } from "./types";
-import { getMonthName, formatPercent } from "../../utils/helpers";
+import { LeadsColumn } from "../core/types";
+import { getMonthName, formatPercent } from "@pm/utils/helpers";
 import {
   DashboardKey,
   DashboardLabel,
   dashboardKeys,
   labels,
   inputKeys,
-} from "./constants";
-import { buildLabelKeyMaps } from "../../columns/utils";
+} from "../core/constants";
+import { buildLabelKeyMaps } from "@pm/columns";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
   // {

@@ -3,10 +3,10 @@ import {
   quarterlyLabels,
   QuarterlyKey,
   QuarterlyLabel,
-} from "./constants";
-import { LeadsQuarterColumn, QuarterRowContext } from "./types";
-import { buildLabelKeyMaps } from "../../columns/utils";
-import { formatPercent } from "../../utils/helpers";
+} from "../core/constants";
+import { LeadsQuarterColumn } from "../core/types";
+import { buildLabelKeyMaps } from "@pm/columns";
+import { formatPercent } from "@pm/utils/helpers";
 
 export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
   // {

@@ -4,10 +4,10 @@ import {
   LeadsRowContext,
   QuarterDashboardRow,
 } from "./types";
-import { LEADS_COLUMNS } from "./columns-months";
-import { QUARTER_COLUMNS } from "./columns-quarters";
-import { mapInputToDashboardRows } from "../../utils/helpers";
-import { inputKeys, QuarterlyKey, quarterlyKeys } from "./constants";
+import { LEADS_COLUMNS } from "../columns";
+import { QUARTER_COLUMNS } from "../columns";
+import { mapInputToDashboardRows } from "../../../utils/helpers";
+import { inputKeys, QuarterlyKey, quarterlyKeys } from "../core/constants";
 import { getQuarterFromMonth } from "./utils";
 
 /**

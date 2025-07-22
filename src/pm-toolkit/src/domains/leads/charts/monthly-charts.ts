@@ -1,9 +1,9 @@
-import { ChartPosition } from "../../../charts/positioner";
-import { TableInfo } from "../../../types";
-import { LEADS_COLUMNS } from "../columns-months";
-import { dashboardKeys, inputKeys } from "../constants";
-import { buildChart } from "../../../charts/build-chart";
-import { CHART_COLORS } from "../colors";
+import { ChartPosition } from "@pm/charts/positioner";
+import { TableInfo } from "@pm/types";
+import { LEADS_COLUMNS } from "@pm/domains/leads/columns/columns-months";
+import { dashboardKeys, inputKeys } from "@pm/domains/leads/core/constants";
+import { buildChart } from "@pm/charts/build-chart";
+import { CHART_COLORS } from "@pm/domains/leads/styles/colors";
 
 export function addMonthlyRevenueChart(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,

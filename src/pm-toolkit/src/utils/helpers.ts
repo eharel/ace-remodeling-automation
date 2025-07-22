@@ -1,5 +1,6 @@
+import { BLANK_SHEET_TEMPLATE } from "@pm/domains/leads/core/constants";
 import { BaseColumn } from "../columns/types";
-import { MONTH_NAMES } from "../constants";
+import { MONTH_NAMES, TEMPLATE_SPREADSHEET_ID } from "../constants";
 
 export function toNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
@@ -111,4 +112,25 @@ export function setNamedRange(
   const existing = ss.getRangeByName(rangeName);
   if (existing) ss.removeNamedRange(rangeName);
   ss.setNamedRange(rangeName, range);
+}
+
+export function getOrCreateLeadsDashboardSheet(
+  sheetName: string
+): GoogleAppsScript.Spreadsheet.Sheet {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const existing = ss.getSheetByName(sheetName);
+  if (existing) {
+    // Adding logging
+    Logger.log(`Using existing dashboard sheet: ${sheetName}`);
+    return existing;
+  }
+
+  const templateFile = SpreadsheetApp.openById(TEMPLATE_SPREADSHEET_ID);
+  const templateSheet = templateFile.getSheetByName(BLANK_SHEET_TEMPLATE);
+  if (!templateSheet) throw new Error("Template sheet not found.");
+
+  const copiedSheet = templateSheet.copyTo(ss);
+  copiedSheet.setName(sheetName);
+  ss.setActiveSheet(copiedSheet);
+  return copiedSheet;
 }

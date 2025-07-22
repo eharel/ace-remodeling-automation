@@ -1,6 +1,11 @@
-import { getColumnIndicesByLabels } from "../../utils/helpers";
+import { getColumnIndicesByLabels } from "../../../utils/helpers";
 import { LeadsInputRow } from "./types";
-import { inputKeys, labels, INPUT_SHEET, NR_MONTHLY_GOALS } from "./constants";
+import {
+  inputKeys,
+  labels,
+  INPUT_SHEET,
+  NR_MONTHLY_GOALS,
+} from "../core/constants";
 
 // 🔠 Extract InputKey union from keys
 type InputKey = keyof typeof inputKeys;

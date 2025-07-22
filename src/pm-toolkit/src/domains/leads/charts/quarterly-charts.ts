@@ -1,9 +1,9 @@
-import { ChartPosition } from "../../../charts/positioner";
-import { TableInfo } from "../../../types";
-import { QUARTER_COLUMNS } from "../columns-quarters";
-import { quarterlyKeys } from "../constants";
-import { buildChart } from "../../../charts/build-chart";
-import { CHART_COLORS, QUARTER_COLORS } from "../colors";
+import { ChartPosition } from "@pm/charts/positioner";
+import { TableInfo } from "@pm/types";
+import { QUARTER_COLUMNS } from "@pm/domains/leads/columns/columns-quarters";
+import { quarterlyKeys } from "@pm/domains/leads/core/constants";
+import { buildChart } from "@pm/charts/build-chart";
+import { CHART_COLORS, QUARTER_COLORS } from "@pm/domains/leads/styles/colors";
 import { ChartFunction } from "./types";
 
 export function addQuarterlyRevenueComparisonChart(

@@ -3,6 +3,11 @@ import { NR_CONTRACT_PRICE, NR_CHANGE_ORDER_TOTAL } from "./named-ranges";
 // === Regex ===
 export const PROJECT_TAB_NAME_REGEX = /^\d{3,4}\s/;
 
+// === File IDs ===
+export const FILE_IDS = {
+  MANAGER_FILE: "1h351NGo2pJnA-dcI5wvDXTkDCImNFTxJJpVh3shy_Zg", // Manager dashboard file
+};
+
 // === General Config ===
 export const TEMPLATE_SPREADSHEET_ID =
   "1GOAREjnQtBsYu1BXzSDD4xlU_lolOPduBfVVQ40d57I";

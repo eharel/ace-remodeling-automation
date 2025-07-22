@@ -1,6 +1,10 @@
-import { InputKey, QuarterlyKey, QuarterlyLabel } from "./constants";
-import { BaseColumn } from "../../columns";
-import { DashboardKey, DashboardLabel } from "./constants";
+import {
+  InputKey,
+  QuarterlyKey,
+  QuarterlyLabel,
+} from "@pm/domains/leads/core/constants";
+import { BaseColumn } from "@pm/columns";
+import { DashboardKey, DashboardLabel } from "@pm/domains/leads/core/constants";
 
 export type LeadsInputRow = {
   [K in InputKey]: number;

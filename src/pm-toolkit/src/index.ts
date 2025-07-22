@@ -7,6 +7,7 @@ import {
   promptProjectToClose,
 } from "./domains/projects/close-project";
 import { generateProjectDashboard } from "./domains/projects/dashboard";
+import { generateOverviewDashboard } from "./domains/leads/dashboards/generate-overview-dashboard";
 import { promptForNewProject } from "./domains/projects/new-project";
 import { generateLeadsDashboard } from "./domains/leads";
 import { showSidebar } from "../../ui/sidebar/showSidebar";
@@ -29,6 +30,7 @@ declare global {
   var generateProjectDashboard: () => void;
   var promptForNewProject: () => void;
   var generateLeadsDashboard: () => void;
+  var generateOverviewDashboard: () => void;
   var showSidebar: () => void;
   var showTabSearchSidebar: () => void;
   var showTabSearchSidebarLocal: () => void;
@@ -51,6 +53,7 @@ registerGlobals({
   generateProjectDashboard,
   promptForNewProject,
   generateLeadsDashboard,
+  generateOverviewDashboard,
 
   // UI functions
   showSidebar,
