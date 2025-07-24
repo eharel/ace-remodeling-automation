@@ -1,4 +1,4 @@
-import { LeadsQuarterColumn } from "../core/types";
+import { LeadsQuarterColumn } from "../../shared/types";
 import { buildLabelKeyMaps } from "shared/columns";
 import { formatPercent } from "@pm/utils/helpers";
 import {

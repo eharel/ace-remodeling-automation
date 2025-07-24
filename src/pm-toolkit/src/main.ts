@@ -1,5 +1,5 @@
 import { buildMainMenu } from "./menu";
-import { buildManagerMenu } from "./menu";
+import { buildExecutiveMenu } from "./menu";
 import { generateProjectDashboard } from "./domains/projects/dashboard";
 import { generateLeadsDashboard } from "./domains/leads";
 import { startsWithProjectNumber } from "./domains/projects/utils";
@@ -34,9 +34,9 @@ export function onOpen() {
   const fileId = SpreadsheetApp.getActiveSpreadsheet().getId();
   Logger.log(`📄 File ID: ${fileId}`);
 
-  if (fileId === FILE_IDS.MANAGER_FILE) {
-    Logger.log("🧠 Loading Manager menu");
-    buildManagerMenu(ui);
+  if (fileId === FILE_IDS.EXECUTIVE_FILE) {
+    Logger.log("🧠 Loading Executive menu");
+    buildExecutiveMenu(ui);
   } else {
     Logger.log("🛠️ Loading PM menu");
     buildMainMenu(ui).addToUi();

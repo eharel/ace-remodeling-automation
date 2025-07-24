@@ -6,7 +6,7 @@ import { getQuarterFromMonth } from "./utils";
 import { mapInputToDashboardRows } from "../../../../utils/helpers";
 import { LeadsRowContext } from "../../shared/rows/types";
 import { QuarterRowContext } from "../../shared/rows/types";
-import { LeadsDashboardRow } from "./types";
+import { LeadsDashboardRow } from "../../shared/types";
 import { QuarterDashboardRow } from "../../shared/rows/types";
 
 /**

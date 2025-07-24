@@ -1,4 +1,4 @@
-import { LeadsColumn } from "../core/types";
+import { LeadsColumn } from "../../shared/types";
 import { getMonthName, formatPercent } from "@pm/utils/helpers";
 
 import { buildLabelKeyMaps } from "shared/columns";
