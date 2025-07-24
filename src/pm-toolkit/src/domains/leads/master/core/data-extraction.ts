@@ -68,8 +68,8 @@ function combineLeadsAndRevenue(
       TOTAL_LEADS,
       SIGNED,
       REVENUE,
-      REVENUE_GOAL: 0,
-      PROP_NOT_SENT: 0,
+      REVENUE_GOAL: undefined,
+      PROP_NOT_SENT: undefined,
       YEAR,
     };
 

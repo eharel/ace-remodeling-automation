@@ -1,4 +1,4 @@
-export * from "./data-transformation";
+export * from "../../shared/data-transformation";
 export * from "./utils";
 export * from "./constants";
 export * from "../../shared/types";

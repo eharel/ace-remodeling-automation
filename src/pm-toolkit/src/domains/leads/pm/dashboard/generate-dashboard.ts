@@ -6,7 +6,7 @@ import { TEMPLATE_SPREADSHEET_ID } from "@pm/constants";
 import {
   createMonthlyDashboardRows,
   createQuarterlyDashboardRows,
-} from "../core/data-transformation";
+} from "../../shared/data-transformation";
 
 import { getQuarterFromMonth } from "../core/utils";
 import { QUARTER_COLUMNS } from "../columns";

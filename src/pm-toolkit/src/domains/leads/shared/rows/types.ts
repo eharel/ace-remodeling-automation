@@ -7,7 +7,7 @@ export type QuarterDashboardRow = DashboardRow<QuarterlyKey>;
 
 // Input row shape
 export type LeadsInputRow = {
-  [K in InputKey]: number;
+  [K in InputKey]: number | undefined;
 };
 
 // Context passed into valueFn() for each column
