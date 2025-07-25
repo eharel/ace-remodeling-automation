@@ -10,6 +10,7 @@ import { createQuarterlyDashboardRows } from "../../shared/data-transformation";
 import { getQuarterRowSpanMap } from "../../shared/dashboard/utils";
 import { createHeader } from "../../shared/dashboard";
 import { MONTHLY_TITLE, QUARTERLY_TITLE } from "../../shared/constants";
+import { LEADS_COLUMNS, QUARTER_COLUMNS } from "../../shared/columns";
 
 const SHOW_DESCRIPTION = false;
 
@@ -23,7 +24,15 @@ export function generateLeadsDashboard(showToast = true) {
   const quarterlyDashboardRows = createQuarterlyDashboardRows(inputRows, year);
   const quarterRowSpanMap = getQuarterRowSpanMap(inputRows);
 
-  const startRow = createHeader(sheet, year, 1);
+  const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
+  
+  // Define header positioning (Google Sheets API: row, column, numRows, numColumns)
+  const row = 1;
+  const column = 1;
+  const numRows = 2;
+  const numColumns = totalTableWidth;
+  
+  const startRow = createHeader(sheet, year, row, column, numRows, numColumns);
 
   const { monthlyInfo, quarterlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
     sheet,
