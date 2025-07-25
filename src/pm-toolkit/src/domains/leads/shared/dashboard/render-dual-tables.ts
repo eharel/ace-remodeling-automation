@@ -26,6 +26,7 @@ export type RenderDualTablesParams = {
   showDescription?: boolean;
   monthlyTitle?: string;
   quarterlyTitle?: string;
+  hasHeaders?: boolean;
 };
 
 export function renderMonthlyAndQuarterlyBreakdowns({
@@ -39,6 +40,7 @@ export function renderMonthlyAndQuarterlyBreakdowns({
   showDescription = false,
   monthlyTitle,
   quarterlyTitle,
+  hasHeaders = true,
 }: RenderDualTablesParams): {
   monthlyInfo: TableInfo;
   quarterlyInfo: TableInfo;
@@ -48,10 +50,11 @@ export function renderMonthlyAndQuarterlyBreakdowns({
     showDescription,
     colorKeys: [dashboardKeys.REVENUE_DIFF],
     columnWidths: {
-      [inputKeys.MONTH]: 73,
+      [inputKeys.MONTH]: 76,
     },
     rowSpanMap: quarterRowSpanMap,
     hasTitle: Boolean(monthlyTitle),
+    hasHeaders,
   };
 
   const monthlyInfo = generateAndStylizeTableFromRows({
@@ -87,6 +90,7 @@ export function renderMonthlyAndQuarterlyBreakdowns({
     },
     summaryTitle: "",
     hasTitle: Boolean(quarterlyTitle),
+    hasHeaders,
   };
 
   const quarterlyInfo = generateAndStylizeTableFromRows({

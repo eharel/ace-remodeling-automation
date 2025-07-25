@@ -15,6 +15,7 @@ export function generateOverviewDashboard() {
   const inputRowsByPM = extractData();
   const dashboardRowsByPM = transformData(inputRowsByPM, year);
   renderDashboard(year, sheet, dashboardRowsByPM);
+  sheet.setFrozenRows(5);
 }
 
 function renderDashboard(
@@ -33,7 +34,7 @@ function renderDashboard(
     const isFirst = index === 0;
     const isLast = index === entries.length - 1;
 
-    const { monthlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
+    const { monthlyInfo, quarterlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
       sheet,
       year,
       startRow: currentRow,
@@ -44,10 +45,16 @@ function renderDashboard(
       showDescription: false,
       monthlyTitle: isFirst ? MONTHLY_TITLE : undefined,
       quarterlyTitle: isFirst ? QUARTERLY_TITLE : undefined,
+      hasHeaders: isFirst,
     });
 
     currentRow = monthlyInfo.endRow;
-    if (!isLast) currentRow += 1;
+
+    if (!isLast) {
+      currentRow += 1;
+      createSeparator(sheet, currentRow, quarterlyInfo.endCol);
+      currentRow += 1;
+    }
   }
 }
 
@@ -80,4 +87,25 @@ export function applyBottomBorder(
       "black",
       SpreadsheetApp.BorderStyle.SOLID_MEDIUM
     );
+}
+
+/**
+ * Inserts a visual separator row into the sheet to divide PM sections.
+ * Adds a light gray background and merges the cells across the dual table width.
+ *
+ * @param sheet - The active dashboard sheet
+ * @param row - The row index to insert the separator
+ * @param endCol - The end column index to merge across (usually endCol of quarterly table)
+ */
+export function createSeparator(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  row: number,
+  endCol: number
+): void {
+  const startCol = 1;
+  const range = sheet.getRange(row, startCol, 1, endCol - startCol + 1);
+  range.merge();
+  range.setBackground("#a0a0a0");
+  range.setFontWeight("bold");
+  range.setValue("");
 }
