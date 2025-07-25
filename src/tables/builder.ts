@@ -9,29 +9,45 @@ import {
 } from "@shared/styles";
 import { stylizeTable } from "@shared/styles";
 
+export type GenerateTableParams<
+  RowType extends Record<string, any>,
+  T extends string
+> = {
+  sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  rows: RowType[];
+  startRow: number;
+  startCol: number;
+  columns: BaseColumn<any, any, any>[];
+  summaryRowOps: SummaryOperationsMap;
+  options?: StylizeOptions<T>;
+  title?: string;
+};
+
 export function generateAndStylizeTableFromRows<
   RowType extends Record<string, any>,
   T extends string
->(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  rows: RowType[],
-  startRow: number,
-  startCol: number,
-  title: string,
-  columns: BaseColumn<any, any, any>[],
-  summaryRowOps: SummaryOperationsMap,
-  options: StylizeOptions<T> = {}
-): TableInfo {
-  const table = generateTableFromRows(
+>(params: GenerateTableParams<RowType, T>): TableInfo {
+  const {
     sheet,
     rows,
     startRow,
     startCol,
-    title,
     columns,
     summaryRowOps,
-    options
-  );
+    options = {},
+    title,
+  } = params;
+
+  const table = generateTableFromRows({
+    sheet,
+    rows,
+    startRow,
+    startCol,
+    columns,
+    summaryRowOps,
+    options,
+    title,
+  });
 
   const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
   stylizeTable(sheet, table, columns, keyToIndex, options);
@@ -43,16 +59,16 @@ export function generateAndStylizeTableFromRows<
   return table;
 }
 
-function generateTableFromRows<RowType extends Record<string, any>>(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  rows: RowType[],
-  startRow: number,
-  startCol: number,
-  title: string,
-  columns: BaseColumn<any, any, any>[],
-  summaryRowOps: SummaryOperationsMap,
-  options?: StylizeOptions
-): TableInfo {
+function generateTableFromRows<RowType extends Record<string, any>>({
+  sheet,
+  rows,
+  startRow,
+  startCol,
+  columns,
+  summaryRowOps,
+  options,
+  title,
+}: GenerateTableParams<RowType, any>): TableInfo {
   let rowIndex = startRow;
 
   if (title) {
@@ -60,12 +76,21 @@ function generateTableFromRows<RowType extends Record<string, any>>(
     rowIndex++;
   }
 
-  const headerRow = rowIndex;
-  addTableHeaders(sheet, headerRow, startCol, columns);
+  const hasHeader = options?.hasHeaders ?? true;
+
+  const headerRow = hasHeader ? rowIndex : undefined;
+  if (hasHeader) {
+    addTableHeaders(sheet, rowIndex, startCol, columns);
+    rowIndex++;
+  }
 
   const hasDescription = options?.showDescription ?? true;
-  const descriptionRow = headerRow + 1;
-  const dataStartRow = hasDescription ? descriptionRow + 1 : headerRow + 1;
+  const descriptionRow = hasHeader ? rowIndex : undefined;
+  if (hasDescription && hasHeader) {
+    rowIndex++; // extra row for description
+  }
+
+  const dataStartRow = rowIndex;
 
   const fallbackRowSpan = options?.rowSpan ?? 1;
   const rowSpanMap = options?.rowSpanMap;

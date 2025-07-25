@@ -1,14 +1,29 @@
 import { LeadsInputRow } from "../../shared/rows/types";
 import { LeadsDashboardRow } from "../../shared/types";
 import { createMonthlyDashboardRows } from "../../shared/data-transformation";
+import { createQuarterlyDashboardRows } from "../../shared/data-transformation";
+import { getQuarterRowSpanMap } from "../../shared/dashboard/utils";
+import { QuarterDashboardRow } from "../../shared/rows/types";
+
+export type PMDashboardData = {
+  monthly: LeadsDashboardRow[];
+  quarterly: QuarterDashboardRow[];
+  rowSpanMap: Record<string, number>;
+};
 
 export function transformData(
-  mapPM2InputRows: Record<string, LeadsInputRow[]>
-): Record<string, LeadsDashboardRow[]> {
-  // for each key in mapPM2InputRows, create a dashboard row via createMonthlyDashboardRows
-  const mapPM2DashboardRows: Record<string, LeadsDashboardRow[]> = {};
-  for (const [key, rows] of Object.entries(mapPM2InputRows)) {
-    mapPM2DashboardRows[key] = createMonthlyDashboardRows(rows);
+  inputRowsByPM: Record<string, LeadsInputRow[]>,
+  year: number
+): Record<string, PMDashboardData> {
+  const result: Record<string, PMDashboardData> = {};
+
+  for (const [pm, inputRows] of Object.entries(inputRowsByPM)) {
+    const monthly = createMonthlyDashboardRows(inputRows);
+    const quarterly = createQuarterlyDashboardRows(inputRows, year);
+    const rowSpanMap = getQuarterRowSpanMap(inputRows);
+
+    result[pm] = { monthly, quarterly, rowSpanMap };
   }
-  return mapPM2DashboardRows;
+
+  return result;
 }

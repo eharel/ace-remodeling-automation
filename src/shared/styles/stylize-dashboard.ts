@@ -44,17 +44,26 @@ export function stylizeTable<T extends string>(
     summaryRow,
   } = table;
 
-  const { zebra = true, colorKeys = [], showDescription = true } = options;
+  const {
+    zebra = true,
+    colorKeys = [],
+    showDescription = true,
+    hasTitle = true,
+  } = options;
 
   const numRows = dataEndRow - dataStartRow + 1;
   const zebraStart = dataStartRow - 1;
   const zebraRows = dataEndRow - zebraStart + 1;
-  const totalTableRows = dataEndRow - headerRow + 1;
+  const totalTableRows = dataEndRow - (headerRow ?? startRow) + 1;
 
-  applyTitleStyle(sheet, startRow, startCol, columns);
-  applyHeaderStyle(sheet, headerRow, startCol, columns);
-  showDescription &&
-    applyDescriptionRow(sheet, headerRow + 1, startCol, columns);
+  hasTitle && applyTitleStyle(sheet, startRow, startCol, columns);
+  if (headerRow !== undefined) {
+    applyHeaderStyle(sheet, headerRow, startCol, columns);
+
+    if (showDescription && headerRow !== undefined) {
+      applyDescriptionRow(sheet, headerRow + 1, startCol, columns);
+    }
+  }
   zebra && applyZebraStriping(sheet, zebraStart, startCol, zebraRows, columns);
   applyCurrencyFormatting(sheet, dataStartRow, startCol, columns, numRows);
   applyPercentFormatting(sheet, dataStartRow, startCol, columns, numRows);
@@ -66,7 +75,7 @@ export function stylizeTable<T extends string>(
     keyToIndex,
     colorKeys
   );
-  applyBorders(sheet, headerRow, startCol, totalTableRows, columns);
+  applyBorders(sheet, headerRow ?? startRow, startCol, totalTableRows, columns);
   applyAlignment(table, sheet, columns);
   resizeColumns(sheet, startCol, columns, options.columnWidths);
 

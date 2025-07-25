@@ -8,6 +8,8 @@ import { addTimestamp } from "@shared/styles";
 import { renderMonthlyAndQuarterlyBreakdowns } from "../../shared/dashboard/render-dual-tables";
 import { createQuarterlyDashboardRows } from "../../shared/data-transformation";
 import { getQuarterRowSpanMap } from "../../shared/dashboard/utils";
+import { createHeader } from "../../shared/dashboard";
+import { MONTHLY_TITLE, QUARTERLY_TITLE } from "../../shared/constants";
 
 const SHOW_DESCRIPTION = false;
 
@@ -21,13 +23,19 @@ export function generateLeadsDashboard(showToast = true) {
   const quarterlyDashboardRows = createQuarterlyDashboardRows(inputRows, year);
   const quarterRowSpanMap = getQuarterRowSpanMap(inputRows);
 
+  const startRow = createHeader(sheet, year, 1);
+
   const { monthlyInfo, quarterlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
     sheet,
     year,
+    startRow,
+    startCol: 1,
     monthlyDashboardRows,
     quarterlyDashboardRows,
     quarterRowSpanMap,
     showDescription: SHOW_DESCRIPTION,
+    monthlyTitle: MONTHLY_TITLE,
+    quarterlyTitle: QUARTERLY_TITLE,
   });
 
   addBottomBorderBandaidFix(sheet, quarterlyInfo);

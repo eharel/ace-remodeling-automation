@@ -4,6 +4,8 @@ export type StylizeOptions<T extends string = string> = {
   showDescription?: boolean;
   rowSpan?: number;
   rowSpanMap?: Record<string, number>;
+  hasTitle?: boolean;
+  hasHeaders?: boolean;
   customStylizers?: ((
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     table: TableInfo
@@ -16,7 +18,7 @@ export type TableInfo = {
   title?: string;
   startRow: number;
   startCol: number;
-  headerRow: number;
+  headerRow?: number;
   dataStartRow: number;
   dataEndRow: number;
   summaryRow?: number;

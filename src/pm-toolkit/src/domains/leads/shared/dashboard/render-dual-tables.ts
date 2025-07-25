@@ -15,28 +15,34 @@ import { dashboardKeys } from "../columns";
 import { inputKeys } from "../columns";
 import { quarterlyKeys } from "../columns";
 
-type RenderDualTablesParams = {
+export type RenderDualTablesParams = {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
   year: number;
+  startRow: number;
+  startCol: number;
   monthlyDashboardRows: LeadsDashboardRow[];
   quarterlyDashboardRows: QuarterDashboardRow[];
   quarterRowSpanMap: Record<string, number>;
   showDescription?: boolean;
+  monthlyTitle?: string;
+  quarterlyTitle?: string;
 };
 
 export function renderMonthlyAndQuarterlyBreakdowns({
   sheet,
   year,
+  startRow,
+  startCol,
   monthlyDashboardRows,
   quarterlyDashboardRows,
   quarterRowSpanMap,
   showDescription = false,
+  monthlyTitle,
+  quarterlyTitle,
 }: RenderDualTablesParams): {
   monthlyInfo: TableInfo;
   quarterlyInfo: TableInfo;
 } {
-  const startingRow = createHeader(sheet, year, 1);
-
   const stylizeOptionsMonths = {
     zebra: false,
     showDescription,
@@ -45,18 +51,19 @@ export function renderMonthlyAndQuarterlyBreakdowns({
       [inputKeys.MONTH]: 73,
     },
     rowSpanMap: quarterRowSpanMap,
+    hasTitle: Boolean(monthlyTitle),
   };
 
-  const monthlyInfo = generateAndStylizeTableFromRows(
+  const monthlyInfo = generateAndStylizeTableFromRows({
     sheet,
-    monthlyDashboardRows,
-    startingRow,
-    1,
-    "Monthly Breakdown",
-    LEADS_COLUMNS,
-    MONTHLY_SUMMARY_OPERATIONS,
-    stylizeOptionsMonths
-  );
+    rows: monthlyDashboardRows,
+    startRow,
+    startCol,
+    columns: LEADS_COLUMNS,
+    summaryRowOps: MONTHLY_SUMMARY_OPERATIONS,
+    options: stylizeOptionsMonths,
+    title: monthlyTitle,
+  });
 
   applyQuarterColoring(sheet, monthlyInfo, LEADS_COLUMNS, quarterRowSpanMap);
   applyVerticalBorders(
@@ -79,18 +86,19 @@ export function renderMonthlyAndQuarterlyBreakdowns({
       [quarterlyKeys.QUARTER]: 60,
     },
     summaryTitle: "",
+    hasTitle: Boolean(quarterlyTitle),
   };
 
-  const quarterlyInfo = generateAndStylizeTableFromRows(
+  const quarterlyInfo = generateAndStylizeTableFromRows({
     sheet,
-    quarterlyDashboardRows,
-    quarterStartRow,
-    quarterStartCol,
-    "Quarterly Breakdown",
-    QUARTER_COLUMNS,
-    QUARTERLY_SUMMARY_OPERATIONS,
-    stylizeOptionsQuarters
-  );
+    rows: quarterlyDashboardRows,
+    startRow: quarterStartRow,
+    startCol: quarterStartCol,
+    columns: QUARTER_COLUMNS,
+    summaryRowOps: QUARTERLY_SUMMARY_OPERATIONS,
+    options: stylizeOptionsQuarters,
+    title: quarterlyTitle,
+  });
 
   applyQuarterColoring(
     sheet,

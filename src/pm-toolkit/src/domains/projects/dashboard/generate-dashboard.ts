@@ -145,21 +145,21 @@ function generateProjectSection({
     projectSheets
   );
 
-  const tableInfo = generateAndStylizeTableFromRows(
-    dashboardSheet,
-    dashboardRows,
-    startingRow,
-    startingCol,
-    title,
-    DASHBOARD_COLUMNS,
-    PROJECT_SUMMARY_OPERATIONS,
-    {
+  const tableInfo = generateAndStylizeTableFromRows({
+    sheet: dashboardSheet,
+    rows: dashboardRows,
+    startRow: startingRow,
+    startCol: startingCol,
+    columns: DASHBOARD_COLUMNS,
+    summaryRowOps: PROJECT_SUMMARY_OPERATIONS,
+    options: {
       colorKeys: PROJECT_COLOR_KEYS,
       columnWidths: {
         [DASHBOARD_KEYS.PROJECT_NO]: 75, // Set project number column width to 75
       },
-    }
-  );
+    },
+    title,
+  });
 
   return tableInfo;
 }

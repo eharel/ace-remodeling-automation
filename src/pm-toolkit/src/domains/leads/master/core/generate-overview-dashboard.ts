@@ -1,11 +1,11 @@
 import { getOrCreateLeadsDashboardSheet } from "@pm/utils";
 import { OVERVIEW_SHEET } from "../../pm/core/constants";
 import { extractData } from "./data-extraction";
-import { createMonthlyDashboardRows } from "../../shared/data-transformation";
 import { transformData } from "./data-transformation";
-import { LeadsDashboardRow } from "../../shared/types";
+import { PMDashboardData } from "./data-transformation";
 import { createHeader } from "../../shared/dashboard";
 import { renderMonthlyAndQuarterlyBreakdowns } from "../../shared/dashboard/render-dual-tables";
+import { MONTHLY_TITLE, QUARTERLY_TITLE } from "../../shared/constants";
 
 export function generateOverviewDashboard() {
   const year = 2025; // TODO: make this dynamic
@@ -13,46 +13,41 @@ export function generateOverviewDashboard() {
   const sheet = getOrCreateLeadsDashboardSheet(OVERVIEW_SHEET);
   sheet.clear();
   const inputRowsByPM = extractData();
-  const dashboardRowsByPM = transformData(inputRowsByPM);
+  const dashboardRowsByPM = transformData(inputRowsByPM, year);
   renderDashboard(year, sheet, dashboardRowsByPM);
 }
 
 function renderDashboard(
   year: number,
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  dashboardRowsByPM: Record<string, LeadsDashboardRow[]>
+  dashboardRowsByPM: Record<string, PMDashboardData>
 ) {
   let currentRow = createHeader(sheet, year, 1);
   currentRow = createMasterSummary(sheet, currentRow);
   const entries = Object.entries(dashboardRowsByPM);
-  for (const [index, [pmName, rows]] of entries.entries()) {
+
+  for (const [
+    index,
+    [pmName, { monthly, quarterly, rowSpanMap }],
+  ] of entries.entries()) {
+    const isFirst = index === 0;
     const isLast = index === entries.length - 1;
 
-    // const { monthlyInfo } = renderMonthlyAndQuarterlyBreakdowns(
-    //   sheet,
-    //   year,
-    //   inputRowsByPM,
-    //   rows,
-    //   showDescription,
-    //   currentRow
-    // );
+    const { monthlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
+      sheet,
+      year,
+      startRow: currentRow,
+      startCol: 2,
+      monthlyDashboardRows: monthly,
+      quarterlyDashboardRows: quarterly,
+      quarterRowSpanMap: rowSpanMap,
+      showDescription: false,
+      monthlyTitle: isFirst ? MONTHLY_TITLE : undefined,
+      quarterlyTitle: isFirst ? QUARTERLY_TITLE : undefined,
+    });
 
-    // const { monthlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
-    //   sheet,
-    //   year,
-    //   inputRows: [], // Not available yet — will be added later
-    //   monthlyRows,
-    //   showDescription: false,
-    // });
-
-    // currentRow = monthlyInfo.endRow;
-
-    // Leave a gap between sections for borders, unless it's the last one
+    currentRow = monthlyInfo.endRow;
     if (!isLast) currentRow += 1;
-
-    // Create merged section with name to the left
-
-    // Add bottom border (skipping last one)
   }
 }
 
