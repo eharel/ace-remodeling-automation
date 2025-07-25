@@ -1,4 +1,4 @@
-import { LeadsQuarterColumn } from "../../shared/types";
+import { LeadsQuarterColumn } from "../types";
 import { buildLabelKeyMaps } from "shared/columns";
 import { formatPercent } from "@pm/utils/helpers";
 import {
@@ -6,16 +6,9 @@ import {
   quarterlyKeys,
   QuarterlyLabel,
   quarterlyLabels,
-} from "../../shared/columns/labels";
+} from "./labels";
 
 export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
-  // {
-  //   key: quarterlyKeys.YEAR,
-  //   label: quarterlyLabels.YEAR,
-  //   valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.YEAR],
-  //   format: "number",
-  //   align: "center",
-  // },
   {
     key: quarterlyKeys.QUARTER,
     label: quarterlyLabels.QUARTER,

@@ -197,3 +197,32 @@ function groupRowsByQuarter(rawValues: string[]): Record<string, number[]> {
   }
   return groupMap;
 }
+
+// Add a top border to the summary row to separate it from the data rows
+// I was going crazy with figuring out why the bottom border wasn't showing up, so I added this bandaid fix
+// Don't judge me
+export function addBottomBorderBandaidFix(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  tableInfo: TableInfo
+) {
+  // Find the summary row (which is right after the data rows)
+  const summaryRow = tableInfo.dataEndRow + 1;
+
+  sheet
+    .getRange(
+      summaryRow,
+      tableInfo.startCol,
+      1,
+      tableInfo.endCol - tableInfo.startCol + 1
+    )
+    .setBorder(
+      true, // top border instead of bottom border
+      null,
+      null,
+      null,
+      null,
+      null,
+      "black",
+      SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+    );
+}

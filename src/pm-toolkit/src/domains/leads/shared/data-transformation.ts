@@ -1,7 +1,11 @@
-import { inputKeys, QuarterlyKey, quarterlyKeys } from "./columns";
+import {
+  inputKeys,
+  LEADS_COLUMNS,
+  QUARTER_COLUMNS,
+  QuarterlyKey,
+  quarterlyKeys,
+} from "./columns";
 import { LeadsInputRow } from "./rows/types";
-import { LEADS_COLUMNS } from "../pm/columns";
-import { QUARTER_COLUMNS } from "../pm/columns";
 import { getQuarterFromMonth } from "../pm/core/utils";
 import { mapInputToDashboardRows } from "../../../utils/helpers";
 import { LeadsRowContext } from "./rows/types";

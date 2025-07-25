@@ -2,7 +2,7 @@ import { ChartPosition } from "@pm/charts/positioner";
 import { TableInfo } from "@shared/styles";
 import { buildChart } from "@pm/charts/build-chart";
 import { ChartFunction } from "./types";
-import { QUARTER_COLUMNS } from "../columns";
+import { QUARTER_COLUMNS } from "../../shared/columns";
 import { quarterlyKeys } from "../../shared/columns";
 import { CHART_COLORS, QUARTER_COLORS } from "../../shared/styles";
 

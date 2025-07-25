@@ -1,28 +1,18 @@
-import { LeadsColumn } from "../../shared/types";
+import { LeadsColumn } from "../types";
 import { getMonthName, formatPercent } from "@pm/utils/helpers";
 
 import { buildLabelKeyMaps } from "shared/columns";
-import {
-  DashboardKey,
-  dashboardKeys,
-  DashboardLabel,
-  inputKeys,
-} from "../../shared/columns";
-import { dashboardLabels } from "../../shared/columns/labels";
+import { DashboardKey, dashboardKeys, DashboardLabel, inputKeys } from ".";
+import { dashboardLabels } from "./labels";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
-  // {
-  //   key: DASHBOARD_KEYS.YEAR,
-  //   label: DASHBOARD_LABELS.YEAR,
-  //   valueFn: ({ inputRowData }: LeadsRowContext) =>
-  //     inputRowData[INPUT_KEYS.YEAR],
-  //   format: "number",
-  //   align: "center",
-  // },
   {
     key: dashboardKeys.MONTH,
     label: dashboardLabels.MONTH,
-    valueFn: ({ inputRowData }) => getMonthName(inputRowData[inputKeys.MONTH]),
+    valueFn: ({ inputRowData }) => {
+      const month = inputRowData[inputKeys.MONTH];
+      return typeof month === "number" ? getMonthName(month) : "";
+    },
     format: "number",
   },
   {
@@ -76,14 +66,6 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     },
     format: "currency",
   },
-  // {
-  //   key: DASHBOARD_KEYS.PROP_NOT_SENT,
-  //   label: DASHBOARD_LABELS.PROP_NOT_SENT,
-  //   valueFn: ({ inputRowData }) =>
-  //     inputRowData[INPUT_KEYS.PROP_NOT_SENT],
-  //   format: "number",
-  //   align: "center",
-  // },
 ];
 
 const labelMaps = buildLabelKeyMaps<DashboardKey, DashboardLabel>(
