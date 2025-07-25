@@ -69,13 +69,13 @@ export function renderMonthlyAndQuarterlyBreakdowns({
   });
 
   applyQuarterColoring(sheet, monthlyInfo, LEADS_COLUMNS, quarterRowSpanMap);
-  applyVerticalBorders(
-    sheet,
-    monthlyInfo.startRow,
-    monthlyInfo.endRow - 1,
-    monthlyInfo.startCol,
-    monthlyInfo.endCol - monthlyInfo.startCol + 1
-  );
+  // Apply vertical borders (Google Sheets API: row, column, numRows, numColumns)
+  const monthlyRow = monthlyInfo.startRow;
+  const monthlyColumn = monthlyInfo.startCol;
+  const monthlyNumRows = monthlyInfo.endRow - monthlyInfo.startRow;
+  const monthlyNumColumns = monthlyInfo.endCol - monthlyInfo.startCol + 1;
+  
+  applyVerticalBorders(sheet, monthlyRow, monthlyColumn, monthlyNumRows, monthlyNumColumns);
   applyQuarterBorders(sheet, monthlyInfo, LEADS_COLUMNS, inputKeys.MONTH, {
     rowSpanMap: quarterRowSpanMap,
   });
@@ -110,13 +110,13 @@ export function renderMonthlyAndQuarterlyBreakdowns({
     QUARTER_COLUMNS,
     quarterRowSpanMap
   );
-  applyVerticalBorders(
-    sheet,
-    quarterlyInfo.startRow,
-    quarterlyInfo.endRow - 1,
-    quarterlyInfo.startCol,
-    quarterlyInfo.endCol - quarterlyInfo.startCol + 1
-  );
+  // Apply vertical borders (Google Sheets API: row, column, numRows, numColumns)
+  const row = quarterlyInfo.startRow;
+  const column = quarterlyInfo.startCol;
+  const numRows = quarterlyInfo.endRow - quarterlyInfo.startRow;
+  const numColumns = quarterlyInfo.endCol - quarterlyInfo.startCol + 1;
+  
+  applyVerticalBorders(sheet, row, column, numRows, numColumns);
   applyQuarterBorders(
     sheet,
     quarterlyInfo,

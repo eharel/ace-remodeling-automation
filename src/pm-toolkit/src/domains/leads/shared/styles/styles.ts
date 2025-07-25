@@ -69,12 +69,13 @@ export function applyQuarterBorders<T extends string>(
   const rowCount = table.dataEndRow - table.dataStartRow + 1;
   const colCount = columns.length;
 
-  const rawValues = extractGroupingValues(
-    sheet,
-    startRow,
-    table.startCol + targetColIndex,
-    rowCount
-  );
+  // Extract grouping values (Google Sheets API: row, column, numRows, numColumns)
+  const row = startRow;
+  const column = table.startCol + targetColIndex;
+  const numRows = rowCount;
+  const numColumns = 1;
+  
+  const rawValues = extractGroupingValues(sheet, row, column, numRows, numColumns);
 
   const groupMap = groupRowsByQuarter(rawValues);
 
@@ -126,19 +127,18 @@ function applyGroupBordersWithMap(
 
 export function applyVerticalBorders(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  endRow: number,
-  startCol: number,
-  numCols: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ) {
-  clearBordersInRange(sheet, startRow, endRow, startCol, numCols);
+  clearBordersInRange(sheet, row, column, numRows, numColumns);
 
   const innerBorderStyle = SpreadsheetApp.BorderStyle.SOLID;
   const lightGray = "#cccccc";
-  const numRows = endRow - startRow + 1;
 
-  for (let c = 1; c < numCols; c++) {
-    const colRange = sheet.getRange(startRow, startCol + c, numRows, 1);
+  for (let c = 1; c < numColumns; c++) {
+    const colRange = sheet.getRange(row, column + c, numRows, 1);
     colRange.setBorder(
       false,
       true,
@@ -154,13 +154,12 @@ export function applyVerticalBorders(
 
 export function clearBordersInRange(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  endRow: number,
-  startCol: number,
-  numCols: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ) {
-  const numRows = endRow - startRow + 1;
-  const range = sheet.getRange(startRow, startCol, numRows, numCols);
+  const range = sheet.getRange(row, column, numRows, numColumns);
   range.setBorder(false, false, false, false, false, false);
 }
 
@@ -173,12 +172,13 @@ function findGroupingColumnIndex<T extends string>(
 
 function extractGroupingValues(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  startCol: number,
-  rowCount: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ): string[] {
   return sheet
-    .getRange(startRow, startCol, rowCount, 1)
+    .getRange(row, column, numRows, numColumns)
     .getValues()
     .map((r) => String(r[0]));
 }

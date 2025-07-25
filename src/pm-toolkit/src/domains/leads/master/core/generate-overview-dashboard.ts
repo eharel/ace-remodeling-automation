@@ -21,7 +21,7 @@ export function generateOverviewDashboard() {
   const dashboardRowsByPM = transformData(inputRowsByPM, year);
   renderDashboard(year, sheet, dashboardRowsByPM);
   sheet.setFrozenRows(5);
-  sheet.setFrozenColumns(1);
+  sheet.setFrozenColumns(2);
 }
 
 function renderDashboard(
@@ -55,10 +55,18 @@ function renderDashboard(
       hasHeaders: isFirst,
     });
 
+    // Create PM name section (Google Sheets API: row, column, numRows, numColumns)
+    const pmNameRow = monthlyInfo.dataStartRow;
+    const pmNameColumn = 1; // Leftmost column
+    const pmNameNumRows = monthlyInfo.endRow - monthlyInfo.dataStartRow + 1;
+    const pmNameNumColumns = 1;
+
     createPMNameSection(
       sheet,
-      monthlyInfo.dataStartRow,
-      monthlyInfo.endRow,
+      pmNameRow,
+      pmNameColumn,
+      pmNameNumRows,
+      pmNameNumColumns,
       pmName
     );
 
@@ -66,7 +74,19 @@ function renderDashboard(
 
     if (!isLast) {
       currentRow += 1;
-      createSeparator(sheet, currentRow, quarterlyInfo.endCol);
+      // Create separator (Google Sheets API: row, column, numRows, numColumns)
+      const separatorRow = currentRow;
+      const separatorColumn = 2;
+      const separatorNumRows = 1;
+      const separatorNumColumns = quarterlyInfo.endCol - 1;
+
+      createSeparator(
+        sheet,
+        separatorRow,
+        separatorColumn,
+        separatorNumRows,
+        separatorNumColumns
+      );
       currentRow += 1;
     }
   }
@@ -77,7 +97,13 @@ function createMasterSummary(
   currentRow: number
 ) {
   // At the current row, create a summary row with the title "Master Summary (Placeholder)"
-  const summaryRow = sheet.getRange(currentRow, 2, 1, 1);
+  // Google Sheets API: (row, column, numRows, numColumns)
+  const row = currentRow;
+  const column = 2;
+  const numRows = 1;
+  const numColumns = 1;
+
+  const summaryRow = sheet.getRange(row, column, numRows, numColumns);
   summaryRow.setValue("Master Summary (Placeholder)");
 
   return currentRow + 1;
@@ -86,11 +112,12 @@ function createMasterSummary(
 export function applyBottomBorder(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   row: number,
-  startCol: number,
-  numCols: number
+  column: number,
+  numRows: number,
+  numColumns: number
 ) {
   sheet
-    .getRange(row, startCol, 1, numCols)
+    .getRange(row, column, numRows, numColumns)
     .setBorder(
       true,
       false,
@@ -109,18 +136,26 @@ function createMasterHeader(
 ) {
   // End row should be the width of the tables
   const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
+  const frozenColumns = 2; // Number of columns we're freezing
   
+  // Balance the layout: exclude frozen columns from both sides for proper centering
   // Define header positioning (Google Sheets API: row, column, numRows, numColumns)
   const row = 1;
-  const column = 2;
+  const column = frozenColumns + 1; // Start after frozen columns
   const numRows = 2;
-  const numColumns = totalTableWidth;
-  
-  const a1Range = sheet.getRange(row, 1, numRows, 1);
-  const nextRow = createHeader(sheet, year, row, column, numRows, numColumns);
+  const numColumns = totalTableWidth - (frozenColumns * 2); // Subtract frozen columns from both sides
 
-  a1Range.merge();
-  a1Range.setBackground(TITLE_BACKGROUND_COLOR);
+  // Handle left frozen columns manually
+  const leftRange = sheet.getRange(row, 1, numRows, frozenColumns);
+  leftRange.setBackground(TITLE_BACKGROUND_COLOR);
+  
+  // Create centered header in the middle section
+  const nextRow = createHeader(sheet, year, row, column, numRows, numColumns);
+  
+  // Handle right columns manually to balance the layout
+  const rightStartCol = column + numColumns;
+  const rightRange = sheet.getRange(row, rightStartCol, numRows, frozenColumns);
+  rightRange.setBackground(TITLE_BACKGROUND_COLOR);
 
   return nextRow;
 }
@@ -136,32 +171,27 @@ function createMasterHeader(
 export function createSeparator(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   row: number,
-  endCol: number
+  column: number,
+  numRows: number,
+  numColumns: number
 ): void {
-  // Separate first column from merged section to allow column freezing
-  // Column 1 gets the same background but remains unmerged for freeze compatibility
-  const firstColRange = sheet.getRange(row, 1, 1, 1);
-  firstColRange.setBackground("#a0a0a0");
-  firstColRange.setFontWeight("bold");
-  firstColRange.setValue("");
-
-  // Merge columns 2 through endCol for the main separator
-  const mergedRange = sheet.getRange(row, 2, 1, endCol - 1);
-  mergedRange.merge();
-  mergedRange.setBackground("#a0a0a0");
-  mergedRange.setFontWeight("bold");
-  mergedRange.setValue("");
+  // Apply separator background to entire row - no merging needed for visual separator
+  // This allows column freezing without any merge conflicts
+  const separatorRange = sheet.getRange(row, 1, numRows, numColumns + 1);
+  separatorRange.setBackground("#a0a0a0");
+  separatorRange.setFontWeight("bold");
+  separatorRange.setValue("");
 }
 
 export function createPMNameSection(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  endRow: number,
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number,
   pmName: string
 ) {
-  const col = 1; // Leftmost column
-  const numRows = endRow - startRow + 1;
-  const range = sheet.getRange(startRow, col, numRows, 1);
+  const range = sheet.getRange(row, column, numRows, numColumns);
 
   range.merge();
   range.setValue(pmName);
@@ -175,11 +205,12 @@ export function createPMNameSection(
 
 export function createPMHeader(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  rowStart: number = 3,
-  rowEnd: number = 5,
-  col: number = 1
+  row: number = 3,
+  column: number = 1,
+  numRows: number = 3,
+  numColumns: number = 1
 ) {
-  const range = sheet.getRange(rowStart, col, rowEnd - rowStart + 1, 1);
+  const range = sheet.getRange(row, column, numRows, numColumns);
   range.merge();
   range.setValue("PM");
   range.setFontWeight("bold");
