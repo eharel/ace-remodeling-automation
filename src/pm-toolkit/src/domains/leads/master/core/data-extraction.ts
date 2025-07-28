@@ -61,7 +61,7 @@ function combineLeadsAndRevenue(
     const { PM, YEAR, MONTH, TOTAL_LEADS, SIGNED } = leadRow;
 
     const key = `${PM}|${YEAR}|${MONTH}`;
-    const REVENUE = revenueMap[key] ?? 0;
+    const REVENUE = revenueMap[key] ?? undefined;
 
     const inputRow: LeadsInputRow = {
       MONTH,

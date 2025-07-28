@@ -5,5 +5,5 @@
     "typeRoots": ["../../node_modules/@types"]
   },
   "include": ["./**/*.ts"],
-  "references": [{ "path": "../shared" }]
+  "references": [{ "path": "../shared" }, { "path": "../utils" }]
 }

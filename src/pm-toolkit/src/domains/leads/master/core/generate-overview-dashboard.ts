@@ -3,7 +3,7 @@ import { OVERVIEW_SHEET } from "../../pm/core/constants";
 import { extractData } from "./data-extraction";
 import { transformData } from "./data-transformation";
 import { PMDashboardData } from "./data-transformation";
-import { createHeader } from "../../shared/dashboard";
+import { createTitle } from "../../shared/dashboard/table-render-utils";
 import { renderMonthlyAndQuarterlyBreakdowns } from "../../shared/dashboard/render-dual-tables";
 import {
   MONTHLY_TITLE,
@@ -135,23 +135,28 @@ function createMasterHeader(
   year: number
 ) {
   // End row should be the width of the tables
-  const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
+  const PM_NAME_COLUMNS = 1;
+  const totalTableWidth =
+    PM_NAME_COLUMNS + LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
   const frozenColumns = 2; // Number of columns we're freezing
-  
+
   // Balance the layout: exclude frozen columns from both sides for proper centering
   // Define header positioning (Google Sheets API: row, column, numRows, numColumns)
   const row = 1;
   const column = frozenColumns + 1; // Start after frozen columns
   const numRows = 2;
-  const numColumns = totalTableWidth - (frozenColumns * 2); // Subtract frozen columns from both sides
+  const numColumns = totalTableWidth - frozenColumns * 2; // Subtract frozen columns from both sides
 
   // Handle left frozen columns manually
   const leftRange = sheet.getRange(row, 1, numRows, frozenColumns);
   leftRange.setBackground(TITLE_BACKGROUND_COLOR);
-  
+
   // Create centered header in the middle section
-  const nextRow = createHeader(sheet, year, row, column, numRows, numColumns);
-  
+  const nextRow = createTitle(sheet, year, row, column, numRows, numColumns, {
+    frozenColumns,
+    numCols: numColumns,
+  });
+
   // Handle right columns manually to balance the layout
   const rightStartCol = column + numColumns;
   const rightRange = sheet.getRange(row, rightStartCol, numRows, frozenColumns);

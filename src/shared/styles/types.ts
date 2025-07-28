@@ -26,3 +26,10 @@ export type TableInfo = {
   endRow: number;
   endCol: number;
 };
+
+export interface CellStyling {
+  background?: string;
+  fontSize?: number;
+  fontWeight?: GoogleAppsScript.Spreadsheet.FontWeight;
+  fontColor?: string;
+}

@@ -1,5 +1,6 @@
 import { BaseColumn } from "@shared/columns";
 import {
+  CellStyling,
   OPERATION_SYMBOLS,
   StylizeOptions,
   SummaryOperation,
@@ -8,6 +9,7 @@ import {
   ValueFormat,
 } from "@shared/styles";
 import { stylizeTable } from "@shared/styles";
+import { applySplitMergeRange } from "@utils/sheets";
 
 export type GenerateTableParams<
   RowType extends Record<string, any>,
@@ -21,6 +23,14 @@ export type GenerateTableParams<
   summaryRowOps: SummaryOperationsMap;
   options?: StylizeOptions<T>;
   title?: string;
+  /**
+   * If provided, will render the title using a split-merge row for frozen layouts.
+   * Allows the title to be centered across the scrollable area.
+   */
+  splitTitle?: {
+    frozenColumns: number;
+    styling?: CellStyling;
+  };
 };
 
 export function generateAndStylizeTableFromRows<
@@ -36,6 +46,7 @@ export function generateAndStylizeTableFromRows<
     summaryRowOps,
     options = {},
     title,
+    splitTitle,
   } = params;
 
   const table = generateTableFromRows({
@@ -47,6 +58,7 @@ export function generateAndStylizeTableFromRows<
     summaryRowOps,
     options,
     title,
+    splitTitle,
   });
 
   const keyToIndex = new Map(columns.map((col, i) => [col.key, i]));
@@ -68,12 +80,28 @@ function generateTableFromRows<RowType extends Record<string, any>>({
   summaryRowOps,
   options,
   title,
+  splitTitle,
 }: GenerateTableParams<RowType, any>): TableInfo {
   let rowIndex = startRow;
 
   if (title) {
-    addTableTitle(sheet, rowIndex, startCol, title, columns);
-    rowIndex++;
+    if (splitTitle) {
+      const { frozenColumns, styling } = splitTitle;
+      applySplitMergeRange({
+        sheet,
+        startRow: rowIndex,
+        startCol,
+        frozenColumns,
+        numCols: columns.length,
+        numRows: 1,
+        value: title,
+        styling,
+      });
+      rowIndex++;
+    } else {
+      addTableTitle(sheet, rowIndex, startCol, title, columns);
+      rowIndex++;
+    }
   }
 
   const hasHeader = options?.hasHeaders ?? true;
@@ -97,13 +125,11 @@ function generateTableFromRows<RowType extends Record<string, any>>({
 
   const values = rows.map((row) => columns.map((col) => row[col.key] ?? ""));
 
-  // 1. Determine span per row
   const rowSpans = rows.map((row) => {
-    const key = row.quarter ?? row.groupKey ?? ""; // fallback logic
+    const key = row.quarter ?? row.groupKey ?? "";
     return rowSpanMap?.[key] ?? fallbackRowSpan;
   });
 
-  // 2. Write rows using cumulative row index
   let currentRow = dataStartRow;
   for (let i = 0; i < values.length; i++) {
     const rowValues = values[i];
@@ -125,7 +151,6 @@ function generateTableFromRows<RowType extends Record<string, any>>({
     currentRow += span;
   }
 
-  // 3. Final row after all written values
   const dataEndRow = currentRow - 1;
 
   const summaryRow =

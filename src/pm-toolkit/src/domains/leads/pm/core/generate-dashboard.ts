@@ -8,7 +8,7 @@ import { addTimestamp } from "@shared/styles";
 import { renderMonthlyAndQuarterlyBreakdowns } from "../../shared/dashboard/render-dual-tables";
 import { createQuarterlyDashboardRows } from "../../shared/data-transformation";
 import { getQuarterRowSpanMap } from "../../shared/dashboard/utils";
-import { createHeader } from "../../shared/dashboard";
+import { createTitle } from "../../shared/dashboard/table-render-utils";
 import { MONTHLY_TITLE, QUARTERLY_TITLE } from "../../shared/constants";
 import { LEADS_COLUMNS, QUARTER_COLUMNS } from "../../shared/columns";
 
@@ -25,14 +25,17 @@ export function generateLeadsDashboard(showToast = true) {
   const quarterRowSpanMap = getQuarterRowSpanMap(inputRows);
 
   const totalTableWidth = LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
-  
+
   // Define header positioning (Google Sheets API: row, column, numRows, numColumns)
   const row = 1;
   const column = 1;
   const numRows = 2;
   const numColumns = totalTableWidth;
-  
-  const startRow = createHeader(sheet, year, row, column, numRows, numColumns);
+
+  const startRow = createTitle(sheet, year, row, column, numRows, numColumns, {
+    frozenColumns: 1,
+    numCols: numColumns,
+  });
 
   const { monthlyInfo, quarterlyInfo } = renderMonthlyAndQuarterlyBreakdowns({
     sheet,
@@ -58,7 +61,8 @@ export function generateLeadsDashboard(showToast = true) {
     );
   }
 
-  sheet.setFrozenRows(3);
+  sheet.setFrozenRows(4);
+  sheet.setFrozenColumns(1);
 }
 
 function getYearFilter(): number {
