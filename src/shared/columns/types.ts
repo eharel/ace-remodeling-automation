@@ -1,3 +1,7 @@
+// Note: SummaryOperationConfig moved to @tables/summary - import directly from there when needed
+
+import { SummaryOperationConfig } from "@shared/columns/summary";
+
 // 📊 Formatting and alignment
 export type ColumnFormat = "currency" | "text" | "number" | "percent" | "date";
 export type Alignment = "left" | "center" | "right";
@@ -12,9 +16,11 @@ export type BaseColumn<
   label: TLabel;
   valueFn: (ctx: TContext) => any;
   format?: ColumnFormat;
+  formatDecimals?: number;
   align?: Alignment;
   description?: string;
   help?: string;
+  summaryOps?: SummaryOperationConfig;
 };
 
 // 🧱 A type-safe dashboard row keyed by a specific set of keys

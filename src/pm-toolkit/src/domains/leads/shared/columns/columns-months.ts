@@ -4,6 +4,7 @@ import { getMonthName, formatPercent } from "@pm/utils/helpers";
 import { buildLabelKeyMaps } from "shared/columns";
 import { DashboardKey, dashboardKeys, DashboardLabel, inputKeys } from ".";
 import { dashboardLabels } from "./labels";
+import { leadsOps, percentAvgOps, revenueOps } from "./summary-presets";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
   {
@@ -20,14 +21,18 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     label: dashboardLabels.TOTAL_LEADS,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.TOTAL_LEADS],
     format: "number",
+    formatDecimals: 1,
     align: "center",
+    summaryOps: leadsOps,
   },
   {
     key: dashboardKeys.SIGNED,
     label: dashboardLabels.SIGNED,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.SIGNED],
     format: "number",
+    formatDecimals: 1,
     align: "center",
+    summaryOps: leadsOps,
   },
   {
     key: dashboardKeys.CONVERSION_RATE,
@@ -40,12 +45,15 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
     align: "center",
+    summaryOps: percentAvgOps,
   },
   {
     key: dashboardKeys.REVENUE,
     label: dashboardLabels.REVENUE,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE],
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: dashboardKeys.REVENUE_GOAL,
@@ -53,6 +61,8 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     description: "Monthly revenue goal",
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE_GOAL] ?? "",
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: dashboardKeys.REVENUE_DIFF,
@@ -65,6 +75,8 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
       return goal - revenue;
     },
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
 ];
 

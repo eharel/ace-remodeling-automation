@@ -1,47 +1,16 @@
-// 📁 projects/dashboard/generate-dashboard.ts
-
 import {
   PROJECT_DASHBOARD_SHEET_NAME,
   COL_GAP_BETWEEN_TABLES,
 } from "@pm/constants";
 import { isClosedTabName, startsWithProjectNumber } from "../utils";
 import { DASHBOARD_COLUMNS, DASHBOARD_KEYS } from "./columns";
-import { generateAndStylizeTableFromRows } from "@tables/builder";
-import { SummaryOperationsMap } from "@shared/styles";
+import { generateAndStylizeTableFromRows } from "@tables/builder/";
 import { extractAllProjectData } from "./data-extraction";
 import { transformExtractedDataToDashboardRows } from "./data-transformation";
 import { setDashboardStatus } from "./utils";
 import { addTimestamp } from "@shared/styles";
 import { toA1Notation } from "@pm/utils/helpers";
-
-// Summary row operations for project dashboard
-const PROJECT_SUMMARY_OPERATIONS: SummaryOperationsMap = {
-  [DASHBOARD_KEYS.CONTRACT_PRICE]: {
-    operation: "sum",
-    format: "currency",
-    decimals: 0,
-  },
-  [DASHBOARD_KEYS.CHANGE_ORDERS]: {
-    operation: "sum",
-    format: "currency",
-    decimals: 0,
-  },
-  [DASHBOARD_KEYS.MAX_ADVANCE]: {
-    operation: "sum",
-    format: "currency",
-    decimals: 0,
-  },
-  [DASHBOARD_KEYS.TOTAL_ADVANCE]: {
-    operation: "sum",
-    format: "currency",
-    decimals: 0,
-  },
-  [DASHBOARD_KEYS.ADVANCE_BALANCE]: {
-    operation: "sum",
-    format: "currency",
-    decimals: 0,
-  },
-};
+import { extractSummaryOps } from "@shared/columns";
 
 const PROJECT_COLOR_KEYS = [
   DASHBOARD_KEYS.EXPECTED_PROFIT,
@@ -151,7 +120,7 @@ function generateProjectSection({
     startRow: startingRow,
     startCol: startingCol,
     columns: DASHBOARD_COLUMNS,
-    summaryRowOps: PROJECT_SUMMARY_OPERATIONS,
+    summaryRowOps: extractSummaryOps(DASHBOARD_COLUMNS),
     options: {
       colorKeys: PROJECT_COLOR_KEYS,
       columnWidths: {

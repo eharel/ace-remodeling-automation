@@ -10,7 +10,13 @@ import {
   QUARTERLY_TITLE,
   TITLE_BACKGROUND_COLOR,
 } from "../../shared/constants";
-import { LEADS_COLUMNS, QUARTER_COLUMNS } from "../../shared/columns";
+import {
+  dashboardKeys,
+  LEADS_COLUMNS,
+  QUARTER_COLUMNS,
+} from "../../shared/columns";
+import { createMasterSummary } from "./master-summary";
+import { LeadsDashboardRow } from "../../shared/types";
 
 export function generateOverviewDashboard() {
   const year = 2025; // TODO: make this dynamic
@@ -19,7 +25,8 @@ export function generateOverviewDashboard() {
   sheet.clear();
   const inputRowsByPM = extractData();
   const dashboardRowsByPM = transformData(inputRowsByPM, year);
-  renderDashboard(year, sheet, dashboardRowsByPM);
+  const masterSummary = createMasterSummary(dashboardRowsByPM, year);
+  renderDashboard(year, sheet, dashboardRowsByPM, masterSummary);
   sheet.setFrozenRows(5);
   sheet.setFrozenColumns(2);
 }
@@ -27,11 +34,12 @@ export function generateOverviewDashboard() {
 function renderDashboard(
   year: number,
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  dashboardRowsByPM: Record<string, PMDashboardData>
+  dashboardRowsByPM: Record<string, PMDashboardData>,
+  masterSummary: LeadsDashboardRow
 ) {
   let currentRow = createMasterHeader(sheet, year);
   createPMHeader(sheet);
-  currentRow = createMasterSummary(sheet, currentRow);
+  currentRow = renderMasterSummary(sheet, currentRow, masterSummary);
   const entries = Object.entries(dashboardRowsByPM);
 
   for (const [
@@ -92,19 +100,60 @@ function renderDashboard(
   }
 }
 
-function createMasterSummary(
+export function renderMasterSummary(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  currentRow: number
-) {
-  // At the current row, create a summary row with the title "Master Summary (Placeholder)"
-  // Google Sheets API: (row, column, numRows, numColumns)
+  currentRow: number,
+  masterSummary: LeadsDashboardRow
+): number {
   const row = currentRow;
-  const column = 2;
-  const numRows = 1;
-  const numColumns = 1;
+  const column = 3;
 
-  const summaryRow = sheet.getRange(row, column, numRows, numColumns);
-  summaryRow.setValue("Master Summary (Placeholder)");
+  const visibleColumns = LEADS_COLUMNS.filter(
+    (col) => col.key !== dashboardKeys.MONTH
+  );
+
+  // Label over A3:B3
+  sheet
+    .getRange(3, 1, 1, 2)
+    .merge()
+    .setValue("📊 Master Summary")
+    .setFontWeight("bold")
+    .setFontStyle("italic")
+    .setHorizontalAlignment("center")
+    .setBackground("#f3f3f3");
+
+  // Values
+  const values = visibleColumns.map((col) => masterSummary[col.key] ?? "");
+  const range = sheet.getRange(row, column, 1, values.length);
+  range.setValues([values]);
+
+  // Styling
+  range
+    .setFontWeight("bold")
+    .setFontStyle("italic")
+    .setBackground("#f8f8f8")
+    .setFontSize(10);
+
+  // Formatting
+  visibleColumns.forEach((col, i) => {
+    const cell = sheet.getRange(row, column + i);
+    switch (col.format) {
+      case "number":
+        cell.setNumberFormat("0.##");
+        break;
+      case "percent":
+        cell.setNumberFormat("0.00%");
+        break;
+      case "currency":
+        cell.setNumberFormat("$#,##0");
+        break;
+      default:
+        cell.setNumberFormat("@");
+    }
+    if (col.align === "center") {
+      cell.setHorizontalAlignment("center");
+    }
+  });
 
   return currentRow + 1;
 }
@@ -210,9 +259,9 @@ export function createPMNameSection(
 
 export function createPMHeader(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  row: number = 3,
+  row: number = 4,
   column: number = 1,
-  numRows: number = 3,
+  numRows: number = 2,
   numColumns: number = 1
 ) {
   const range = sheet.getRange(row, column, numRows, numColumns);
@@ -223,4 +272,6 @@ export function createPMHeader(
   range.setVerticalAlignment("middle");
   range.setBackground("#e0e0e0");
   range.setFontSize(10);
+
+  sheet.setColumnWidth(column, 56);
 }

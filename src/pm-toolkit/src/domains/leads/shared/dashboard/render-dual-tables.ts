@@ -1,17 +1,16 @@
 import { QuarterDashboardRow } from "../rows/types";
 import { TableInfo } from "@shared/styles";
 import { LEADS_COLUMNS } from "../columns";
-import { MONTHLY_SUMMARY_OPERATIONS } from "./summary-operations";
 import { applyQuarterColoring } from "../styles";
 import { applyVerticalBorders } from "../styles";
 import { applyQuarterBorders } from "../styles";
-import { generateAndStylizeTableFromRows } from "@tables/builder";
+import { generateAndStylizeTableFromRows } from "@tables/builder/";
 import { LeadsDashboardRow } from "../types";
 import { QUARTER_COLUMNS } from "../columns";
-import { QUARTERLY_SUMMARY_OPERATIONS } from "./summary-operations";
 import { dashboardKeys } from "../columns";
 import { inputKeys } from "../columns";
 import { quarterlyKeys } from "../columns";
+import { extractSummaryOps } from "@shared/columns";
 
 export type RenderDualTablesParams = {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
@@ -62,7 +61,7 @@ export function renderMonthlyAndQuarterlyBreakdowns({
     startRow,
     startCol,
     columns: LEADS_COLUMNS,
-    summaryRowOps: MONTHLY_SUMMARY_OPERATIONS,
+    summaryRowOps: extractSummaryOps(LEADS_COLUMNS),
     options: stylizeOptionsMonths,
     title: monthlyTitle,
     splitTitle: {
@@ -110,7 +109,7 @@ export function renderMonthlyAndQuarterlyBreakdowns({
     startRow: quarterStartRow,
     startCol: quarterStartCol,
     columns: QUARTER_COLUMNS,
-    summaryRowOps: QUARTERLY_SUMMARY_OPERATIONS,
+    summaryRowOps: extractSummaryOps(QUARTER_COLUMNS),
     options: stylizeOptionsQuarters,
     title: quarterlyTitle,
     splitTitle: {
