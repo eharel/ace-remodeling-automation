@@ -25,6 +25,6 @@
       "@tables/*": ["tables/*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["src/sandbox"]
+  "include": ["src/**/*", "sandbox"],
+  "exclude": ["sandbox"]
 }

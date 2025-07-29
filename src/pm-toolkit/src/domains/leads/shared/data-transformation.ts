@@ -1,13 +1,17 @@
-import { inputKeys, QuarterlyKey, quarterlyKeys } from "../../shared/columns";
-import { LeadsInputRow } from "../../shared/rows/types";
-import { LEADS_COLUMNS } from "../columns";
-import { QUARTER_COLUMNS } from "../columns";
-import { getQuarterFromMonth } from "./utils";
-import { mapInputToDashboardRows } from "../../../../utils/helpers";
-import { LeadsRowContext } from "../../shared/rows/types";
-import { QuarterRowContext } from "../../shared/rows/types";
+import {
+  inputKeys,
+  LEADS_COLUMNS,
+  QUARTER_COLUMNS,
+  QuarterlyKey,
+  quarterlyKeys,
+} from "./columns";
+import { LeadsInputRow } from "./rows/types";
+import { getQuarterFromMonth } from "../pm/core/utils";
+import { mapInputToDashboardRows } from "../../../utils/helpers";
+import { LeadsRowContext } from "./rows/types";
+import { QuarterRowContext } from "./rows/types";
 import { LeadsDashboardRow } from "./types";
-import { QuarterDashboardRow } from "../../shared/rows/types";
+import { QuarterDashboardRow } from "./rows/types";
 
 /**
  * Creates monthly dashboard rows from input data

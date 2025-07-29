@@ -1,5 +1,15 @@
 import { dashboardKeys } from "./keys";
 
+export const inputLabels = {
+  YEAR: "Year",
+  MONTH: "Month",
+  TOTAL_LEADS: "Total Leads",
+  SIGNED: "Signed Proposals",
+  REVENUE: "Approved Revenue",
+  PROP_NOT_SENT: "Prop. Not Sent",
+  REVENUE_GOAL: "Revenue Goal",
+};
+
 // 🔖 HUMAN-FRIENDLY LABELS
 export const dashboardLabels: Record<keyof typeof dashboardKeys, string> = {
   YEAR: "Year",

@@ -123,8 +123,6 @@ export function getOrCreateLeadsDashboardSheet(
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const existing = ss.getSheetByName(sheetName);
   if (existing) {
-    // Adding logging
-    Logger.log(`Using existing dashboard sheet: ${sheetName}`);
     return existing;
   }
 

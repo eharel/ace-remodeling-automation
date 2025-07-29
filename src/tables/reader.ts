@@ -1,19 +1,18 @@
-export function extractTableData<T extends Record<string, any>>({
+export function extractTableData<TRow extends Record<string, any>>({
+  ss = SpreadsheetApp.getActiveSpreadsheet(),
   sheetName,
   labelMap,
-  keyMap,
-  blankableKeys = new Set<string>(),
+  blankableKeys = new Set<keyof TRow>(),
   rowFilter = () => true,
   valueParser = defaultParser,
 }: {
+  ss?: GoogleAppsScript.Spreadsheet.Spreadsheet;
   sheetName: string;
-  labelMap: Record<string, string>; // e.g. labels.YEAR → "Year"
-  keyMap: Record<string, string>; // e.g. inputKeys.YEAR → "YEAR"
-  blankableKeys?: Set<string>;
+  labelMap: Record<keyof TRow, string>; // e.g. { YEAR: "Year", REVENUE: "Approved Revenue" }
+  blankableKeys?: Set<keyof TRow>;
   rowFilter?: (row: any[]) => boolean;
-  valueParser?: (key: string, raw: any, isBlankable: boolean) => any;
-}): T[] {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  valueParser?: (key: keyof TRow, raw: any, isBlankable: boolean) => any;
+}): TRow[] {
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) throw new Error(`Sheet "${sheetName}" not found`);
 
@@ -28,19 +27,21 @@ export function extractTableData<T extends Record<string, any>>({
     columnIndexByLabel[label] = idx;
   });
 
-  for (const key of Object.keys(keyMap)) {
+  for (const key of Object.keys(labelMap) as (keyof TRow)[]) {
     const label = labelMap[key];
     if (!(label in columnIndexByLabel)) {
       throw new Error(
-        `❌ Missing column "${label}" (for key "${keyMap[key]}") in sheet "${sheetName}"`
+        `❌ Missing column "${label}" (for key "${String(
+          key
+        )}") in sheet "${sheetName}"`
       );
     }
   }
 
   return dataRows.filter(rowFilter).map((row) => {
-    const result: Record<string, any> = {};
+    const result: Partial<TRow> = {};
 
-    for (const key of Object.keys(keyMap)) {
+    for (const key of Object.keys(labelMap) as (keyof TRow)[]) {
       const label = labelMap[key];
       const colIndex = columnIndexByLabel[label];
       const raw = row[colIndex];
@@ -48,19 +49,33 @@ export function extractTableData<T extends Record<string, any>>({
       result[key] = valueParser(key, raw, blankableKeys.has(key));
     }
 
-    return result as T;
+    return result as TRow;
   });
 }
 
-function defaultParser(
-  key: string,
+// function defaultParser<TRow extends Record<string, any>>(
+//   key: keyof TRow,
+//   raw: any,
+//   isBlankable: boolean
+// ): number | undefined {
+//   if (isBlankable && (raw === "" || raw === undefined || raw === null)) {
+//     return undefined;
+//   }
+
+//   const parsed = typeof raw === "number" ? raw : Number(raw);
+//   return isNaN(parsed) ? (isBlankable ? undefined : 0) : parsed;
+// }
+
+function defaultParser<TRow extends Record<string, any>>(
+  key: keyof TRow,
   raw: any,
   isBlankable: boolean
-): number | undefined {
-  if (isBlankable) {
-    if (raw === "" || raw === undefined || raw === null) return undefined;
+): any {
+  if (raw === "" || raw === undefined || raw === null) {
+    return isBlankable ? undefined : raw;
   }
 
+  // Try parsing as number
   const parsed = typeof raw === "number" ? raw : Number(raw);
-  return isNaN(parsed) ? (isBlankable ? undefined : 0) : parsed;
+  return isNaN(parsed) ? raw : parsed;
 }

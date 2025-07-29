@@ -69,12 +69,13 @@ export function applyQuarterBorders<T extends string>(
   const rowCount = table.dataEndRow - table.dataStartRow + 1;
   const colCount = columns.length;
 
-  const rawValues = extractGroupingValues(
-    sheet,
-    startRow,
-    table.startCol + targetColIndex,
-    rowCount
-  );
+  // Extract grouping values (Google Sheets API: row, column, numRows, numColumns)
+  const row = startRow;
+  const column = table.startCol + targetColIndex;
+  const numRows = rowCount;
+  const numColumns = 1;
+  
+  const rawValues = extractGroupingValues(sheet, row, column, numRows, numColumns);
 
   const groupMap = groupRowsByQuarter(rawValues);
 
@@ -126,19 +127,18 @@ function applyGroupBordersWithMap(
 
 export function applyVerticalBorders(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  endRow: number,
-  startCol: number,
-  numCols: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ) {
-  clearBordersInRange(sheet, startRow, endRow, startCol, numCols);
+  clearBordersInRange(sheet, row, column, numRows, numColumns);
 
   const innerBorderStyle = SpreadsheetApp.BorderStyle.SOLID;
   const lightGray = "#cccccc";
-  const numRows = endRow - startRow + 1;
 
-  for (let c = 1; c < numCols; c++) {
-    const colRange = sheet.getRange(startRow, startCol + c, numRows, 1);
+  for (let c = 1; c < numColumns; c++) {
+    const colRange = sheet.getRange(row, column + c, numRows, 1);
     colRange.setBorder(
       false,
       true,
@@ -154,13 +154,12 @@ export function applyVerticalBorders(
 
 export function clearBordersInRange(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  endRow: number,
-  startCol: number,
-  numCols: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ) {
-  const numRows = endRow - startRow + 1;
-  const range = sheet.getRange(startRow, startCol, numRows, numCols);
+  const range = sheet.getRange(row, column, numRows, numColumns);
   range.setBorder(false, false, false, false, false, false);
 }
 
@@ -173,12 +172,13 @@ function findGroupingColumnIndex<T extends string>(
 
 function extractGroupingValues(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  startRow: number,
-  startCol: number,
-  rowCount: number
+  row: number,
+  column: number,
+  numRows: number,
+  numColumns: number
 ): string[] {
   return sheet
-    .getRange(startRow, startCol, rowCount, 1)
+    .getRange(row, column, numRows, numColumns)
     .getValues()
     .map((r) => String(r[0]));
 }
@@ -196,4 +196,33 @@ function groupRowsByQuarter(rawValues: string[]): Record<string, number[]> {
     groupMap[groupKey].push(i);
   }
   return groupMap;
+}
+
+// Add a top border to the summary row to separate it from the data rows
+// I was going crazy with figuring out why the bottom border wasn't showing up, so I added this bandaid fix
+// Don't judge me
+export function addBottomBorderBandaidFix(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  tableInfo: TableInfo
+) {
+  // Find the summary row (which is right after the data rows)
+  const summaryRow = tableInfo.dataEndRow + 1;
+
+  sheet
+    .getRange(
+      summaryRow,
+      tableInfo.startCol,
+      1,
+      tableInfo.endCol - tableInfo.startCol + 1
+    )
+    .setBorder(
+      true, // top border instead of bottom border
+      null,
+      null,
+      null,
+      null,
+      null,
+      "black",
+      SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+    );
 }

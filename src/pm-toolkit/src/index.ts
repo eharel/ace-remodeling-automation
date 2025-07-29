@@ -7,7 +7,7 @@ import {
   promptProjectToClose,
 } from "./domains/projects/close-project";
 import { generateProjectDashboard } from "./domains/projects/dashboard";
-import { generateOverviewDashboard } from "./domains/leads/master/dashboard/generate-overview-dashboard";
+import { generateOverviewDashboard } from "./domains/leads/master/core/generate-overview-dashboard";
 import { promptForNewProject } from "./domains/projects/new-project";
 import { generateLeadsDashboard } from "./domains/leads";
 import { showSidebar } from "../../ui/sidebar/showSidebar";

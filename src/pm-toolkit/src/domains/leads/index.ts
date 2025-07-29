@@ -1,2 +1,2 @@
-export { generateLeadsDashboard } from "./pm/dashboard/generate-dashboard";
-export { generateOverviewDashboard } from "./master/dashboard/generate-overview-dashboard";
+export { generateLeadsDashboard } from "./pm/core/generate-dashboard";
+export { generateOverviewDashboard } from "./master/core/generate-overview-dashboard";

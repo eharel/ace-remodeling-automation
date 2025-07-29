@@ -1,5 +1,8 @@
 // Generic map builders and accessors
 
+import { BaseColumn } from "./types";
+import { SummaryOperationConfig, SummaryOperationsMap } from "./summary";
+
 export function buildLabelKeyMaps<K extends string, L extends string>(
   columns: { key: K; label: L }[]
 ): {
@@ -29,4 +32,22 @@ export function getColumnKey<K extends string, L extends string>(
   keysByLabel: Record<L, K>
 ): K {
   return keysByLabel[label];
+}
+
+export function extractSummaryOps<T extends BaseColumn<any, any, any>>(
+  columns: T[],
+  overrides?: Partial<Record<string, SummaryOperationConfig>>
+): SummaryOperationsMap {
+  const map: SummaryOperationsMap = {};
+
+  for (const col of columns) {
+    const override = overrides?.[col.key];
+    if (override) {
+      map[col.key] = override;
+    } else if (col.summaryOps) {
+      map[col.key] = col.summaryOps;
+    }
+  }
+
+  return map;
 }

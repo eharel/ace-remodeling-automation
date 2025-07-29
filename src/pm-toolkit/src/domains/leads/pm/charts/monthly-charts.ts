@@ -1,7 +1,7 @@
 import { ChartPosition } from "@pm/charts/positioner";
 import { TableInfo } from "@shared/styles";
 import { buildChart } from "@pm/charts/build-chart";
-import { LEADS_COLUMNS } from "../columns";
+import { LEADS_COLUMNS } from "../../shared/columns";
 import { CHART_COLORS } from "../../shared/styles";
 import { dashboardKeys, inputKeys } from "../../shared/columns";
 

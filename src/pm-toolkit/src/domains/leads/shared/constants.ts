@@ -10,3 +10,8 @@ export type Quarter = keyof typeof QUARTER_TO_MONTHS;
 export type Month = (typeof QUARTER_TO_MONTHS)[Quarter][number];
 
 export const QUARTERS_ROW_SPAN = 3;
+
+export const MONTHLY_TITLE = "Monthly Breakdown";
+export const QUARTERLY_TITLE = "Quarterly Breakdown";
+
+export const TITLE_BACKGROUND_COLOR = "#1A237E";

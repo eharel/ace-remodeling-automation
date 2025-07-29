@@ -1,4 +1,4 @@
-import { LeadsQuarterColumn } from "../core/types";
+import { LeadsQuarterColumn } from "../types";
 import { buildLabelKeyMaps } from "shared/columns";
 import { formatPercent } from "@pm/utils/helpers";
 import {
@@ -6,16 +6,10 @@ import {
   quarterlyKeys,
   QuarterlyLabel,
   quarterlyLabels,
-} from "../../shared/columns/labels";
+} from "./labels";
+import { leadsOps, percentAvgOps, revenueOps } from "./summary-presets";
 
 export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
-  // {
-  //   key: quarterlyKeys.YEAR,
-  //   label: quarterlyLabels.YEAR,
-  //   valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.YEAR],
-  //   format: "number",
-  //   align: "center",
-  // },
   {
     key: quarterlyKeys.QUARTER,
     label: quarterlyLabels.QUARTER,
@@ -29,6 +23,8 @@ export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
     valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.TOTAL_LEADS],
     format: "number",
     align: "center",
+    formatDecimals: 1,
+    summaryOps: leadsOps,
   },
   {
     key: quarterlyKeys.SIGNED,
@@ -36,6 +32,8 @@ export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
     valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.SIGNED],
     format: "number",
     align: "center",
+    formatDecimals: 1,
+    summaryOps: leadsOps,
   },
   {
     key: quarterlyKeys.CONVERSION_RATE,
@@ -48,24 +46,32 @@ export const QUARTER_COLUMNS: LeadsQuarterColumn[] = [
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
     align: "center",
+    formatDecimals: 2,
+    summaryOps: percentAvgOps,
   },
   {
     key: quarterlyKeys.REVENUE,
     label: quarterlyLabels.REVENUE,
     valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.REVENUE],
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: quarterlyKeys.REVENUE_GOAL,
     label: quarterlyLabels.REVENUE_GOAL,
     valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.REVENUE_GOAL],
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: quarterlyKeys.REVENUE_DIFF,
     label: quarterlyLabels.REVENUE_DIFF,
     valueFn: ({ inputRowData }) => inputRowData[quarterlyKeys.REVENUE_DIFF],
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
 ];
 

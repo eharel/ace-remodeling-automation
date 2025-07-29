@@ -3,6 +3,7 @@ export const INPUT_SHEET = "Leads Input";
 export const INPUT_ANCHOR = "A1";
 
 export const DASHBOARD_SHEET = "Leads Dashboard";
+export const OVERVIEW_SHEET = "Leads Master Overview";
 
 // 📌 NAMED RANGES
 // NR_DASHBOARD_* — Dashboard named ranges

@@ -4,6 +4,7 @@ import {
 } from "../../../constants";
 import * as GF from "./transform-functions";
 import { ProjectColumn, ProjectContext } from "./types";
+import { SummaryOperationConfig, SummaryOperationsMap } from "@shared/styles";
 
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
@@ -39,6 +40,12 @@ export type DashboardColumnLabel =
 export type DashboardColumnKey =
   (typeof DASHBOARD_KEYS)[keyof typeof DASHBOARD_KEYS];
 
+const currencySummaryOps: SummaryOperationConfig = {
+  operation: "sum",
+  format: "currency",
+  decimals: 2,
+};
+
 export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   {
     key: DASHBOARD_KEYS.PROJECT_NO,
@@ -61,6 +68,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     description: "CP",
     format: "currency",
     legacyCell: "M2",
+    summaryOps: currencySummaryOps,
   },
   {
     key: DASHBOARD_KEYS.CHANGE_ORDERS,
@@ -69,6 +77,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     description: "CO",
     format: "currency",
     legacyCell: "M7",
+    summaryOps: currencySummaryOps,
   },
   {
     key: DASHBOARD_KEYS.EXPECTED_PROFIT,
@@ -77,6 +86,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     valueFn: (ctx: ProjectContext) => GF.getExpectedProfit(ctx),
     help: "What the PM is expected to keep after all subs and materials are paid",
     format: "currency",
+    summaryOps: currencySummaryOps,
   },
   {
     key: DASHBOARD_KEYS.MAX_ADVANCE,
@@ -86,6 +96,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     help: "Maximum allowed advance = 10% of Contract Price + Change Orders",
     format: "currency",
     legacyCell: "I15",
+    summaryOps: currencySummaryOps,
   },
   {
     key: DASHBOARD_KEYS.TOTAL_ADVANCE,
@@ -93,6 +104,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     valueFn: (ctx: ProjectContext) => GF.getTotalAdvance(ctx),
     format: "currency",
     legacyCell: "I21",
+    summaryOps: currencySummaryOps,
   },
   {
     key: DASHBOARD_KEYS.ADVANCE_BALANCE,
@@ -102,6 +114,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
     valueFn: (projectContext: ProjectContext) =>
       GF.getAdvanceBalance(projectContext),
     format: "currency",
+    summaryOps: currencySummaryOps,
   },
   // {
   //   key: DASHBOARD_KEYS.EXPENSES,
@@ -128,10 +141,11 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
       GF.getPMAfterAdvance(projectContext),
     format: "currency",
     legacyCell: "M21",
+    summaryOps: currencySummaryOps,
   },
 ];
 
-import { buildLabelKeyMaps } from "../../../../../shared/columns/utils";
+import { buildLabelKeyMaps } from "@shared/columns/utils";
 
 const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
   DASHBOARD_COLUMNS

@@ -1,10 +1,10 @@
+import { inputKeys } from "../../shared/columns";
 import {
   INPUT_SHEET,
   NR_INPUT_YEAR_COL,
   NR_INPUT_MONTH_COL,
   NR_INPUT_GOAL_COL,
   NR_INPUT_REVENUE_COL,
-  inputKeys,
 } from "./constants";
 
 /**

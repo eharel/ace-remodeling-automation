@@ -6,6 +6,7 @@ export const PROJECT_TAB_NAME_REGEX = /^\d{3,4}\s/;
 // === File IDs ===
 export const FILE_IDS = {
   MANAGER_FILE: "1h351NGo2pJnA-dcI5wvDXTkDCImNFTxJJpVh3shy_Zg", // Manager dashboard file
+  EXECUTIVE_FILE: "12i9kHVpKI2WZkN5UKZl7fkPT9PB5xeFl53Uvs6AxVX0",
 };
 
 // === General Config ===

@@ -9,11 +9,7 @@
     "rootDir": "src"
   },
   "include": [
-    "src/**/*",
-    "../tables/builder.ts",
-    "../shared/columns",
-    "../shared/styles",
-    "../shared/styles"
+    "src/**/*"
   ],
   "references": [
     { "path": "../../src/utils" },

@@ -1,28 +1,19 @@
-import { LeadsColumn } from "../core/types";
+import { LeadsColumn } from "../types";
 import { getMonthName, formatPercent } from "@pm/utils/helpers";
 
 import { buildLabelKeyMaps } from "shared/columns";
-import {
-  DashboardKey,
-  dashboardKeys,
-  DashboardLabel,
-  inputKeys,
-} from "../../shared/columns";
-import { dashboardLabels } from "../../shared/columns/labels";
+import { DashboardKey, dashboardKeys, DashboardLabel, inputKeys } from ".";
+import { dashboardLabels } from "./labels";
+import { leadsOps, percentAvgOps, revenueOps } from "./summary-presets";
 
 export const LEADS_COLUMNS: LeadsColumn[] = [
-  // {
-  //   key: DASHBOARD_KEYS.YEAR,
-  //   label: DASHBOARD_LABELS.YEAR,
-  //   valueFn: ({ inputRowData }: LeadsRowContext) =>
-  //     inputRowData[INPUT_KEYS.YEAR],
-  //   format: "number",
-  //   align: "center",
-  // },
   {
     key: dashboardKeys.MONTH,
     label: dashboardLabels.MONTH,
-    valueFn: ({ inputRowData }) => getMonthName(inputRowData[inputKeys.MONTH]),
+    valueFn: ({ inputRowData }) => {
+      const month = inputRowData[inputKeys.MONTH];
+      return typeof month === "number" ? getMonthName(month) : "";
+    },
     format: "number",
   },
   {
@@ -30,14 +21,18 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     label: dashboardLabels.TOTAL_LEADS,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.TOTAL_LEADS],
     format: "number",
+    formatDecimals: 1,
     align: "center",
+    summaryOps: leadsOps,
   },
   {
     key: dashboardKeys.SIGNED,
     label: dashboardLabels.SIGNED,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.SIGNED],
     format: "number",
+    formatDecimals: 1,
     align: "center",
+    summaryOps: leadsOps,
   },
   {
     key: dashboardKeys.CONVERSION_RATE,
@@ -50,12 +45,15 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     format: "percent",
     help: "Signed Proposals ÷ Total Leads",
     align: "center",
+    summaryOps: percentAvgOps,
   },
   {
     key: dashboardKeys.REVENUE,
     label: dashboardLabels.REVENUE,
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE],
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: dashboardKeys.REVENUE_GOAL,
@@ -63,6 +61,8 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
     description: "Monthly revenue goal",
     valueFn: ({ inputRowData }) => inputRowData[inputKeys.REVENUE_GOAL] ?? "",
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
   {
     key: dashboardKeys.REVENUE_DIFF,
@@ -75,15 +75,9 @@ export const LEADS_COLUMNS: LeadsColumn[] = [
       return goal - revenue;
     },
     format: "currency",
+    formatDecimals: 2,
+    summaryOps: revenueOps,
   },
-  // {
-  //   key: DASHBOARD_KEYS.PROP_NOT_SENT,
-  //   label: DASHBOARD_LABELS.PROP_NOT_SENT,
-  //   valueFn: ({ inputRowData }) =>
-  //     inputRowData[INPUT_KEYS.PROP_NOT_SENT],
-  //   format: "number",
-  //   align: "center",
-  // },
 ];
 
 const labelMaps = buildLabelKeyMaps<DashboardKey, DashboardLabel>(
