@@ -105,8 +105,14 @@ export function renderMasterSummary(
   currentRow: number,
   masterSummary: LeadsDashboardRow
 ): number {
+  const BACKGROUND_COLOR = TITLE_BACKGROUND_COLOR;
   const row = currentRow;
   const column = 3;
+
+  // Total number of columns in the dashboard table (for full-width background)
+  const PM_NAME_COLUMNS = 1;
+  const fullWidth =
+    PM_NAME_COLUMNS + LEADS_COLUMNS.length + QUARTER_COLUMNS.length;
 
   const visibleColumns = LEADS_COLUMNS.filter(
     (col) => col.key !== dashboardKeys.MONTH
@@ -120,21 +126,34 @@ export function renderMasterSummary(
     .setFontWeight("bold")
     .setFontStyle("italic")
     .setHorizontalAlignment("center")
-    .setBackground("#f3f3f3");
+    .setBackground(BACKGROUND_COLOR)
+    .setFontColor("white");
 
   // Values
   const values = visibleColumns.map((col) => masterSummary[col.key] ?? "");
-  const range = sheet.getRange(row, column, 1, values.length);
-  range.setValues([values]);
+  sheet.getRange(row, column, 1, values.length).setValues([values]);
 
-  // Styling
-  range
-    .setFontWeight("bold")
-    .setFontStyle("italic")
-    .setBackground("#f8f8f8")
-    .setFontSize(10);
+  // Apply visual styling to the *entire row* (A to full width)
+  const fullRowRange = sheet.getRange(row, 1, 1, fullWidth);
+  fullRowRange
+    .setBackground(BACKGROUND_COLOR)
+    .setFontColor("white")
+    .setBorder(
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "white",
+      SpreadsheetApp.BorderStyle.SOLID
+    );
 
-  // Formatting
+  // Apply text styling only to actual summary values
+  const valueRange = sheet.getRange(row, column, 1, values.length);
+  valueRange.setFontWeight("bold").setFontStyle("italic").setFontSize(10);
+
+  // Apply number formats and alignments to the value cells only
   visibleColumns.forEach((col, i) => {
     const cell = sheet.getRange(row, column + i);
     switch (col.format) {
@@ -145,7 +164,7 @@ export function renderMasterSummary(
         cell.setNumberFormat("0.00%");
         break;
       case "currency":
-        cell.setNumberFormat("$#,##0");
+        cell.setNumberFormat("$#,##0.00");
         break;
       default:
         cell.setNumberFormat("@");

@@ -154,13 +154,13 @@ function resolveDecimals(
     resolved = format === "percent" || format === "currency" ? 2 : 0;
   }
 
-  Logger.log(
-    "→ resolveDecimals | format: %s | config.decimals: %s | column.formatDecimals: %s | result: %s",
-    format,
-    typeof opConfig === "object" && opConfig ? (opConfig as any).decimals : "-",
-    column.formatDecimals,
-    resolved
-  );
+  // Logger.log(
+  //   "→ resolveDecimals | format: %s | config.decimals: %s | column.formatDecimals: %s | result: %s",
+  //   format,
+  //   typeof opConfig === "object" && opConfig ? (opConfig as any).decimals : "-",
+  //   column.formatDecimals,
+  //   resolved
+  // );
 
   return Math.floor(resolved); // Ensure integer
 }
