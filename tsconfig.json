@@ -5,7 +5,7 @@
     { "path": "src/tables" },
     { "path": "src/domains/pm-toolkit" },
     { "path": "src/domains/vendors" },
-    { "path": "src/domains/forms" },
+    { "path": "src/apps-scripts/forms-library" },
     { "path": "src/ui" },
     { "path": "src/utils" }
   ],
@@ -21,7 +21,7 @@
     "baseUrl": "src",
     "paths": {
       "@shared/*": ["shared/*"],
-      "@pm/*": ["domains/pm-toolkit/src/*"],
+      "@pm/*": ["domains/pm-toolkit/*"],
       "@ui/*": ["ui/*"],
       "@utils/*": ["utils/*"],
       "@tables/*": ["tables/*"],

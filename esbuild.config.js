@@ -13,7 +13,7 @@ const chalk = {
 
 // Path aliases for monorepo packages
 const aliases = {
-  "@pm": path.resolve(__dirname, "src/domains/pm-toolkit/src"),
+  "@pm": path.resolve(__dirname, "src/domains/pm-toolkit"),
   "@forms": path.resolve(__dirname, "src/forms"),
   "@domains": path.resolve(__dirname, "src/domains"),
   "@ui": path.resolve(__dirname, "src/ui"),
@@ -35,13 +35,13 @@ for (const [alias, aliasPath] of Object.entries(aliases)) {
 const domains = [
   {
     name: "pm-toolkit",
-    entryPoint: "src/domains/pm-toolkit/src/index.ts",
-    outfile: "src/domains/pm-toolkit/build/code.js",
+    entryPoint: "src/apps-scripts/pm-toolkit/src/index.ts",
+    outfile: "src/apps-scripts/pm-toolkit/build/code.js",
   },
   {
     name: "forms",
-    entryPoint: "src/domains/forms/src/index.ts",
-    outfile: "src/domains/forms/build/code.js",
+    entryPoint: "src/apps-scripts/forms-library/src/index.ts",
+    outfile: "src/apps-scripts/forms-library/build/code.js",
   },
   // Add additional domains below if needed
   // {

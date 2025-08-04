@@ -6,8 +6,11 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": "."
+    "rootDir": "src"
   },
-  "include": ["**/*.ts"],
-  "references": [{ "path": "../../utils" }, { "path": "../../forms" }]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../utils" },
+    { "path": "../../domains/pm-toolkit" }
+  ]
 }

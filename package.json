@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "clean:all": "rimraf src/*/build",
-    "clean:pm": "rimraf src/domains/pm-toolkit/build",
-    "clean:forms": "rimraf src/domains/forms/build",
+    "clean:pm": "rimraf src/apps-scripts/pm-toolkit/build",
+    "clean:forms": "rimraf src/apps-scripts/forms-library/build",
     "build:all": "node esbuild.config.js",
-    "build:pm": "cross-env DOMAIN=pm-toolkit node esbuild.config.js && copyfiles -u 3 'src/domains/pm-toolkit/src/appsscript.json' src/domains/pm-toolkit/build/",
-    "build:forms": "cross-env DOMAIN=forms node esbuild.config.js && copyfiles -u 3 'src/domains/forms/src/appsscript.json' src/domains/forms/build/",
-    "push:pm": "npm run build:pm && (cd src/domains/pm-toolkit && npm run push:raw)",
-    "push:forms": "npm run build:forms && (cd src/domains/forms && npm run push:raw)",
+    "build:pm": "cross-env DOMAIN=pm-toolkit node esbuild.config.js && copyfiles -u 3 'src/apps-scripts/pm-toolkit/src/appsscript.json' src/apps-scripts/pm-toolkit/build/",
+    "build:forms": "cross-env DOMAIN=forms node esbuild.config.js && copyfiles -u 3 'src/apps-scripts/forms-library/src/appsscript.json' src/apps-scripts/forms-library/build/",
+    "push:pm": "npm run build:pm && (cd src/apps-scripts/pm-toolkit && npm run push:raw)",
+    "push:forms": "npm run build:forms && (cd src/apps-scripts/forms-library && npm run push:raw)",
     "clean": "npm run clean:all",
     "build": "npm run build:all",
     "push": "npm run push:pm",
@@ -36,7 +36,7 @@
   },
   "workspaces": [
     "src/domains/pm-toolkit",
-    "src/domains/forms",
+    "src/apps-scripts/forms-library",
     "src/ui",
     "src/utils"
   ]

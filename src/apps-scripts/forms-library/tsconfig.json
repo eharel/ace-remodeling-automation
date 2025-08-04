@@ -6,15 +6,13 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": "."
+    "rootDir": "src"
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*"],
   "references": [
     { "path": "../../utils" },
-    { "path": "../../ui" },
-    { "path": "../../globals" },
-    { "path": "../../tables" },
+    { "path": "../../forms" },
     { "path": "../../shared" },
-    { "path": "../../forms" }
+    { "path": "../../domains/vendors" }
   ]
 }
