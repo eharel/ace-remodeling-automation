@@ -3,7 +3,8 @@
   "references": [
     { "path": "src/shared" },
     { "path": "src/tables" },
-    { "path": "src/pm-toolkit" },
+    { "path": "src/domains/pm-toolkit" },
+    { "path": "src/domains/vendors" },
     { "path": "src/ui" },
     { "path": "src/utils" }
   ],
@@ -19,12 +20,13 @@
     "baseUrl": "src",
     "paths": {
       "@shared/*": ["shared/*"],
-      "@pm/*": ["pm-toolkit/src/*"],
+      "@pm/*": ["domains/pm-toolkit/src/*"],
       "@ui/*": ["ui/*"],
       "@utils/*": ["utils/*"],
-      "@tables/*": ["tables/*"]
+      "@tables/*": ["tables/*"],
+      "@domains/*": ["domains/*"]
     }
   },
-  "include": ["src/**/*", "sandbox"],
+  "include": ["sandbox"],
   "exclude": ["sandbox"]
 }

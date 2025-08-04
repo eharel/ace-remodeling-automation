@@ -1,0 +1,1 @@
+export const VENDOR_SHEET_ID = "1cMAGOIsPl5chA9cP3hYMyn9i3xLJL8bOALG_mygNY0w";
