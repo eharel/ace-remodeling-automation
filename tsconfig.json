@@ -5,6 +5,7 @@
     { "path": "src/tables" },
     { "path": "src/domains/pm-toolkit" },
     { "path": "src/domains/vendors" },
+    { "path": "src/domains/forms" },
     { "path": "src/ui" },
     { "path": "src/utils" }
   ],
