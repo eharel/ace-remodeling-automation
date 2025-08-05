@@ -3,6 +3,7 @@
   "references": [
     { "path": "src/shared" },
     { "path": "src/tables" },
+    { "path": "src/forms" },
     { "path": "src/domains/pm-toolkit" },
     { "path": "src/domains/vendors" },
     { "path": "src/apps-scripts/forms-library" },
@@ -25,7 +26,8 @@
       "@ui/*": ["ui/*"],
       "@utils/*": ["utils/*"],
       "@tables/*": ["tables/*"],
-      "@domains/*": ["domains/*"]
+      "@domains/*": ["domains/*"],
+      "@forms/*": ["forms/*"]
     }
   },
   "include": ["sandbox"],

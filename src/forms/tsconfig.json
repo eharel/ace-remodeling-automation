@@ -1,13 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "build",
     "composite": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": "."
+    "rootDir": ".",
+    "outDir": "build"
   },
   "include": ["**/*"],
-  "references": []
+  "references": [{ "path": "../domains/vendors" }]
 }

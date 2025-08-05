@@ -15,6 +15,6 @@
     { "path": "../../globals" },
     { "path": "../../tables" },
     { "path": "../../shared" },
-    { "path": "../../forms" }
+    { "path": "../../utils" }
   ]
 }
