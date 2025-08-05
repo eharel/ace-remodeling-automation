@@ -1,5 +1,5 @@
 // Export types
-export type { VendorFormResponse } from "./types";
+export type { Vendor } from "./types";
 
 // Export core functions
 export { parseVendorResponse } from "./core/parse-vendor-response";

@@ -1,6 +1,6 @@
 import { extractResponse } from "../../../forms/core/extract-response";
 import { parseVendorResponse } from "./parse-vendor-response";
-import { VendorFormResponse } from "../types";
+import { Vendor } from "../types";
 
 // Vendor sheet configuration
 const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0"; // Copy for testing
@@ -19,6 +19,7 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
 
     // Extract the raw form response
     const raw = extractResponse(e);
+    writeTestLog("Raw keys:\n" + Object.keys(raw).join("\n"));
     console.log("📋 Raw form data extracted");
     writeTestLog("Raw form data extracted");
 
@@ -26,6 +27,9 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
     const parsed = parseVendorResponse(raw);
     console.log("✅ Vendor data parsed successfully");
     writeTestLog("Vendor data parsed successfully");
+
+    // Log the actual parsed object for inspection
+    writeTestLog("Parsed data:\n" + JSON.stringify(parsed, null, 2));
 
     // Save to Google Sheets
     saveVendorDataToSheet(parsed);
@@ -47,25 +51,25 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
 /**
  * Saves vendor data to the Google Sheet
  */
-function saveVendorDataToSheet(vendorData: VendorFormResponse) {
+function saveVendorDataToSheet(vendorData: Vendor) {
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
   const sheet =
     spreadsheet.getSheetByName(VENDOR_SHEET_NAME) ||
     spreadsheet.insertSheet(VENDOR_SHEET_NAME);
 
   // Define headers based on the VendorFormResponse type
-  const headers: (keyof VendorFormResponse)[] = [
-    "Company Name",
-    "Type of Trade",
-    "Contact Name",
-    "Phone Number",
-    "Email",
-    "Website (if applicable)",
-    "Company Bio",
-    "Type of Materials",
-    "Are you Insured, Licensed, or New?",
-    "Date of Submission",
-    "Upload License and/or Insurance",
+  const headers: (keyof Vendor)[] = [
+    "companyName",
+    "tradeType",
+    "contactName",
+    "phone",
+    "email",
+    "website",
+    "bio",
+    "materials",
+    "certifications",
+    "submittedAt",
+    "uploads",
   ];
 
   // Write headers if sheet is empty
@@ -83,7 +87,7 @@ function saveVendorDataToSheet(vendorData: VendorFormResponse) {
 
   // Append the new row
   sheet.appendRow(row);
-  console.log(`✅ Added vendor data to sheet: ${vendorData["Company Name"]}`);
+  console.log(`✅ Added vendor data to sheet: ${vendorData.companyName}`);
 }
 
 /**
