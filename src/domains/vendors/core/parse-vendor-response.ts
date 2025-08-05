@@ -1,4 +1,5 @@
 import { DEFAULT_VENDOR_RESPONSE, RAW_TO_VENDOR_KEY } from "../constants";
+import { parseYesNo } from "./utils";
 import { Vendor } from "../types";
 
 // Type-safe field assignment using a mapping function
@@ -18,28 +19,41 @@ const fieldHandlers: Record<
   email: (value, parsed) => {
     parsed.email = value;
   },
-  website: (value, parsed) => {
-    parsed.website = value;
+  address: (value, parsed) => {
+    parsed.address = value;
   },
-  materials: (value, parsed) => {
-    parsed.materials = value.split(",").map((s) => s.trim());
+  productsOffered: (value, parsed) => {
+    parsed.productsOffered = value.split(",").map((s) => s.trim());
   },
-  certifications: (value, parsed) => {
-    parsed.certifications = value.split(",").map((s) => s.trim());
+  websiteOrSocial: (value, parsed) => {
+    parsed.websiteOrSocial = value;
   },
-  tradeType: (value, parsed) => {
-    parsed.tradeType = value;
+  hasShowroom: (value, parsed) => {
+    parsed.hasShowroom = parseYesNo(value);
   },
-  uploads: (value, parsed) => {
-    parsed.uploads = value.split(",").map((s) => s.trim());
+  offersCustomOrders: (value, parsed) => {
+    parsed.offersCustomOrders = parseYesNo(value);
   },
-  bio: (value, parsed) => {
-    // If bio already has content, append with separator
-    if (parsed.bio) {
-      parsed.bio += ` | ${value}`;
-    } else {
-      parsed.bio = value;
-    }
+  offersDelivery: (value, parsed) => {
+    parsed.offersDelivery = parseYesNo(value);
+  },
+  turnaroundTime: (value, parsed) => {
+    parsed.turnaroundTime = value;
+  },
+  offersContractorPricing: (value, parsed) => {
+    parsed.offersContractorPricing = parseYesNo(value);
+  },
+  paymentMethods: (value, parsed) => {
+    parsed.paymentMethods = value.split(",").map((s) => s.trim());
+  },
+  paymentDetails: (value, parsed) => {
+    parsed.paymentDetails = value;
+  },
+  willEmailCatalogs: (value, parsed) => {
+    parsed.willEmailCatalogs = parseYesNo(value);
+  },
+  comments: (value, parsed) => {
+    parsed.comments = value;
   },
   submittedAt: () => {
     /* Set programmatically later */
@@ -51,7 +65,10 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
 
   for (const [rawKey, value] of Object.entries(raw)) {
     const fieldKey = RAW_TO_VENDOR_KEY[rawKey];
-    if (!fieldKey) continue;
+    if (!fieldKey) {
+      console.warn(`⚠️ Unrecognized form field: ${rawKey}`);
+      continue;
+    }
 
     // Execute the handler for this field
     const handler = fieldHandlers[fieldKey];
