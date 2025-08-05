@@ -1,0 +1,18 @@
+{
+  "name": "ace-remodeling-forms",
+  "version": "1.0.0",
+  "description": "ACE Remodeling Forms Processing Library",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "node clasp-build.js",
+    "push:raw": "npm run build && clasp push --ignore '**/*.d.ts'",
+    "deploy": "npm run build && clasp deploy"
+  },
+  "keywords": [
+    "google-apps-script",
+    "forms",
+    "ace-remodeling"
+  ],
+  "author": "",
+  "license": "ISC"
+}
