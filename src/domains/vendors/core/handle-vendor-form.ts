@@ -1,10 +1,7 @@
 import { extractResponse } from "../../../forms/core/extract-response";
 import { parseVendorResponse } from "./parse-vendor-response";
-import { Vendor } from "../types";
+import { saveVendorDataToSheet } from "./integrations/sheets-integration";
 import { VENDOR_SHEET_ID } from "../constants";
-
-// Vendor sheet configuration
-const VENDOR_SHEET_NAME = "Vendor Form Responses";
 
 /**
  * Handles vendor form submissions
@@ -46,55 +43,6 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
     );
     throw error;
   }
-}
-
-/**
- * Saves vendor data to the Google Sheet
- */
-function saveVendorDataToSheet(vendorData: Vendor) {
-  console.log(`📊 Attempting to save to sheet ID: ${VENDOR_SHEET_ID}`);
-
-  const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
-  console.log(`📊 Opened spreadsheet: ${spreadsheet.getName()}`);
-  console.log(`📊 Spreadsheet URL: ${spreadsheet.getUrl()}`);
-
-  const sheet =
-    spreadsheet.getSheetByName(VENDOR_SHEET_NAME) ||
-    spreadsheet.insertSheet(VENDOR_SHEET_NAME);
-
-  console.log(`📊 Using sheet: ${sheet.getName()}`);
-  console.log(
-    `📊 Sheet URL: ${sheet.getParent().getUrl()}#gid=${sheet.getSheetId()}`
-  );
-
-  // Get all keys from the Vendor type dynamically
-  const headers: (keyof Vendor)[] = Object.keys(vendorData) as (keyof Vendor)[];
-
-  // Write headers if sheet is empty
-  if (sheet.getLastRow() === 0) {
-    console.log(`📊 Writing headers: ${headers.join(", ")}`);
-    sheet.appendRow(headers);
-  } else {
-    console.log(
-      `📊 Sheet already has ${sheet.getLastRow()} rows, skipping headers`
-    );
-  }
-
-  // Format the row data
-  const row = headers.map((key) => {
-    const value = vendorData[key];
-    if (Array.isArray(value)) return value.join(", ");
-    if (value instanceof Date) return value.toISOString().slice(0, 10); // YYYY-MM-DD
-    if (typeof value === "boolean") return value ? "Yes" : "No";
-    return value ?? "";
-  });
-
-  console.log(`📊 Appending row: ${row.join(" | ")}`);
-
-  // Append the new row
-  sheet.appendRow(row);
-  console.log(`✅ Added vendor data to sheet: ${vendorData.companyName}`);
-  console.log(`✅ Final row count: ${sheet.getLastRow()}`);
 }
 
 /**

@@ -2,6 +2,108 @@ import { Vendor } from "./types";
 
 export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
 
+// Shared status options for both Rough and Finish tables
+export const VENDOR_STATUS_OPTIONS = [
+  "New",
+  "In progress",
+  "Under review",
+  "Published",
+  "Suspended",
+  "Paused",
+  "Not contacted",
+  "Onboarded",
+  "Contacted",
+  "Insured",
+  "Licensed",
+] as const;
+
+export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
+
+// Table configurations for the vendor sheet
+export const VENDOR_TABLES = {
+  ROUGH: {
+    name: "Rough",
+    headers: [
+      "Names",
+      "Type",
+      "Details",
+      "Point of Contact",
+      "Phone Number",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+    ],
+  },
+  FINISH: {
+    name: "Finish",
+    headers: [
+      "Names",
+      "Type",
+      "Email",
+      "Location",
+      "Phone",
+      "Point of Contact",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+    ],
+  },
+} as const;
+
+// Type mapping for Rough table - maps form options to Rough table dropdown options
+export const FORM_TO_ROUGH_TYPE_MAP: Record<string, string> = {
+  Cabinets: "Wood",
+  Countertops: "Building Supplies",
+  Flooring: "Floors",
+  Tile: "Building Supplies",
+  Doors: "Wood",
+  Hardware: "Metal",
+  Glass: "Building Supplies",
+  "Plumbing Fixtures": "Building Supplies",
+  Lighting: "Building Supplies",
+  Paint: "Building Supplies",
+  Drywall: "Drywall",
+  Stucco: "Building Supplies",
+  Siding: "Building Supplies",
+  Fence: "Building Supplies",
+  Gutter: "Roofs",
+  Decking: "Wood",
+  Roofing: "Roofs",
+  Stone: "Building Supplies",
+  Iron: "Metal",
+  Metal: "Metal",
+  Other: "All",
+};
+
+// Type mapping for Finish table - maps form options to Finish table dropdown options
+export const FORM_TO_FINISH_TYPE_MAP: Record<string, string> = {
+  Cabinets: "Cabinetry",
+  Countertops: "Countertops",
+  Flooring: "Floors",
+  Tile: "Tiles",
+  Doors: "Doors",
+  Hardware: "Supplier",
+  Glass: "Windows",
+  "Plumbing Fixtures": "Appliances",
+  Lighting: "Appliances",
+  Paint: "Paint",
+  Drywall: "Paint",
+  Stucco: "Paint",
+  Siding: "Vinyl",
+  Fence: "Gates, Fences, Electric",
+  Gutter: "Vinyl",
+  Decking: "Floors",
+  Roofing: "Vinyl",
+  Stone: "Slabs, Granite, Marble, Quartz",
+  Iron: "Gates, Fences, Electric",
+  Metal: "Gates, Fences, Electric",
+  Other: "Supplier",
+};
+
 // Map Vendor fields to their possible form titles (exact matches from Google Forms)
 export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   companyName: ["Company Name/ Nombre de la Empresa"],
