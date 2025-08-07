@@ -1,10 +1,8 @@
 import { Vendor } from "../../types";
 import { VENDOR_SHEET_ID, VENDOR_TABLES } from "../../constants";
 import {
-  transformVendorToRoughTable,
+  transformVendorToRoughTableTest,
   RoughTableRow,
-  transformVendorToFinishTable,
-  FinishTableRow,
 } from "../transformations/vendor-to-sheets";
 
 /**
@@ -17,39 +15,33 @@ export interface SheetsTableConfig {
 }
 
 /**
- * Saves vendor data to the Rough table in the Google Sheet
+ * TEST MODE: Saves vendor data using placeholder mappings
+ * Use this to test the pipeline before getting real mappings from employees
  */
-export function saveVendorDataToSheet(vendorData: Vendor) {
-  console.log(`📊 Attempting to save to sheet ID: ${VENDOR_SHEET_ID}`);
+export function saveVendorDataToSheetTest(vendorData: Vendor) {
+  console.log(
+    `🧪 TEST MODE: Saving vendor data to sheet ID: ${VENDOR_SHEET_ID}`
+  );
 
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
-  console.log(`📊 Opened spreadsheet: ${spreadsheet.getName()}`);
-  console.log(`📊 Spreadsheet URL: ${spreadsheet.getUrl()}`);
-
   const sheet =
     spreadsheet.getSheetByName(VENDOR_TABLES.ROUGH.name) ||
     spreadsheet.insertSheet(VENDOR_TABLES.ROUGH.name);
 
-  console.log(`📊 Using sheet: ${sheet.getName()}`);
-  console.log(
-    `📊 Sheet URL: ${sheet.getParent().getUrl()}#gid=${sheet.getSheetId()}`
-  );
+  // Find the actual last row with content (not just empty rows)
+  const lastRowWithContent = findLastRowWithContent(sheet);
+  console.log(`🧪 TEST MODE: Last row with content: ${lastRowWithContent}`);
 
-  // Transform vendor data to Rough table format
-  const roughTableRow = transformVendorToRoughTable(vendorData);
-  console.log(`📊 Transformed data:`, roughTableRow);
+  // Use test transformation with placeholder mappings
+  const roughTableRow = transformVendorToRoughTableTest(vendorData);
 
   // Get headers from the transformed data
   const headers = Object.keys(roughTableRow) as (keyof RoughTableRow)[];
 
-  // Write headers if sheet is empty
-  if (sheet.getLastRow() === 0) {
-    console.log(`📊 Writing headers: ${headers.join(", ")}`);
+  // Write headers if sheet is empty (only header row exists)
+  if (lastRowWithContent <= 1) {
+    console.log(`🧪 TEST MODE: Writing headers`);
     sheet.appendRow(headers);
-  } else {
-    console.log(
-      `📊 Sheet already has ${sheet.getLastRow()} rows, skipping headers`
-    );
   }
 
   // Format the row data using the transformed structure
@@ -58,73 +50,75 @@ export function saveVendorDataToSheet(vendorData: Vendor) {
     return value ?? "";
   });
 
-  console.log(`📊 Appending row: ${row.join(" | ")}`);
+  // Insert the new row AFTER the last row with content (not at the very end)
+  const insertRowNumber = lastRowWithContent + 1;
+  console.log(`🧪 TEST MODE: Inserting row at position ${insertRowNumber}`);
 
-  // Append the new row
-  sheet.appendRow(row);
-  console.log(`✅ Added vendor data to Rough table: ${vendorData.companyName}`);
-  console.log(`✅ Final row count: ${sheet.getLastRow()}`);
+  // Insert a new row at the correct position
+  sheet.insertRowAfter(lastRowWithContent);
+
+  // Write the data to the newly inserted row
+  const targetRange = sheet.getRange(insertRowNumber, 1, 1, row.length);
+  targetRange.setValues([row]);
+
+  console.log(`🧪 TEST MODE: Added vendor data: ${vendorData.companyName}`);
 }
 
 /**
- * Inserts vendor data into a specific table in Google Sheets
- * Uses the appropriate transformation based on table type
+ * Finds the last row that actually contains vendor data by checking column A (Names)
  */
-export function insertVendorIntoSheetsTable(
-  vendor: Vendor,
-  config: SheetsTableConfig
-): void {
-  console.log(`📊 Inserting vendor into sheets table: ${config.sheetName}`);
-
-  const spreadsheet = SpreadsheetApp.openById(config.spreadsheetId);
-  const sheet = spreadsheet.getSheetByName(config.sheetName);
-
-  if (!sheet) {
-    throw new Error(`Sheet '${config.sheetName}' not found`);
-  }
-
-  // Determine which transformation to use based on table name
-  let transformedData: any;
-  if (config.sheetName === VENDOR_TABLES.ROUGH.name) {
-    transformedData = transformVendorToRoughTable(vendor);
-    console.log(`📊 Transformed vendor data for Rough table:`, transformedData);
-  } else if (config.sheetName === VENDOR_TABLES.FINISH.name) {
-    transformedData = transformVendorToFinishTable(vendor);
-    console.log(
-      `📊 Transformed vendor data for Finish table:`,
-      transformedData
-    );
-  } else {
-    throw new Error(
-      `No transformation available for table: ${config.sheetName}`
-    );
-  }
-
-  // Get headers from the transformed data
-  const headers = Object.keys(transformedData);
-
-  // Validate that our headers match the table structure
-  const tableHeaders = getSheetsTableHeaders(sheet);
-  console.log(`📊 Table headers: ${tableHeaders.join(", ")}`);
-  console.log(`📊 Our headers: ${headers.join(", ")}`);
-
-  // Create row data in the correct order
-  const row = headers.map((key) => transformedData[key] ?? "");
-
-  // Append the new row
-  sheet.appendRow(row);
-  console.log(`✅ Vendor inserted into table: ${vendor.companyName}`);
-}
-
-/**
- * Gets the headers from an existing Google Sheets table
- * Useful for validation and dynamic field mapping
- */
-export function getSheetsTableHeaders(
+function findLastRowWithContent(
   sheet: GoogleAppsScript.Spreadsheet.Sheet
-): string[] {
-  const headerRow = sheet
-    .getRange(1, 1, 1, sheet.getLastColumn())
-    .getValues()[0];
-  return headerRow.filter((cell: any) => cell !== ""); // Remove empty cells
+): number {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow === 0) return 0;
+
+  // Start from the last row and work backwards
+  for (let row = lastRow; row >= 1; row--) {
+    // Only check column A (Names)
+    const nameCell = sheet.getRange(row, 1);
+    const nameValue = String(nameCell.getValue()).trim();
+
+    // Skip empty cells
+    if (!nameValue) continue;
+
+    // Skip header row (row 1)
+    if (row === 1) continue;
+
+    // Skip placeholder/smart table content in Names column
+    const isPlaceholder = [
+      "Sample",
+      "Example",
+      "Test",
+      "Demo",
+      "Placeholder",
+      "N/A",
+      "TBD",
+      "Click to edit",
+      "Enter data",
+      "Type here",
+      "Add data",
+      "Names", // Skip if someone accidentally put "Names" in the data
+    ].some((placeholder) =>
+      nameValue.toLowerCase().includes(placeholder.toLowerCase())
+    );
+
+    if (isPlaceholder) continue;
+
+    // Skip cells that look like formulas
+    const isFormula =
+      nameValue.startsWith("=") ||
+      nameValue.includes("{{") ||
+      nameValue.includes("}}");
+    if (isFormula) continue;
+
+    // If we get here, it's a real company name
+    console.log(`📊 Found vendor data in row ${row}: "${nameValue}"`);
+    return row;
+  }
+
+  // If no vendor data found, return 1 (header row)
+  console.log(`📊 No vendor data found, using header row (1)`);
+  return 1;
 }

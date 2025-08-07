@@ -150,3 +150,58 @@ export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
       .join(" | "),
   };
 }
+
+/**
+ * TEST MODE: Transforms vendor data with placeholder mappings
+ * Use this for testing the pipeline before getting real mappings from employees
+ */
+export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
+  return {
+    Names: vendor.companyName,
+    Type: mapProductsToRoughType(vendor.productsOffered),
+    Details: "TEST: Will be mapped by employees", // Placeholder
+    "Point of Contact": vendor.contactName, // Using contact name as placeholder
+    "Phone Number": vendor.phone,
+    Status: VENDOR_STATUS_OPTIONS[0], // "New"
+    "Post date": vendor.submittedAt.toISOString().slice(0, 10),
+    File: vendor.websiteOrSocial || "",
+    Stars: "",
+    Notes: `TEST: ${vendor.comments || "No comments"} | Products: ${
+      vendor.productsOffered?.join(", ") || "None"
+    }`, // Placeholder
+  };
+}
+
+/**
+ * TEST MODE: Transforms vendor data with placeholder mappings for Finish table
+ * Use this for testing the pipeline before getting real mappings from employees
+ */
+export function transformVendorToFinishTableTest(
+  vendor: Vendor
+): FinishTableRow {
+  return {
+    Names: vendor.companyName,
+    Type: mapProductsToFinishType(vendor.productsOffered),
+    Email: vendor.email,
+    Location: vendor.address,
+    Phone: vendor.phone,
+    "Point of Contact": vendor.contactName,
+    Status: VENDOR_STATUS_OPTIONS[0], // "New"
+    "Post date": vendor.submittedAt.toISOString().slice(0, 10),
+    File: vendor.websiteOrSocial || "",
+    Stars: "",
+    Notes: [
+      vendor.comments,
+      `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,
+      `Custom Orders: ${vendor.offersCustomOrders ? "Yes" : "No"}`,
+      `Delivery: ${vendor.offersDelivery ? "Yes" : "No"}`,
+      `Turnaround: ${vendor.turnaroundTime || "Not specified"}`,
+      `Contractor Pricing: ${vendor.offersContractorPricing ? "Yes" : "No"}`,
+      `Payment Methods: ${vendor.paymentMethods.join(", ")}`,
+      `Payment Details: ${vendor.paymentDetails}`,
+      `Email Catalogs: ${vendor.willEmailCatalogs ? "Yes" : "No"}`,
+    ]
+      .filter(Boolean)
+      .join(" | "),
+  };
+}
