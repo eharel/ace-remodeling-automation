@@ -4,6 +4,7 @@ import {
   FORM_TO_ROUGH_TYPE_MAP,
   FORM_TO_FINISH_TYPE_MAP,
 } from "../../constants";
+import { formatPhoneNumber } from "@utils/index";
 
 /**
  * Interface for the Rough table row format
@@ -111,10 +112,10 @@ export function transformVendorToRoughTable(vendor: Vendor): RoughTableRow {
     Type: mapProductsToRoughType(vendor.productsOffered),
     Details: "TBD - Need clarification", // Placeholder until clarified
     "Point of Contact": "TBD - Need clarification", // Placeholder until clarified
-    "Phone Number": vendor.phone,
+    "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
     Status: VENDOR_STATUS_OPTIONS[0], // "New" - first option in the array
     "Post date": vendor.submittedAt.toISOString().slice(0, 10), // YYYY-MM-DD
-    File: vendor.websiteOrSocial || "",
+    File: "", // Empty for Rough table
     Stars: "", // Empty for new vendors
     Notes: "TBD - Need clarification", // Placeholder until clarified
   };
@@ -129,11 +130,11 @@ export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
     Type: mapProductsToFinishType(vendor.productsOffered),
     Email: vendor.email,
     Location: vendor.address,
-    Phone: vendor.phone,
+    Phone: formatPhoneNumber(vendor.phone, "parentheses"),
     "Point of Contact": vendor.contactName,
     Status: VENDOR_STATUS_OPTIONS[0], // "New" - first option in the array
     "Post date": vendor.submittedAt.toISOString().slice(0, 10), // YYYY-MM-DD
-    File: vendor.websiteOrSocial || "",
+    File: "", // Empty since no files are submitted
     Stars: "", // Empty for new vendors
     Notes: [
       vendor.comments,
@@ -161,10 +162,10 @@ export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
     Type: mapProductsToRoughType(vendor.productsOffered),
     Details: "TEST: Will be mapped by employees", // Placeholder
     "Point of Contact": vendor.contactName, // Using contact name as placeholder
-    "Phone Number": vendor.phone,
+    "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
     Status: VENDOR_STATUS_OPTIONS[0], // "New"
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
-    File: vendor.websiteOrSocial || "",
+    File: "", // Empty for Rough table
     Stars: "",
     Notes: `TEST: ${vendor.comments || "No comments"} | Products: ${
       vendor.productsOffered?.join(", ") || "None"
@@ -184,11 +185,11 @@ export function transformVendorToFinishTableTest(
     Type: mapProductsToFinishType(vendor.productsOffered),
     Email: vendor.email,
     Location: vendor.address,
-    Phone: vendor.phone,
+    Phone: formatPhoneNumber(vendor.phone, "parentheses"),
     "Point of Contact": vendor.contactName,
     Status: VENDOR_STATUS_OPTIONS[0], // "New"
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
-    File: vendor.websiteOrSocial || "",
+    File: "", // Empty since no files are submitted
     Stars: "",
     Notes: [
       vendor.comments,

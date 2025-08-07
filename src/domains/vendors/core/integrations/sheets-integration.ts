@@ -2,7 +2,9 @@ import { Vendor } from "../../types";
 import { VENDOR_SHEET_ID, VENDOR_TABLES } from "../../constants";
 import {
   transformVendorToRoughTableTest,
+  transformVendorToFinishTableTest,
   RoughTableRow,
+  FinishTableRow,
 } from "../transformations/vendor-to-sheets";
 
 /**
@@ -15,28 +17,51 @@ export interface SheetsTableConfig {
 }
 
 /**
- * TEST MODE: Saves vendor data using placeholder mappings
- * Use this to test the pipeline before getting real mappings from employees
+ * Determines which sheet the vendor data should be written to
+ * TODO: Add employee logic here when they provide the rules
  */
-export function saveVendorDataToSheetTest(vendorData: Vendor) {
+export function determineDestinationSheet(
+  vendorData: Vendor
+): "Rough" | "Finish" {
+  // For now, always use Rough table for testing
+  // TODO: Add logic based on employee input
+  return "Rough";
+}
+
+/**
+ * TEST MODE: Saves vendor data to the specified sheet using appropriate transformation
+ */
+export function saveVendorDataToSheetTest(
+  vendorData: Vendor,
+  destinationSheet: "Rough" | "Finish" = "Rough"
+) {
   console.log(
-    `🧪 TEST MODE: Saving vendor data to sheet ID: ${VENDOR_SHEET_ID}`
+    `🧪 TEST MODE: Saving vendor data to ${destinationSheet} sheet, ID: ${VENDOR_SHEET_ID}`
   );
 
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
+  const sheetName =
+    destinationSheet === "Rough"
+      ? VENDOR_TABLES.ROUGH.name
+      : VENDOR_TABLES.FINISH.name;
   const sheet =
-    spreadsheet.getSheetByName(VENDOR_TABLES.ROUGH.name) ||
-    spreadsheet.insertSheet(VENDOR_TABLES.ROUGH.name);
+    spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
 
   // Find the actual last row with content (not just empty rows)
   const lastRowWithContent = findLastRowWithContent(sheet);
   console.log(`🧪 TEST MODE: Last row with content: ${lastRowWithContent}`);
 
-  // Use test transformation with placeholder mappings
-  const roughTableRow = transformVendorToRoughTableTest(vendorData);
+  // Transform data based on destination sheet
+  let transformedData: RoughTableRow | FinishTableRow;
+  let headers: string[];
 
-  // Get headers from the transformed data
-  const headers = Object.keys(roughTableRow) as (keyof RoughTableRow)[];
+  if (destinationSheet === "Rough") {
+    transformedData = transformVendorToRoughTableTest(vendorData);
+    headers = Object.keys(transformedData) as (keyof RoughTableRow)[];
+  } else {
+    transformedData = transformVendorToFinishTableTest(vendorData);
+    headers = Object.keys(transformedData) as (keyof FinishTableRow)[];
+  }
 
   // Write headers if sheet is empty (only header row exists)
   if (lastRowWithContent <= 1) {
@@ -46,7 +71,7 @@ export function saveVendorDataToSheetTest(vendorData: Vendor) {
 
   // Format the row data using the transformed structure
   const row = headers.map((key) => {
-    const value = roughTableRow[key];
+    const value = transformedData[key as keyof typeof transformedData];
     return value ?? "";
   });
 
@@ -61,7 +86,9 @@ export function saveVendorDataToSheetTest(vendorData: Vendor) {
   const targetRange = sheet.getRange(insertRowNumber, 1, 1, row.length);
   targetRange.setValues([row]);
 
-  console.log(`🧪 TEST MODE: Added vendor data: ${vendorData.companyName}`);
+  console.log(
+    `🧪 TEST MODE: Added vendor data to ${destinationSheet} sheet: ${vendorData.companyName}`
+  );
 }
 
 /**
