@@ -1,63 +1,80 @@
-export interface SplitMergeRangeParams {
-  sheet: GoogleAppsScript.Spreadsheet.Sheet;
-  startRow: number;
-  startCol: number;
-  numRows: number;
-  numCols: number;
-  frozenColumns: number;
-  value: string;
-  styling?: {
-    background?: string;
-    fontSize?: number;
-    fontWeight?: GoogleAppsScript.Spreadsheet.FontWeight;
-    fontColor?: string;
-  };
+/**
+ * Creates an email HYPERLINK formula
+ */
+export function createEmailLinkFormula(email: string): string {
+  if (!email) return "";
+  return `=HYPERLINK("mailto:${email}", "${email}")`;
 }
 
-export function applySplitMergeRange(params: SplitMergeRangeParams) {
-  const {
-    sheet,
-    startRow,
-    startCol,
-    numRows,
-    numCols,
-    frozenColumns,
-    value,
-    styling,
-  } = params;
+/**
+ * Creates a Google Maps HYPERLINK formula for an address
+ */
+export function createMapsLinkFormula(address: string): string {
+  if (!address) return "";
+  const encodedAddress = encodeURIComponent(address);
+  return `=HYPERLINK("https://www.google.com/maps/search/?api=1&query=${encodedAddress}", "${address}")`;
+}
 
-  const middleStart = startCol + frozenColumns;
-  const middleWidth = numCols - frozenColumns * 2;
+/**
+ * Returns the email link formula if the email is valid, otherwise empty string
+ */
+export function getEmailLinkFormula(email: string): string {
+  if (!email || !email.includes("@")) return "";
+  return createEmailLinkFormula(email);
+}
 
-  const leftRange = sheet.getRange(startRow, startCol, numRows, frozenColumns);
-  const middleRange = sheet.getRange(
-    startRow,
-    middleStart,
-    numRows,
-    middleWidth
-  );
-  const rightRange = sheet.getRange(
-    startRow,
-    middleStart + middleWidth,
-    numRows,
-    frozenColumns
-  );
+/**
+ * Returns the Google Maps link formula if the location is valid, otherwise empty string
+ */
+export function getLocationLinkFormula(location: string): string {
+  if (!location || !location.trim()) return "";
+  return createMapsLinkFormula(location);
+}
 
-  if (styling?.background) {
-    sheet
-      .getRange(startRow, startCol, numRows, numCols)
-      .setBackground(styling.background);
+/**
+ * Finds the last row that actually contains data by checking column A
+ * Ignores empty cells, headers, placeholders, and formulas
+ */
+export function findLastRowWithContent(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  placeholderKeywords: string[]
+): number {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow === 0) return 0;
+
+  // Start from the last row and work backwards
+  for (let row = lastRow; row >= 1; row--) {
+    // Only check column A (Names)
+    const nameCell = sheet.getRange(row, 1);
+    const nameValue = String(nameCell.getValue()).trim();
+
+    // Skip empty cells
+    if (!nameValue) continue;
+
+    // Skip header row (row 1)
+    if (row === 1) continue;
+
+    // Skip placeholder/smart table content in Names column
+    const isPlaceholder = placeholderKeywords.some((placeholder) =>
+      nameValue.toLowerCase().includes(placeholder.toLowerCase())
+    );
+
+    if (isPlaceholder) continue;
+
+    // Skip cells that look like formulas
+    const isFormula =
+      nameValue.startsWith("=") ||
+      nameValue.includes("{{") ||
+      nameValue.includes("}}");
+    if (isFormula) continue;
+
+    // If we get here, it's a real company name
+    console.log(`📊 Found data in row ${row}: "${nameValue}"`);
+    return row;
   }
 
-  middleRange
-    .merge()
-    .setValue(value)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-
-  if (styling?.fontSize) middleRange.setFontSize(styling.fontSize);
-  if (styling?.fontWeight) middleRange.setFontWeight(styling.fontWeight);
-  if (styling?.fontColor) middleRange.setFontColor(styling.fontColor);
-
-  return middleRange;
+  // If no data found, return 1 (header row)
+  console.log(`📊 No data found, using header row (1)`);
+  return 1;
 }
