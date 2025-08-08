@@ -146,30 +146,52 @@ function saveVendorDataToSheetTestInternal(
 
   // Transform data based on destination sheet
   let transformedData: RoughTableRow | FinishTableRow;
-  let headers: string[];
 
   if (destinationSheet === TABLE_NAMES.ROUGH) {
     transformedData = transformVendorToRoughTableTest(vendorData);
-    headers = Object.keys(transformedData) as (keyof RoughTableRow)[];
   } else {
     transformedData = transformVendorToFinishTableTest(vendorData);
-    headers = Object.keys(transformedData) as (keyof FinishTableRow)[];
   }
+
+  console.log(
+    `🔍 Transformed data keys: ${Object.keys(transformedData).join(", ")}`
+  );
+  console.log(`🔍 Transformed data:`, transformedData);
+
+  // Read existing headers from the sheet (order-independent)
+  const existingHeaders = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getValues()[0] as string[];
+  console.log(`🧪 TEST MODE: Existing headers: ${existingHeaders.join(", ")}`);
+
+  // Normalize headers to handle Google Sheets Smart Table formatting
+  const normalizedHeaders = existingHeaders.map((header) =>
+    header.replace(/[:：]/g, "").trim()
+  );
+  console.log(
+    `🧪 TEST MODE: Normalized headers: ${normalizedHeaders.join(", ")}`
+  );
 
   // Write headers if sheet is empty (only header row exists)
   if (lastRowWithContent <= 1) {
     console.log(`🧪 TEST MODE: Writing headers`);
-    sheet.appendRow(headers);
+    const expectedHeaders = Object.keys(transformedData);
+    sheet
+      .getRange(1, 1, 1, expectedHeaders.length)
+      .setValues([expectedHeaders]);
+    console.log(`🧪 TEST MODE: Wrote headers: ${expectedHeaders.join(", ")}`);
   }
 
-  // Format the row data using the transformed structure
-  const row = headers.map((key) => {
-    const value = transformedData[key as keyof typeof transformedData];
-
+  // Map data to match the actual header order in the sheet
+  const rowData = normalizedHeaders.map((header) => {
+    const value = transformedData[header as keyof typeof transformedData];
+    console.log(
+      `🔍 Mapping header "${header}" -> value: "${value ?? "undefined"}"`
+    );
     return value ?? "";
   });
 
-  console.log(`🔍 Final row data:`, row);
+  console.log(`🔍 Final row data:`, rowData);
 
   // Insert the new row AFTER the last row with content (not at the very end)
   const insertRowNumber = lastRowWithContent + 1;
@@ -179,16 +201,16 @@ function saveVendorDataToSheetTestInternal(
   sheet.insertRowAfter(lastRowWithContent);
 
   // Write the data to the newly inserted row
-  const targetRange = sheet.getRange(insertRowNumber, 1, 1, row.length);
-  targetRange.setValues([row]);
+  const targetRange = sheet.getRange(insertRowNumber, 1, 1, rowData.length);
+  targetRange.setValues([rowData]);
 
   // Apply Smart Chip formatting (email links, location chips, etc.)
   // Only apply to Finish table since Rough table doesn't have Email/Location columns
   if (destinationSheet === TABLE_NAMES.FINISH) {
     const finishTableData = transformedData as FinishTableRow;
 
-    // Apply email link
-    const emailColumnIndex = headers.indexOf("Email") + 1;
+    // Apply email link - find column by name instead of position
+    const emailColumnIndex = normalizedHeaders.indexOf("Email") + 1;
     if (emailColumnIndex > 0) {
       const emailFormula = getEmailLinkFormula(finishTableData.Email);
       if (emailFormula) {
@@ -198,8 +220,8 @@ function saveVendorDataToSheetTestInternal(
       }
     }
 
-    // Apply location link
-    const locationColumnIndex = headers.indexOf("Location") + 1;
+    // Apply location link - find column by name instead of position
+    const locationColumnIndex = normalizedHeaders.indexOf("Location") + 1;
     if (locationColumnIndex > 0) {
       const locationFormula = getLocationLinkFormula(finishTableData.Location);
       if (locationFormula) {

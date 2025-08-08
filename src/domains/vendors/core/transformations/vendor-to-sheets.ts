@@ -5,10 +5,10 @@ import { PRODUCT_BY_LABEL } from "../../products";
 
 /**
  * Interface for the Rough table row format
- * Matches the actual table structure: Names, Type, Details, Point of Contact, Phone Number, Status, Post date, File, Stars, Notes
+ * Matches the actual table structure: Name, Type, Details, Point of Contact, Phone Number, Status, Post date, File, Stars, Notes
  */
 export interface RoughTableRow {
-  Names: string;
+  Name: string;
   Type: string; // multi-select rendered as comma+space string
   Details: string;
   "Point of Contact": string;
@@ -22,10 +22,10 @@ export interface RoughTableRow {
 
 /**
  * Interface for the Finish table row format
- * Matches the actual table structure: Names, Type, Email, Location, Phone, Point of Contact, Status, Post date, File, Stars, Notes
+ * Matches the actual table structure: Name, Type, Email, Location, Phone, Point of Contact, Status, Post date, File, Stars, Notes
  */
 export interface FinishTableRow {
-  Names: string;
+  Name: string;
   Type: string; // multi-select rendered as comma+space string
   Email: string;
   Location: string; // NOTE: place chip not programmatically settable
@@ -82,7 +82,7 @@ export function transformVendorToRoughTable(vendor: Vendor): RoughTableRow {
   ];
 
   return {
-    Names: vendor.companyName,
+    Name: vendor.companyName,
     Type: joinForChip(mapProductsToRoughTypes(allProducts)),
     Details: "TBD - Need clarification",
     "Point of Contact": "TBD - Need clarification",
@@ -106,7 +106,7 @@ export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
   ];
 
   return {
-    Names: vendor.companyName,
+    Name: vendor.companyName,
     Type: joinForChip(mapProductsToFinishTypes(allProducts)),
     Email: vendor.email,
     Location: vendor.address, // leave plain or write URL chip elsewhere
@@ -143,7 +143,7 @@ export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
   ];
 
   return {
-    Names: vendor.companyName,
+    Name: vendor.companyName,
     Type: joinForChip(mapProductsToRoughTypes(allProducts)),
     Details: "TEST: Will be mapped by employees",
     "Point of Contact": vendor.contactName,
@@ -171,7 +171,7 @@ export function transformVendorToFinishTableTest(
   ];
 
   return {
-    Names: vendor.companyName,
+    Name: vendor.companyName,
     Type: joinForChip(mapProductsToFinishTypes(allProducts)),
     Email: vendor.email,
     Location: vendor.address,
