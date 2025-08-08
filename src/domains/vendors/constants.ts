@@ -2,6 +2,24 @@ import { Vendor } from "./types";
 
 export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
 
+// Table name constants
+export const TABLE_NAMES = {
+  ROUGH: "Rough",
+  FINISH: "Finish",
+} as const;
+
+export type TableName = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES];
+
+// Category constants (matching products.ts)
+export const VENDOR_CATEGORIES = {
+  ROUGH: "ROUGH",
+  FINISH: "FINISH",
+  BOTH: "BOTH",
+} as const;
+
+export type VendorCategory =
+  (typeof VENDOR_CATEGORIES)[keyof typeof VENDOR_CATEGORIES];
+
 // Shared status options for both Rough and Finish tables
 export const VENDOR_STATUS_OPTIONS = [
   "New",
@@ -22,7 +40,7 @@ export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
 // Table configurations for the vendor sheet
 export const VENDOR_TABLES = {
   ROUGH: {
-    name: "Rough",
+    name: TABLE_NAMES.ROUGH,
     headers: [
       "Names",
       "Type",
@@ -37,7 +55,7 @@ export const VENDOR_TABLES = {
     ],
   },
   FINISH: {
-    name: "Finish",
+    name: TABLE_NAMES.FINISH,
     headers: [
       "Names",
       "Type",
@@ -111,9 +129,8 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   phone: ["Phone Number/ Número de teléfono"],
   email: ["Email/ Correo electrónico"],
   address: ["Business Address/ Dirección de negocio"],
-  productsOffered: [
-    "Type of Products You Offer / Tipo de Productos que Ofrece",
-  ],
+  roughProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
+  finishProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   websiteOrSocial: ["Website or Social Media"],
   hasShowroom: [
     "Do you have a physical showroom? / ¿Tiene una sala de exhibición física?",
@@ -158,7 +175,8 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   phone: "",
   email: "",
   address: "",
-  productsOffered: [],
+  roughProducts: [],
+  finishProducts: [],
   websiteOrSocial: "",
   hasShowroom: undefined,
   offersCustomOrders: undefined,

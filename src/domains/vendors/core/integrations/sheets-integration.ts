@@ -1,5 +1,10 @@
 import { Vendor } from "../../types";
-import { VENDOR_SHEET_ID, VENDOR_TABLES } from "../../constants";
+import {
+  VENDOR_SHEET_ID,
+  VENDOR_TABLES,
+  TABLE_NAMES,
+  VENDOR_CATEGORIES,
+} from "../../constants";
 import {
   transformVendorToRoughTableTest,
   transformVendorToFinishTableTest,
@@ -11,6 +16,40 @@ import {
   getEmailLinkFormula,
   getLocationLinkFormula,
 } from "@utils/sheets";
+import { PRODUCT_BY_LABEL } from "../../products";
+
+// Helper function to extract English part from bilingual labels
+function english(label: string): string {
+  return label.split("/")[0].trim();
+}
+
+/**
+ * Determines which tables a vendor should appear in based on their products
+ */
+export function decideDestinations(
+  products?: string[]
+): (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES][] {
+  if (!products?.length) return [TABLE_NAMES.FINISH]; // safe default
+  let rough = false,
+    finish = false;
+  for (const p of products) {
+    const def = PRODUCT_BY_LABEL[english(p)];
+    if (!def) continue;
+    if (
+      def.category === VENDOR_CATEGORIES.ROUGH ||
+      def.category === VENDOR_CATEGORIES.BOTH
+    )
+      rough = true;
+    if (
+      def.category === VENDOR_CATEGORIES.FINISH ||
+      def.category === VENDOR_CATEGORIES.BOTH
+    )
+      finish = true;
+  }
+  if (rough && finish) return [TABLE_NAMES.ROUGH, TABLE_NAMES.FINISH];
+  if (rough) return [TABLE_NAMES.ROUGH];
+  return [TABLE_NAMES.FINISH];
+}
 
 /**
  * Configuration for Google Sheets table operations
@@ -27,18 +66,54 @@ export interface SheetsTableConfig {
  */
 export function determineDestinationSheet(
   vendorData: Vendor
-): "Rough" | "Finish" {
+): (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES] {
   // For now, always use Finish table for testing
   // TODO: Add logic based on employee input
-  return "Finish";
+  return TABLE_NAMES.FINISH;
 }
 
 /**
- * TEST MODE: Saves vendor data to the specified sheet using appropriate transformation
+ * TEST MODE: Saves vendor data to the appropriate sheets based on their products
+ * Creates entries for both Rough and Finish tables if the vendor has products in both categories
  */
-export function saveVendorDataToSheetTest(
+export function saveVendorDataToSheetTest(vendorData: Vendor) {
+  console.log(
+    `🧪 TEST MODE: Processing vendor data for ${vendorData.companyName}`
+  );
+
+  // Get all products from both arrays (these are the categorized products)
+  const allProducts = [
+    ...(vendorData.roughProducts || []),
+    ...(vendorData.finishProducts || []),
+  ];
+
+  console.log(
+    `🧪 TEST MODE: All products: ${allProducts.join(", ") || "None"}`
+  );
+
+  // Determine which tables to create entries for based on the categorized products
+  const destinations = decideDestinations(allProducts);
+  console.log(`🧪 TEST MODE: Destinations: ${destinations.join(", ")}`);
+
+  // Create entries for each destination
+  for (const destination of destinations) {
+    console.log(`🧪 TEST MODE: Creating ${destination} table entry`);
+    saveVendorDataToSheetTestInternal(vendorData, destination);
+  }
+
+  if (destinations.length === 0) {
+    console.warn(
+      `⚠️ No destinations found for vendor: ${vendorData.companyName}`
+    );
+  }
+}
+
+/**
+ * Internal function to save vendor data to a specific sheet
+ */
+function saveVendorDataToSheetTestInternal(
   vendorData: Vendor,
-  destinationSheet: "Rough" | "Finish" = "Rough"
+  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
 ) {
   console.log(
     `🧪 TEST MODE: Saving vendor data to ${destinationSheet} sheet, ID: ${VENDOR_SHEET_ID}`
@@ -46,7 +121,7 @@ export function saveVendorDataToSheetTest(
 
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
   const sheetName =
-    destinationSheet === "Rough"
+    destinationSheet === TABLE_NAMES.ROUGH
       ? VENDOR_TABLES.ROUGH.name
       : VENDOR_TABLES.FINISH.name;
   const sheet =
@@ -73,7 +148,7 @@ export function saveVendorDataToSheetTest(
   let transformedData: RoughTableRow | FinishTableRow;
   let headers: string[];
 
-  if (destinationSheet === "Rough") {
+  if (destinationSheet === TABLE_NAMES.ROUGH) {
     transformedData = transformVendorToRoughTableTest(vendorData);
     headers = Object.keys(transformedData) as (keyof RoughTableRow)[];
   } else {
@@ -109,7 +184,7 @@ export function saveVendorDataToSheetTest(
 
   // Apply Smart Chip formatting (email links, location chips, etc.)
   // Only apply to Finish table since Rough table doesn't have Email/Location columns
-  if (destinationSheet === "Finish") {
+  if (destinationSheet === TABLE_NAMES.FINISH) {
     const finishTableData = transformedData as FinishTableRow;
 
     // Apply email link

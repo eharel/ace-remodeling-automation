@@ -1,6 +1,7 @@
 import { Vendor } from "../../types";
 import { VENDOR_STATUS_OPTIONS } from "../../constants";
 import { formatPhoneNumber } from "@utils/index";
+import { PRODUCT_BY_LABEL } from "../../products";
 
 /**
  * Interface for the Rough table row format
@@ -37,177 +38,52 @@ export interface FinishTableRow {
   Notes: string;
 }
 
-/** Sheets expects comma+space to represent multi-select values in one cell */
-function formatForMultiSelect(options: string[] | undefined): string {
-  return options && options.length ? options.join(", ") : "";
+/** utility: Sheets wants "A, B, C" for multi-select cells */
+function joinForChip(values: string[] | undefined) {
+  return values && values.length ? values.join(", ") : "";
 }
 
-/**
- * Maps form products → Rough “Type” options (returns ALL matches as an array).
- * Form options are bilingual: "English / Spanish" → we strip to English before mapping.
- */
-function mapProductsToRoughTypes(products: string[] | undefined): string[] {
-  if (!products || products.length === 0) return [];
-
-  const mapped = new Set<string>();
-
-  for (const product of products) {
-    const english = product.split("/")[0].trim();
-
-    switch (english) {
-      case "Cabinets":
-        mapped.add("Wood");
-        break;
-      case "Countertops":
-        mapped.add("Building Supplies");
-        break;
-      case "Flooring":
-        mapped.add("Floors");
-        break;
-      case "Tile":
-        mapped.add("Building Supplies");
-        break;
-      case "Doors":
-        mapped.add("Wood");
-        break;
-      case "Hardware":
-        mapped.add("Metal");
-        break;
-      case "Glass":
-        mapped.add("Building Supplies");
-        break;
-      case "Plumbing Fixtures":
-        mapped.add("Building Supplies");
-        break;
-      case "Lighting":
-        mapped.add("Building Supplies");
-        break;
-      case "Paint":
-        mapped.add("Building Supplies");
-        break;
-      case "Drywall":
-        mapped.add("Drywall");
-        break;
-      case "Stucco":
-        mapped.add("Building Supplies");
-        break;
-      case "Siding":
-        mapped.add("Building Supplies");
-        break;
-      case "Fence":
-        mapped.add("Building Supplies");
-        break;
-      case "Gutter":
-        mapped.add("Roofs");
-        break;
-      case "Decking":
-        mapped.add("Wood");
-        break;
-      case "Roofing":
-        mapped.add("Roofs");
-        break;
-      case "Stone":
-        mapped.add("Building Supplies");
-        break;
-      case "Iron & Metal":
-      case "Iron":
-      case "Metal":
-        mapped.add("Metal");
-        break;
-      case "Other":
-        mapped.add("All");
-        break;
-      default:
-        console.warn(`⚠️ Unknown product type: ${english}`);
-        mapped.add("All");
-        break;
-    }
-  }
-
-  return Array.from(mapped);
+function english(label: string) {
+  // "X / Y" → "X"
+  return label.split("/")[0].trim();
 }
 
-/**
- * Maps form products → Finish “Type” options (returns ALL matches as an array).
- */
-function mapProductsToFinishTypes(products: string[] | undefined): string[] {
-  if (!products || products.length === 0) return [];
-
-  const mapped = new Set<string>();
-
-  for (const product of products) {
-    const english = product.split("/")[0].trim();
-
-    switch (english) {
-      case "Cabinets":
-        mapped.add("Cabinetry");
-        break;
-      case "Countertops":
-        mapped.add("Countertops");
-        break;
-      case "Flooring":
-        mapped.add("Floors");
-        break;
-      case "Tile":
-        mapped.add("Tiles");
-        break;
-      case "Doors":
-        mapped.add("Doors");
-        break;
-      case "Hardware":
-        mapped.add("Supplier");
-        break;
-      case "Glass":
-        mapped.add("Windows");
-        break;
-      case "Plumbing Fixtures":
-      case "Lighting":
-        mapped.add("Appliances");
-        break;
-      case "Paint":
-      case "Drywall":
-      case "Stucco":
-        mapped.add("Paint");
-        break;
-      case "Siding":
-      case "Gutter":
-      case "Roofing":
-        mapped.add("Vinyl");
-        break;
-      case "Fence":
-      case "Iron & Metal":
-      case "Iron":
-      case "Metal":
-        mapped.add("Gates / Fences / Electric");
-        break;
-      case "Decking":
-        mapped.add("Floors");
-        break;
-      case "Stone":
-        mapped.add("Slabs / Granite / Marble / Quartz");
-        break;
-      case "Other":
-        mapped.add("Supplier");
-        break;
-      default:
-        console.warn(`⚠️ Unknown product type: ${english}`);
-        mapped.add("Supplier");
-        break;
-    }
+function mapProductsToRoughTypes(products?: string[]): string[] {
+  if (!products?.length) return [];
+  const out = new Set<string>();
+  for (const p of products) {
+    const def = PRODUCT_BY_LABEL[english(p)];
+    if (def?.roughTypes) def.roughTypes.forEach((t: string) => out.add(t));
   }
+  // sensible fallback if nothing mapped
+  return out.size ? [...out] : ["All"];
+}
 
-  return Array.from(mapped);
+function mapProductsToFinishTypes(products?: string[]): string[] {
+  if (!products?.length) return [];
+  const out = new Set<string>();
+  for (const p of products) {
+    const def = PRODUCT_BY_LABEL[english(p)];
+    if (def?.finishTypes) def.finishTypes.forEach((t: string) => out.add(t));
+  }
+  return out.size ? [...out] : ["Supplier"];
 }
 
 /**
  * Transforms Vendor data to match the Rough table structure.
  * NOTE: If your Rough "Type" column is single-select, replace the Type line with:
- *   Type: mapProductsToRoughTypes(vendor.productsOffered)[0] ?? "",
+ *   Type: mapProductsToRoughTypes(vendor.roughProducts)[0] ?? "",
  */
 export function transformVendorToRoughTable(vendor: Vendor): RoughTableRow {
+  // Use all products for Type mapping since we need the original form data
+  const allProducts = [
+    ...(vendor.roughProducts || []),
+    ...(vendor.finishProducts || []),
+  ];
+
   return {
     Names: vendor.companyName,
-    Type: formatForMultiSelect(mapProductsToRoughTypes(vendor.productsOffered)),
+    Type: joinForChip(mapProductsToRoughTypes(allProducts)),
     Details: "TBD - Need clarification",
     "Point of Contact": "TBD - Need clarification",
     "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
@@ -223,11 +99,15 @@ export function transformVendorToRoughTable(vendor: Vendor): RoughTableRow {
  * Transforms Vendor data to match the Finish table structure.
  */
 export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
+  // Use all products for Type mapping since we need the original form data
+  const allProducts = [
+    ...(vendor.roughProducts || []),
+    ...(vendor.finishProducts || []),
+  ];
+
   return {
     Names: vendor.companyName,
-    Type: formatForMultiSelect(
-      mapProductsToFinishTypes(vendor.productsOffered)
-    ),
+    Type: joinForChip(mapProductsToFinishTypes(allProducts)),
     Email: vendor.email,
     Location: vendor.address, // leave plain or write URL chip elsewhere
     Phone: formatPhoneNumber(vendor.phone, "parentheses"),
@@ -256,9 +136,15 @@ export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
  * TEST MODE: Transforms vendor data with placeholder mappings (Rough)
  */
 export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
+  // Use all products for Type mapping since we need the original form data
+  const allProducts = [
+    ...(vendor.roughProducts || []),
+    ...(vendor.finishProducts || []),
+  ];
+
   return {
     Names: vendor.companyName,
-    Type: formatForMultiSelect(mapProductsToRoughTypes(vendor.productsOffered)),
+    Type: joinForChip(mapProductsToRoughTypes(allProducts)),
     Details: "TEST: Will be mapped by employees",
     "Point of Contact": vendor.contactName,
     "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
@@ -267,7 +153,7 @@ export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
     File: "",
     Stars: "",
     Notes: `TEST: ${vendor.comments || "No comments"} | Products: ${
-      vendor.productsOffered?.join(", ") || "None"
+      allProducts.join(", ") || "None"
     }`,
   };
 }
@@ -278,11 +164,15 @@ export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
 export function transformVendorToFinishTableTest(
   vendor: Vendor
 ): FinishTableRow {
+  // Use all products for Type mapping since we need the original form data
+  const allProducts = [
+    ...(vendor.roughProducts || []),
+    ...(vendor.finishProducts || []),
+  ];
+
   return {
     Names: vendor.companyName,
-    Type: formatForMultiSelect(
-      mapProductsToFinishTypes(vendor.productsOffered)
-    ),
+    Type: joinForChip(mapProductsToFinishTypes(allProducts)),
     Email: vendor.email,
     Location: vendor.address,
     Phone: formatPhoneNumber(vendor.phone, "parentheses"),

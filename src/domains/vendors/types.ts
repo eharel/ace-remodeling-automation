@@ -7,7 +7,8 @@ export interface Vendor {
   email: string; // 4
   address: string; // 5
 
-  productsOffered?: string[]; // 6
+  roughProducts?: string[]; // Products that go to Rough table
+  finishProducts?: string[]; // Products that go to Finish table
   websiteOrSocial?: string; // 7
 
   hasShowroom?: boolean; // 8
