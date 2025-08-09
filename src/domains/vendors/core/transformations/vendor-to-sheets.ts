@@ -36,6 +36,7 @@ export interface FinishTableRow {
   File: string;
   Stars: string;
   Notes: string;
+  "Website / Social": string;
 }
 
 /** utility: Sheets wants "A, B, C" for multi-select cells */
@@ -116,6 +117,7 @@ export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
     "Post date": vendor.submittedAt.toISOString().slice(0, 10), // YYYY-MM-DD
     File: "", // No files submitted via form
     Stars: "", // New vendors start empty
+    "Website / Social": vendor.websiteOrSocial || "",
     Notes: [
       vendor.comments,
       `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,
@@ -181,6 +183,7 @@ export function transformVendorToFinishTableTest(
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
     File: "",
     Stars: "",
+    "Website / Social": vendor.websiteOrSocial || "",
     Notes: [
       vendor.comments,
       `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,

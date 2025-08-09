@@ -16,6 +16,24 @@ export function createMapsLinkFormula(address: string): string {
 }
 
 /**
+ * Creates a website HYPERLINK formula
+ */
+export function createWebsiteLinkFormula(website: string): string {
+  if (!website) return "";
+
+  // Ensure the URL has a protocol
+  let url = website.trim();
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+
+  // Extract display name (remove protocol for cleaner display)
+  const displayName = url.replace(/^https?:\/\//, "");
+
+  return `=HYPERLINK("${url}", "${displayName}")`;
+}
+
+/**
  * Returns the email link formula if the email is valid, otherwise empty string
  */
 export function getEmailLinkFormula(email: string): string {
@@ -29,6 +47,14 @@ export function getEmailLinkFormula(email: string): string {
 export function getLocationLinkFormula(location: string): string {
   if (!location || !location.trim()) return "";
   return createMapsLinkFormula(location);
+}
+
+/**
+ * Returns the website link formula if the website is valid, otherwise empty string
+ */
+export function getWebsiteLinkFormula(website: string): string {
+  if (!website || !website.trim()) return "";
+  return createWebsiteLinkFormula(website);
 }
 
 /**

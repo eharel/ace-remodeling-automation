@@ -15,6 +15,7 @@ import {
   findLastRowWithContent,
   getEmailLinkFormula,
   getLocationLinkFormula,
+  getWebsiteLinkFormula,
 } from "@utils/sheets";
 import { PRODUCT_BY_LABEL } from "../../products";
 
@@ -232,6 +233,22 @@ function saveVendorDataToSheetTestInternal(
         locationCell.setFormula(locationFormula);
         console.log(
           `🗺️ Created Google Maps link for: ${finishTableData.Location}`
+        );
+      }
+    }
+
+    // Apply website link - find column by name instead of position
+    const websiteColumnIndex =
+      normalizedHeaders.indexOf("Website / Social") + 1;
+    if (websiteColumnIndex > 0) {
+      const websiteFormula = getWebsiteLinkFormula(
+        finishTableData["Website / Social"]
+      );
+      if (websiteFormula) {
+        const websiteCell = sheet.getRange(insertRowNumber, websiteColumnIndex);
+        websiteCell.setFormula(websiteFormula);
+        console.log(
+          `🌐 Created website link for: ${finishTableData["Website / Social"]}`
         );
       }
     }
