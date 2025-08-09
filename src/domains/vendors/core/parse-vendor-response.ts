@@ -8,7 +8,7 @@ import { Vendor } from "../types";
 import { PRODUCT_BY_LABEL } from "../products";
 
 // Helper function to extract English part from bilingual labels
-function english(label: string): string {
+function toEnglish(label: string): string {
   return label.split("/")[0].trim();
 }
 
@@ -85,22 +85,12 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
 
     // Special handling for the products form field
     if (rawKey.includes("Type of Products You Offer")) {
-      console.log(`🔍 Processing products field: ${rawKey}`);
-      console.log(`🔍 Raw value: ${value}`);
-
       const products = value.split(",").map((s: string) => s.trim());
-      console.log(`🔍 Parsed products: ${products.join(", ")}`);
-
       const roughProducts: string[] = [];
       const finishProducts: string[] = [];
 
       for (const product of products) {
-        const productDef = PRODUCT_BY_LABEL[english(product)];
-        console.log(
-          `🔍 Product: "${product}" -> English: "${english(product)}" -> Def: ${
-            productDef ? productDef.key : "NOT FOUND"
-          }`
-        );
+        const productDef = PRODUCT_BY_LABEL[toEnglish(product)];
 
         if (productDef) {
           if (
@@ -108,14 +98,12 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
             productDef.category === VENDOR_CATEGORIES.BOTH
           ) {
             roughProducts.push(product);
-            console.log(`🔍 Added to Rough: ${product}`);
           }
           if (
             productDef.category === VENDOR_CATEGORIES.FINISH ||
             productDef.category === VENDOR_CATEGORIES.BOTH
           ) {
             finishProducts.push(product);
-            console.log(`🔍 Added to Finish: ${product}`);
           }
         } else {
           console.warn(`⚠️ Unknown product type: ${product}`);
@@ -124,9 +112,6 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
           finishProducts.push(product);
         }
       }
-
-      console.log(`🔍 Final Rough products: ${roughProducts.join(", ")}`);
-      console.log(`🔍 Final Finish products: ${finishProducts.join(", ")}`);
 
       if (roughProducts.length > 0) {
         parsed.roughProducts = roughProducts;

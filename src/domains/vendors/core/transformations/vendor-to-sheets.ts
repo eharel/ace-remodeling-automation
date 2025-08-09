@@ -39,35 +39,44 @@ export interface FinishTableRow {
   "Website / Social": string;
 }
 
+// Helper function to extract English part from bilingual labels
+function toEnglish(label: string): string {
+  return label.split("/")[0].trim();
+}
+
 /** utility: Sheets wants "A, B, C" for multi-select cells */
 function joinForChip(values: string[] | undefined) {
   return values && values.length ? values.join(", ") : "";
 }
 
-function english(label: string) {
-  // "X / Y" → "X"
-  return label.split("/")[0].trim();
+/**
+ * Generic function to map products to sheet types
+ * @param products - Array of product strings from form
+ * @param typeKey - Either 'roughTypes' or 'finishTypes'
+ * @param fallback - Default value if no mapping found
+ */
+function mapProductsToTypes(
+  products: string[],
+  typeKey: "roughTypes" | "finishTypes",
+  fallback: string
+): string[] {
+  if (!products?.length) return [];
+  const out = new Set<string>();
+  for (const p of products) {
+    const def = PRODUCT_BY_LABEL[toEnglish(p)];
+    if (def?.[typeKey]) {
+      def[typeKey].forEach((t: string) => out.add(t));
+    }
+  }
+  return out.size ? [...out] : [fallback];
 }
 
 function mapProductsToRoughTypes(products?: string[]): string[] {
-  if (!products?.length) return [];
-  const out = new Set<string>();
-  for (const p of products) {
-    const def = PRODUCT_BY_LABEL[english(p)];
-    if (def?.roughTypes) def.roughTypes.forEach((t: string) => out.add(t));
-  }
-  // sensible fallback if nothing mapped
-  return out.size ? [...out] : ["All"];
+  return mapProductsToTypes(products || [], "roughTypes", "All");
 }
 
 function mapProductsToFinishTypes(products?: string[]): string[] {
-  if (!products?.length) return [];
-  const out = new Set<string>();
-  for (const p of products) {
-    const def = PRODUCT_BY_LABEL[english(p)];
-    if (def?.finishTypes) def.finishTypes.forEach((t: string) => out.add(t));
-  }
-  return out.size ? [...out] : ["Supplier"];
+  return mapProductsToTypes(products || [], "finishTypes", "Supplier");
 }
 
 /**

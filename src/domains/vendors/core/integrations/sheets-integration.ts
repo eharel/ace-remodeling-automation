@@ -4,6 +4,7 @@ import {
   VENDOR_TABLES,
   TABLE_NAMES,
   VENDOR_CATEGORIES,
+  PLACEHOLDER_KEYWORDS,
 } from "../../constants";
 import {
   transformVendorToRoughTableTest,
@@ -20,7 +21,7 @@ import {
 import { PRODUCT_BY_LABEL } from "../../products";
 
 // Helper function to extract English part from bilingual labels
-function english(label: string): string {
+function toEnglish(label: string): string {
   return label.split("/")[0].trim();
 }
 
@@ -34,7 +35,7 @@ export function decideDestinations(
   let rough = false,
     finish = false;
   for (const p of products) {
-    const def = PRODUCT_BY_LABEL[english(p)];
+    const def = PRODUCT_BY_LABEL[toEnglish(p)];
     if (!def) continue;
     if (
       def.category === VENDOR_CATEGORIES.ROUGH ||
@@ -129,21 +130,10 @@ function saveVendorDataToSheetTestInternal(
     spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
 
   // Find the actual last row with content (not just empty rows)
-  const lastRowWithContent = findLastRowWithContent(sheet, [
-    "Sample",
-    "Example",
-    "Test",
-    "Demo",
-    "Placeholder",
-    "N/A",
-    "TBD",
-    "Click to edit",
-    "Enter data",
-    "Type here",
-    "Add data",
-    "Names", // Skip if someone accidentally put "Names" in the data
-  ]);
-  console.log(`🧪 TEST MODE: Last row with content: ${lastRowWithContent}`);
+  const lastRowWithContent = findLastRowWithContent(
+    sheet,
+    PLACEHOLDER_KEYWORDS
+  );
 
   // Transform data based on destination sheet
   let transformedData: RoughTableRow | FinishTableRow;
@@ -154,23 +144,14 @@ function saveVendorDataToSheetTestInternal(
     transformedData = transformVendorToFinishTableTest(vendorData);
   }
 
-  console.log(
-    `🔍 Transformed data keys: ${Object.keys(transformedData).join(", ")}`
-  );
-  console.log(`🔍 Transformed data:`, transformedData);
-
   // Read existing headers from the sheet (order-independent)
   const existingHeaders = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
     .getValues()[0] as string[];
-  console.log(`🧪 TEST MODE: Existing headers: ${existingHeaders.join(", ")}`);
 
   // Normalize headers to handle Google Sheets Smart Table formatting
   const normalizedHeaders = existingHeaders.map((header) =>
     header.replace(/[:：]/g, "").trim()
-  );
-  console.log(
-    `🧪 TEST MODE: Normalized headers: ${normalizedHeaders.join(", ")}`
   );
 
   // Write headers if sheet is empty (only header row exists)
@@ -180,23 +161,16 @@ function saveVendorDataToSheetTestInternal(
     sheet
       .getRange(1, 1, 1, expectedHeaders.length)
       .setValues([expectedHeaders]);
-    console.log(`🧪 TEST MODE: Wrote headers: ${expectedHeaders.join(", ")}`);
   }
 
   // Map data to match the actual header order in the sheet
   const rowData = normalizedHeaders.map((header) => {
     const value = transformedData[header as keyof typeof transformedData];
-    console.log(
-      `🔍 Mapping header "${header}" -> value: "${value ?? "undefined"}"`
-    );
     return value ?? "";
   });
 
-  console.log(`🔍 Final row data:`, rowData);
-
   // Insert the new row AFTER the last row with content (not at the very end)
   const insertRowNumber = lastRowWithContent + 1;
-  console.log(`🧪 TEST MODE: Inserting row at position ${insertRowNumber}`);
 
   // Insert a new row at the correct position
   sheet.insertRowAfter(lastRowWithContent);
@@ -217,7 +191,6 @@ function saveVendorDataToSheetTestInternal(
       if (emailFormula) {
         const emailCell = sheet.getRange(insertRowNumber, emailColumnIndex);
         emailCell.setFormula(emailFormula);
-        console.log(`🔗 Created email link for: ${finishTableData.Email}`);
       }
     }
 
@@ -231,9 +204,6 @@ function saveVendorDataToSheetTestInternal(
           locationColumnIndex
         );
         locationCell.setFormula(locationFormula);
-        console.log(
-          `🗺️ Created Google Maps link for: ${finishTableData.Location}`
-        );
       }
     }
 
@@ -247,9 +217,6 @@ function saveVendorDataToSheetTestInternal(
       if (websiteFormula) {
         const websiteCell = sheet.getRange(insertRowNumber, websiteColumnIndex);
         websiteCell.setFormula(websiteFormula);
-        console.log(
-          `🌐 Created website link for: ${finishTableData["Website / Social"]}`
-        );
       }
     }
   }

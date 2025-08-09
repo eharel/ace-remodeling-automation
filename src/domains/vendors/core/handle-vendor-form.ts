@@ -42,7 +42,7 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
     console.log(`🎯 Destination sheet determined: ${destinationSheet}`);
 
     // Save to Google Sheets (TEST MODE)
-    saveVendorDataToSheetTest(vendorData, destinationSheet);
+    saveVendorDataToSheetTest(vendorData);
     console.log("📊 Vendor data saved to Google Sheets (TEST MODE)");
 
     console.log("🎉 Vendor form processed successfully");

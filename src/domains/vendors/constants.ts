@@ -57,7 +57,7 @@ export const VENDOR_TABLES = {
   FINISH: {
     name: TABLE_NAMES.FINISH,
     headers: [
-      "Names",
+      "Name",
       "Type",
       "Email",
       "Location",
@@ -68,59 +68,10 @@ export const VENDOR_TABLES = {
       "File",
       "Stars",
       "Notes",
+      "Website / Social",
     ],
   },
 } as const;
-
-// Type mapping for Rough table - maps form options to Rough table dropdown options
-export const FORM_TO_ROUGH_TYPE_MAP: Record<string, string> = {
-  Cabinets: "Wood",
-  Countertops: "Building Supplies",
-  Flooring: "Floors",
-  Tile: "Building Supplies",
-  Doors: "Wood",
-  Hardware: "Metal",
-  Glass: "Building Supplies",
-  "Plumbing Fixtures": "Building Supplies",
-  Lighting: "Building Supplies",
-  Paint: "Building Supplies",
-  Drywall: "Drywall",
-  Stucco: "Building Supplies",
-  Siding: "Building Supplies",
-  Fence: "Building Supplies",
-  Gutter: "Roofs",
-  Decking: "Wood",
-  Roofing: "Roofs",
-  Stone: "Building Supplies",
-  Iron: "Metal",
-  Metal: "Metal",
-  Other: "All",
-};
-
-// Type mapping for Finish table - maps form options to Finish table dropdown options
-export const FORM_TO_FINISH_TYPE_MAP: Record<string, string> = {
-  Cabinets: "Cabinetry",
-  Countertops: "Countertops",
-  Flooring: "Floors",
-  Tile: "Tiles",
-  Doors: "Doors",
-  Hardware: "Supplier",
-  Glass: "Windows",
-  "Plumbing Fixtures": "Appliances",
-  Lighting: "Appliances",
-  Paint: "Paint",
-  Drywall: "Paint",
-  Stucco: "Paint",
-  Siding: "Vinyl",
-  Fence: "Gates, Fences, Electric",
-  Gutter: "Vinyl",
-  Decking: "Floors",
-  Roofing: "Vinyl",
-  Stone: "Slabs, Granite, Marble, Quartz",
-  Iron: "Gates, Fences, Electric",
-  Metal: "Gates, Fences, Electric",
-  Other: "Supplier",
-};
 
 // Map Vendor fields to their possible form titles (exact matches from Google Forms)
 export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
@@ -189,3 +140,19 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   comments: "",
   submittedAt: new Date(),
 };
+
+// Keywords that indicate placeholder content in Google Sheets
+export const PLACEHOLDER_KEYWORDS = [
+  "Sample",
+  "Example",
+  "Test",
+  "Demo",
+  "Placeholder",
+  "N/A",
+  "TBD",
+  "Click to edit",
+  "Enter data",
+  "Type here",
+  "Add data",
+  "Names", // Skip if someone accidentally put "Names" in the data
+];
