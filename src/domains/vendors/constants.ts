@@ -2,6 +2,77 @@ import { Vendor } from "./types";
 
 export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
 
+// Table name constants
+export const TABLE_NAMES = {
+  ROUGH: "Rough",
+  FINISH: "Finish",
+} as const;
+
+export type TableName = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES];
+
+// Category constants (matching products.ts)
+export const VENDOR_CATEGORIES = {
+  ROUGH: "ROUGH",
+  FINISH: "FINISH",
+  BOTH: "BOTH",
+} as const;
+
+export type VendorCategory =
+  (typeof VENDOR_CATEGORIES)[keyof typeof VENDOR_CATEGORIES];
+
+// Shared status options for both Rough and Finish tables
+export const VENDOR_STATUS_OPTIONS = [
+  "New",
+  "In progress",
+  "Under review",
+  "Published",
+  "Suspended",
+  "Paused",
+  "Not contacted",
+  "Onboarded",
+  "Contacted",
+  "Insured",
+  "Licensed",
+] as const;
+
+export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
+
+// Table configurations for the vendor sheet
+export const VENDOR_TABLES = {
+  ROUGH: {
+    name: TABLE_NAMES.ROUGH,
+    headers: [
+      "Names",
+      "Type",
+      "Details",
+      "Point of Contact",
+      "Phone Number",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+    ],
+  },
+  FINISH: {
+    name: TABLE_NAMES.FINISH,
+    headers: [
+      "Name",
+      "Type",
+      "Email",
+      "Location",
+      "Phone",
+      "Point of Contact",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+      "Website / Social",
+    ],
+  },
+} as const;
+
 // Map Vendor fields to their possible form titles (exact matches from Google Forms)
 export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   companyName: ["Company Name/ Nombre de la Empresa"],
@@ -9,9 +80,8 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   phone: ["Phone Number/ Número de teléfono"],
   email: ["Email/ Correo electrónico"],
   address: ["Business Address/ Dirección de negocio"],
-  productsOffered: [
-    "Type of Products You Offer / Tipo de Productos que Ofrece",
-  ],
+  roughProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
+  finishProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   websiteOrSocial: ["Website or Social Media"],
   hasShowroom: [
     "Do you have a physical showroom? / ¿Tiene una sala de exhibición física?",
@@ -56,7 +126,8 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   phone: "",
   email: "",
   address: "",
-  productsOffered: [],
+  roughProducts: [],
+  finishProducts: [],
   websiteOrSocial: "",
   hasShowroom: undefined,
   offersCustomOrders: undefined,
@@ -69,3 +140,19 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   comments: "",
   submittedAt: new Date(),
 };
+
+// Keywords that indicate placeholder content in Google Sheets
+export const PLACEHOLDER_KEYWORDS = [
+  "Sample",
+  "Example",
+  "Test",
+  "Demo",
+  "Placeholder",
+  "N/A",
+  "TBD",
+  "Click to edit",
+  "Enter data",
+  "Type here",
+  "Add data",
+  "Names", // Skip if someone accidentally put "Names" in the data
+];
