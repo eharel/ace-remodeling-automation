@@ -1,8 +1,10 @@
 import { handleVendorForm } from "../../domains/vendors/core/handle-vendor-form";
+import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboarding-form";
 
 // Form IDs - we'll need to get these from your actual Google Forms
 const FORM_IDS = {
   VENDOR: "1ZJjubXrTZY32t4XDYzfCtruf5kdsrNrl2e8RFURGjhU", // Copy for testing
+  ONBOARDING: "your-onboarding-form-id-here", // Replace with actual form ID
   TRADES: "your-trades-form-id-here", // Replace with actual form ID
   KITCHEN_REMODEL: "your-kitchen-form-id-here", // Replace with actual form ID
   BATHROOM_REMODEL: "your-bathroom-form-id-here", // Replace with actual form ID
@@ -23,6 +25,10 @@ export function onFormSubmit(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
       case FORM_IDS.VENDOR:
         console.log("🛠️ Routing to vendor form handler");
         return handleVendorForm(e);
+
+      case FORM_IDS.ONBOARDING:
+        console.log("👤 Routing to onboarding form handler");
+        return handleOnboardingForm(e);
 
       case FORM_IDS.TRADES:
         console.log("🔧 Routing to trades form handler");

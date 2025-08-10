@@ -9,5 +9,8 @@
     "outDir": "build"
   },
   "include": ["**/*"],
-  "references": [{ "path": "../domains/vendors" }]
+  "references": [
+    { "path": "../domains/vendors" },
+    { "path": "../domains/onboarding" }
+  ]
 }
