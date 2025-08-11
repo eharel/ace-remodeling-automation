@@ -1,6 +1,13 @@
 import { OnboardingFormData } from "../../types";
-import { ONBOARDING_SHEET_CONFIG, ONBOARDING_STATUS } from "../../constants";
-import { createEmailFormula, createMapsLinkFormula } from "../../../../utils";
+import {
+  ONBOARDING_SHEET_CONFIG,
+  ONBOARDING_STATUS,
+  ONBOARDING_SHEET_ID,
+} from "../../constants";
+import {
+  createEmailLinkFormula,
+  createMapsLinkFormula,
+} from "../../../../utils";
 
 /**
  * Saves onboarding data to Google Sheets
@@ -9,7 +16,7 @@ export function saveOnboardingDataToSheet(data: OnboardingFormData): void {
   console.log("📊 Saving onboarding data to Google Sheets...");
 
   try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const spreadsheet = SpreadsheetApp.openById(ONBOARDING_SHEET_ID);
     let sheet = spreadsheet.getSheetByName(ONBOARDING_SHEET_CONFIG.SHEET_NAME);
 
     // Create sheet if it doesn't exist
@@ -24,19 +31,16 @@ export function saveOnboardingDataToSheet(data: OnboardingFormData): void {
     // Prepare row data
     const rowData = [
       data.contactInfo.name,
-      createEmailFormula(data.contactInfo.email),
-      data.contactInfo.phone,
-      createMapsLinkFormula(data.contactInfo.address),
       data.contactInfo.company,
-      data.paymentDetails.paymentMethod,
-      data.paymentDetails.accountNumber,
-      data.paymentDetails.routingNumber,
-      data.paymentDetails.cardNumber,
-      data.paymentDetails.expirationDate,
-      data.paymentDetails.cvv,
-      data.additionalNotes,
+      data.contactInfo.profession.join(", "),
+      data.contactInfo.insurance,
+      data.contactInfo.phone,
+      createEmailLinkFormula(data.contactInfo.email),
+      createMapsLinkFormula(data.contactInfo.address),
+      data.paymentDetails.paymentMethod.join(", "),
+      data.paymentDetails.paymentInfo,
+      data.comments || "",
       data.submissionDate,
-      ONBOARDING_STATUS.NEW,
     ];
 
     // Append the new row

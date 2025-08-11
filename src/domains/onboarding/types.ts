@@ -4,25 +4,23 @@
 
 export interface OnboardingContactInfo {
   name: string;
-  email: string;
+  company: string;
+  profession: string[];
+  insurance: string;
   phone: string;
-  address?: string;
-  company?: string;
+  email: string;
+  address: string;
 }
 
 export interface OnboardingPaymentDetails {
-  paymentMethod: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  cardNumber?: string;
-  expirationDate?: string;
-  cvv?: string;
+  paymentMethod: string[];
+  paymentInfo: string;
 }
 
 export interface OnboardingFormData {
   contactInfo: OnboardingContactInfo;
   paymentDetails: OnboardingPaymentDetails;
-  additionalNotes?: string;
+  comments?: string;
   submissionDate: string;
 }
 

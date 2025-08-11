@@ -11,8 +11,14 @@ export function validateOnboardingData(data: OnboardingFormData): boolean {
   // Basic validation - ensure required fields are present
   if (
     !data.contactInfo.name ||
+    !data.contactInfo.company ||
+    !data.contactInfo.profession.length ||
+    !data.contactInfo.insurance ||
+    !data.contactInfo.phone ||
     !data.contactInfo.email ||
-    !data.contactInfo.phone
+    !data.contactInfo.address ||
+    !data.paymentDetails.paymentMethod.length ||
+    !data.paymentDetails.paymentInfo
   ) {
     return false;
   }
@@ -20,11 +26,6 @@ export function validateOnboardingData(data: OnboardingFormData): boolean {
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(data.contactInfo.email)) {
-    return false;
-  }
-
-  // Validate payment method is selected
-  if (!data.paymentDetails.paymentMethod) {
     return false;
   }
 
@@ -38,20 +39,18 @@ export function formatOnboardingData(data: OnboardingFormData): string {
   return `
 Contact Information:
 - Name: ${data.contactInfo.name}
-- Email: ${data.contactInfo.email}
+- Company: ${data.contactInfo.company}
+- Profession: ${data.contactInfo.profession.join(", ")}
+- Insurance: ${data.contactInfo.insurance}
 - Phone: ${data.contactInfo.phone}
-- Address: ${data.contactInfo.address || "Not provided"}
-- Company: ${data.contactInfo.company || "Not provided"}
+- Email: ${data.contactInfo.email}
+- Address: ${data.contactInfo.address}
 
 Payment Details:
-- Method: ${data.paymentDetails.paymentMethod}
-- Account Number: ${data.paymentDetails.accountNumber || "Not provided"}
-- Routing Number: ${data.paymentDetails.routingNumber || "Not provided"}
-- Card Number: ${data.paymentDetails.cardNumber || "Not provided"}
-- Expiration: ${data.paymentDetails.expirationDate || "Not provided"}
-- CVV: ${data.paymentDetails.cvv || "Not provided"}
+- Method: ${data.paymentDetails.paymentMethod.join(", ")}
+- Payment Information: ${data.paymentDetails.paymentInfo}
 
-Additional Notes: ${data.additionalNotes || "None"}
+Comments: ${data.comments || "None"}
 Submission Date: ${data.submissionDate}
   `.trim();
 }
