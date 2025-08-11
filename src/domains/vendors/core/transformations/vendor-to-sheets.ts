@@ -1,6 +1,10 @@
 import { Vendor } from "../../types";
-import { VENDOR_STATUS_OPTIONS, VENDOR_CATEGORIES } from "../../constants";
-import { formatPhoneNumber } from "@utils/index";
+import {
+  VENDOR_STATUS_OPTIONS,
+  VENDOR_CATEGORIES,
+  VENDOR_STATUS,
+} from "../../constants";
+import { formatPhoneNumber, toEnglish } from "@utils/index";
 import { PRODUCT_BY_LABEL } from "../../products";
 
 /**
@@ -20,11 +24,6 @@ export interface VendorTableRow {
   Stars: string;
   Notes: string;
   "Website / Social": string;
-}
-
-// Helper function to extract English part from bilingual labels
-function toEnglish(label: string): string {
-  return label.split("/")[0].trim();
 }
 
 /** utility: Sheets wants "A, B, C" for multi-select cells */
@@ -85,23 +84,17 @@ export function mapProductsToOtherTypes(products?: string[]): string[] {
  */
 export function transformVendorToTable(
   vendor: Vendor,
+  products: string[],
   typeMapper: (products: string[]) => string[]
 ): VendorTableRow {
-  // Use all products for Type mapping since we need the original form data
-  const allProducts = [
-    ...(vendor.roughProducts || []),
-    ...(vendor.finishProducts || []),
-    ...(vendor.otherProducts || []),
-  ];
-
   return {
     Name: vendor.companyName,
-    Type: joinForChip(typeMapper(allProducts)),
+    Type: joinForChip(typeMapper(products)),
     Email: vendor.email,
     Location: vendor.address,
     Phone: formatPhoneNumber(vendor.phone, "parentheses"),
     "Point of Contact": vendor.contactName,
-    Status: VENDOR_STATUS_OPTIONS[0], // "New"
+    Status: VENDOR_STATUS.NEW,
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
     File: "",
     Stars: "",

@@ -1,8 +1,5 @@
 import { parseVendorResponse } from "./parse-vendor-response";
-import {
-  saveVendorDataToSheetTest,
-  determineDestinationSheet,
-} from "./integrations/sheets-integration";
+import { saveVendorDataToSheetTest } from "./integrations/sheets-integration";
 
 /**
  * Handles vendor form submissions
@@ -31,9 +28,6 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
 
     // Parse the raw data into our Vendor type
     const vendorData = parseVendorResponse(rawFormData);
-
-    // Determine which sheet to write to
-    const destinationSheet = determineDestinationSheet(vendorData);
 
     // Save to Google Sheets (TEST MODE)
     saveVendorDataToSheetTest(vendorData);

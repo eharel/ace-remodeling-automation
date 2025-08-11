@@ -39,6 +39,21 @@ export const VENDOR_STATUS_OPTIONS = [
 
 export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
 
+// Named constants for vendor statuses
+export const VENDOR_STATUS = {
+  NEW: VENDOR_STATUS_OPTIONS[0],
+  IN_PROGRESS: VENDOR_STATUS_OPTIONS[1],
+  UNDER_REVIEW: VENDOR_STATUS_OPTIONS[2],
+  PUBLISHED: VENDOR_STATUS_OPTIONS[3],
+  SUSPENDED: VENDOR_STATUS_OPTIONS[4],
+  PAUSED: VENDOR_STATUS_OPTIONS[5],
+  NOT_CONTACTED: VENDOR_STATUS_OPTIONS[6],
+  ONBOARDED: VENDOR_STATUS_OPTIONS[7],
+  CONTACTED: VENDOR_STATUS_OPTIONS[8],
+  INSURED: VENDOR_STATUS_OPTIONS[9],
+  LICENSED: VENDOR_STATUS_OPTIONS[10],
+} as const;
+
 // Table configurations for the vendor sheet - all tables now have identical structure
 export const VENDOR_TABLES = {
   ROUGH: {
@@ -179,3 +194,10 @@ export const PLACEHOLDER_KEYWORDS = [
   "Add data",
   "Names", // Skip if someone accidentally put "Names" in the data
 ];
+
+// Smart chip column configuration
+export const SMART_CHIP_COLUMNS = {
+  EMAIL: "Email",
+  LOCATION: "Location",
+  WEBSITE: "Website / Social",
+} as const;

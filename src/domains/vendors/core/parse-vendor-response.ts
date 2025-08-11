@@ -6,10 +6,53 @@ import {
 import { parseYesNo } from "./utils";
 import { Vendor } from "../types";
 import { PRODUCT_BY_LABEL } from "../products";
+import { toEnglish } from "@utils/index";
 
-// Helper function to extract English part from bilingual labels
-function toEnglish(label: string): string {
-  return label.split("/")[0].trim();
+/**
+ * Categorizes products into Rough, Finish, and Other arrays
+ */
+function categorizeProducts(productsString: string): {
+  rough: string[];
+  finish: string[];
+  other: string[];
+} {
+  const products = productsString.split(",").map((s: string) => s.trim());
+  const roughProducts: string[] = [];
+  const finishProducts: string[] = [];
+  const otherProducts: string[] = [];
+
+  for (const product of products) {
+    const productDef = PRODUCT_BY_LABEL[toEnglish(product)];
+
+    if (productDef) {
+      if (
+        productDef.category === VENDOR_CATEGORIES.ROUGH ||
+        productDef.category === VENDOR_CATEGORIES.BOTH
+      ) {
+        roughProducts.push(product);
+      }
+      if (
+        productDef.category === VENDOR_CATEGORIES.FINISH ||
+        productDef.category === VENDOR_CATEGORIES.BOTH
+      ) {
+        finishProducts.push(product);
+      }
+      if (productDef.category === VENDOR_CATEGORIES.OTHER) {
+        // OTHER category products go to Other table only
+        otherProducts.push(product);
+      }
+    } else {
+      // Default to both tables for unknown products
+      roughProducts.push(product);
+      finishProducts.push(product);
+    }
+  }
+
+  return {
+    rough: roughProducts,
+    finish: finishProducts,
+    other: otherProducts,
+  };
 }
 
 // Type-safe field assignment using a mapping function
@@ -87,46 +130,16 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
 
     // Special handling for the products form field
     if (rawKey.includes("Type of Products You Offer")) {
-      const products = value.split(",").map((s: string) => s.trim());
-      const roughProducts: string[] = [];
-      const finishProducts: string[] = [];
-      const otherProducts: string[] = [];
+      const categorizedProducts = categorizeProducts(value);
 
-      for (const product of products) {
-        const productDef = PRODUCT_BY_LABEL[toEnglish(product)];
-
-        if (productDef) {
-          if (
-            productDef.category === VENDOR_CATEGORIES.ROUGH ||
-            productDef.category === VENDOR_CATEGORIES.BOTH
-          ) {
-            roughProducts.push(product);
-          }
-          if (
-            productDef.category === VENDOR_CATEGORIES.FINISH ||
-            productDef.category === VENDOR_CATEGORIES.BOTH
-          ) {
-            finishProducts.push(product);
-          }
-          if (productDef.category === VENDOR_CATEGORIES.OTHER) {
-            // OTHER category products go to Other table only
-            otherProducts.push(product);
-          }
-        } else {
-          // Default to both tables for unknown products
-          roughProducts.push(product);
-          finishProducts.push(product);
-        }
+      if (categorizedProducts.rough.length > 0) {
+        parsed.roughProducts = categorizedProducts.rough;
       }
-
-      if (roughProducts.length > 0) {
-        parsed.roughProducts = roughProducts;
+      if (categorizedProducts.finish.length > 0) {
+        parsed.finishProducts = categorizedProducts.finish;
       }
-      if (finishProducts.length > 0) {
-        parsed.finishProducts = finishProducts;
-      }
-      if (otherProducts.length > 0) {
-        parsed.otherProducts = otherProducts;
+      if (categorizedProducts.other.length > 0) {
+        parsed.otherProducts = categorizedProducts.other;
       }
       continue;
     }

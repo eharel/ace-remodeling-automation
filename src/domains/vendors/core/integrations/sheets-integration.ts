@@ -20,10 +20,33 @@ import {
   getWebsiteLinkFormula,
 } from "@utils/sheets";
 import { PRODUCT_BY_LABEL } from "../../products";
+import { toEnglish } from "@utils/index";
+import { SMART_CHIP_COLUMNS } from "../../constants";
 
-// Helper function to extract English part from bilingual labels
-function toEnglish(label: string): string {
-  return label.split("/")[0].trim();
+/**
+ * Applies smart chip formatting to a specific column
+ */
+function applySmartChipToColumn(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  insertRowNumber: number,
+  normalizedHeaders: string[],
+  columnName: keyof typeof SMART_CHIP_COLUMNS,
+  tableData: VendorTableRow,
+  formulaGetter: (value: string) => string
+): void {
+  const columnIndex =
+    normalizedHeaders.indexOf(SMART_CHIP_COLUMNS[columnName]) + 1;
+  if (columnIndex > 0) {
+    const formula = formulaGetter(
+      tableData[
+        SMART_CHIP_COLUMNS[columnName] as keyof VendorTableRow
+      ] as string
+    );
+    if (formula) {
+      const cell = sheet.getRange(insertRowNumber, columnIndex);
+      cell.setFormula(formula);
+    }
+  }
 }
 
 /**
@@ -75,18 +98,6 @@ export interface SheetsTableConfig {
 }
 
 /**
- * Determines which sheet the vendor data should be written to
- * TODO: Add employee logic here when they provide the rules
- */
-export function determineDestinationSheet(
-  vendorData: Vendor
-): (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES] {
-  // For now, always use Finish table for testing
-  // TODO: Add logic based on employee input
-  return TABLE_NAMES.FINISH;
-}
-
-/**
  * TEST MODE: Saves vendor data to the appropriate sheets based on their products
  * Creates entries for both Rough and Finish tables if the vendor has products in both categories
  */
@@ -112,12 +123,15 @@ export function saveVendorDataToSheetTest(vendorData: Vendor) {
 }
 
 /**
- * Internal function to save vendor data to a specific sheet
+ * Gets the sheet and headers for a specific destination
  */
-function saveVendorDataToSheetTestInternal(
-  vendorData: Vendor,
+function getSheetAndHeaders(
   destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
-) {
+): {
+  sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  lastRowWithContent: number;
+  normalizedHeaders: string[];
+} {
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
   const sheetName =
     destinationSheet === TABLE_NAMES.ROUGH
@@ -134,23 +148,6 @@ function saveVendorDataToSheetTestInternal(
     PLACEHOLDER_KEYWORDS
   );
 
-  // Transform data based on destination sheet using the appropriate type mapper
-  let transformedData: VendorTableRow;
-
-  if (destinationSheet === TABLE_NAMES.ROUGH) {
-    transformedData = transformVendorToTable(vendorData, (products) =>
-      mapProductsToRoughTypes(vendorData.roughProducts)
-    );
-  } else if (destinationSheet === TABLE_NAMES.OTHER) {
-    transformedData = transformVendorToTable(vendorData, (products) =>
-      mapProductsToOtherTypes(vendorData.otherProducts)
-    );
-  } else {
-    transformedData = transformVendorToTable(vendorData, (products) =>
-      mapProductsToFinishTypes(vendorData.finishProducts)
-    );
-  }
-
   // Read existing headers from the sheet (order-independent)
   const existingHeaders = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
@@ -161,6 +158,18 @@ function saveVendorDataToSheetTestInternal(
     header.replace(/[:：]/g, "").trim()
   );
 
+  return { sheet, lastRowWithContent, normalizedHeaders };
+}
+
+/**
+ * Writes vendor data to the sheet and returns the insert row number
+ */
+function writeDataToSheet(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  lastRowWithContent: number,
+  normalizedHeaders: string[],
+  transformedData: VendorTableRow
+): number {
   // Write headers if sheet is empty (only header row exists)
   if (lastRowWithContent <= 1) {
     const expectedHeaders = Object.keys(transformedData);
@@ -171,7 +180,7 @@ function saveVendorDataToSheetTestInternal(
 
   // Map data to match the actual header order in the sheet
   const rowData = normalizedHeaders.map((header) => {
-    const value = transformedData[header as keyof typeof transformedData];
+    const value = transformedData[header as keyof VendorTableRow];
     return value ?? "";
   });
 
@@ -185,37 +194,76 @@ function saveVendorDataToSheetTestInternal(
   const targetRange = sheet.getRange(insertRowNumber, 1, 1, rowData.length);
   targetRange.setValues([rowData]);
 
+  return insertRowNumber;
+}
+
+/**
+ * Internal function to save vendor data to a specific sheet
+ */
+function saveVendorDataToSheetTestInternal(
+  vendorData: Vendor,
+  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
+) {
+  const { sheet, lastRowWithContent, normalizedHeaders } =
+    getSheetAndHeaders(destinationSheet);
+
+  // Transform data based on destination sheet using the appropriate type mapper
+  let transformedData: VendorTableRow;
+
+  if (destinationSheet === TABLE_NAMES.ROUGH) {
+    transformedData = transformVendorToTable(
+      vendorData,
+      vendorData.roughProducts || [],
+      mapProductsToRoughTypes
+    );
+  } else if (destinationSheet === TABLE_NAMES.OTHER) {
+    transformedData = transformVendorToTable(
+      vendorData,
+      vendorData.otherProducts || [],
+      mapProductsToOtherTypes
+    );
+  } else {
+    transformedData = transformVendorToTable(
+      vendorData,
+      vendorData.finishProducts || [],
+      mapProductsToFinishTypes
+    );
+  }
+
+  // Write data to sheet
+  const insertRowNumber = writeDataToSheet(
+    sheet,
+    lastRowWithContent,
+    normalizedHeaders,
+    transformedData
+  );
+
   // Apply Smart Chip formatting (email links, location chips, etc.)
   // All tables have identical structure, so apply to all
   const tableData = transformedData as VendorTableRow;
 
-  // Apply email link - find column by name instead of position
-  const emailColumnIndex = normalizedHeaders.indexOf("Email") + 1;
-  if (emailColumnIndex > 0) {
-    const emailFormula = getEmailLinkFormula(tableData.Email);
-    if (emailFormula) {
-      const emailCell = sheet.getRange(insertRowNumber, emailColumnIndex);
-      emailCell.setFormula(emailFormula);
-    }
-  }
-
-  // Apply location link - find column by name instead of position
-  const locationColumnIndex = normalizedHeaders.indexOf("Location") + 1;
-  if (locationColumnIndex > 0) {
-    const locationFormula = getLocationLinkFormula(tableData.Location);
-    if (locationFormula) {
-      const locationCell = sheet.getRange(insertRowNumber, locationColumnIndex);
-      locationCell.setFormula(locationFormula);
-    }
-  }
-
-  // Apply website link - find column by name instead of position
-  const websiteColumnIndex = normalizedHeaders.indexOf("Website / Social") + 1;
-  if (websiteColumnIndex > 0) {
-    const websiteFormula = getWebsiteLinkFormula(tableData["Website / Social"]);
-    if (websiteFormula) {
-      const websiteCell = sheet.getRange(insertRowNumber, websiteColumnIndex);
-      websiteCell.setFormula(websiteFormula);
-    }
-  }
+  applySmartChipToColumn(
+    sheet,
+    insertRowNumber,
+    normalizedHeaders,
+    "EMAIL",
+    tableData,
+    getEmailLinkFormula
+  );
+  applySmartChipToColumn(
+    sheet,
+    insertRowNumber,
+    normalizedHeaders,
+    "LOCATION",
+    tableData,
+    getLocationLinkFormula
+  );
+  applySmartChipToColumn(
+    sheet,
+    insertRowNumber,
+    normalizedHeaders,
+    "WEBSITE",
+    tableData,
+    getWebsiteLinkFormula
+  );
 }
