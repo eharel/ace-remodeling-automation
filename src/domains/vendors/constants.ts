@@ -1,11 +1,15 @@
 import { Vendor } from "./types";
 
-export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
+import { getVendorSheetId } from "../../forms/config/environment";
+
+// Sheet ID - automatically determined by environment
+export const VENDOR_SHEET_ID = getVendorSheetId();
 
 // Table name constants
 export const TABLE_NAMES = {
   ROUGH: "Rough",
   FINISH: "Finish",
+  OTHER: "Other",
 } as const;
 
 export type TableName = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES];
@@ -15,6 +19,7 @@ export const VENDOR_CATEGORIES = {
   ROUGH: "ROUGH",
   FINISH: "FINISH",
   BOTH: "BOTH",
+  OTHER: "OTHER",
 } as const;
 
 export type VendorCategory =
@@ -37,25 +42,59 @@ export const VENDOR_STATUS_OPTIONS = [
 
 export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
 
-// Table configurations for the vendor sheet
+// Named constants for vendor statuses
+export const VENDOR_STATUS = {
+  NEW: VENDOR_STATUS_OPTIONS[0],
+  IN_PROGRESS: VENDOR_STATUS_OPTIONS[1],
+  UNDER_REVIEW: VENDOR_STATUS_OPTIONS[2],
+  PUBLISHED: VENDOR_STATUS_OPTIONS[3],
+  SUSPENDED: VENDOR_STATUS_OPTIONS[4],
+  PAUSED: VENDOR_STATUS_OPTIONS[5],
+  NOT_CONTACTED: VENDOR_STATUS_OPTIONS[6],
+  ONBOARDED: VENDOR_STATUS_OPTIONS[7],
+  CONTACTED: VENDOR_STATUS_OPTIONS[8],
+  INSURED: VENDOR_STATUS_OPTIONS[9],
+  LICENSED: VENDOR_STATUS_OPTIONS[10],
+} as const;
+
+// Table configurations for the vendor sheet - all tables have identical structure
 export const VENDOR_TABLES = {
   ROUGH: {
     name: TABLE_NAMES.ROUGH,
     headers: [
-      "Names",
+      "Name",
       "Type",
-      "Details",
+      "Email",
+      "Location",
+      "Phone",
       "Point of Contact",
-      "Phone Number",
       "Status",
       "Post date",
       "File",
       "Stars",
       "Notes",
+      "Website / Social",
     ],
   },
   FINISH: {
     name: TABLE_NAMES.FINISH,
+    headers: [
+      "Name",
+      "Type",
+      "Email",
+      "Location",
+      "Phone",
+      "Point of Contact",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+      "Website / Social",
+    ],
+  },
+  OTHER: {
+    name: TABLE_NAMES.OTHER,
     headers: [
       "Name",
       "Type",
@@ -82,6 +121,7 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   address: ["Business Address/ Dirección de negocio"],
   roughProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   finishProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
+  otherProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   websiteOrSocial: ["Website or Social Media"],
   hasShowroom: [
     "Do you have a physical showroom? / ¿Tiene una sala de exhibición física?",
@@ -128,6 +168,7 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   address: "",
   roughProducts: [],
   finishProducts: [],
+  otherProducts: [],
   websiteOrSocial: "",
   hasShowroom: undefined,
   offersCustomOrders: undefined,
@@ -156,3 +197,10 @@ export const PLACEHOLDER_KEYWORDS = [
   "Add data",
   "Names", // Skip if someone accidentally put "Names" in the data
 ];
+
+// Smart chip column configuration
+export const SMART_CHIP_COLUMNS = {
+  EMAIL: "Email",
+  LOCATION: "Location",
+  WEBSITE: "Website / Social",
+} as const;

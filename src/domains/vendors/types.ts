@@ -9,6 +9,7 @@ export interface Vendor {
 
   roughProducts?: string[]; // Products that go to Rough table
   finishProducts?: string[]; // Products that go to Finish table
+  otherProducts?: string[]; // Products that go to Other table
   websiteOrSocial?: string; // 7
 
   hasShowroom?: boolean; // 8

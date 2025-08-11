@@ -1,30 +1,17 @@
 import { Vendor } from "../../types";
-import { VENDOR_STATUS_OPTIONS } from "../../constants";
-import { formatPhoneNumber } from "@utils/index";
+import {
+  VENDOR_STATUS_OPTIONS,
+  VENDOR_CATEGORIES,
+  VENDOR_STATUS,
+} from "../../constants";
+import { formatPhoneNumber, toEnglish } from "@utils/index";
 import { PRODUCT_BY_LABEL } from "../../products";
 
 /**
- * Interface for the Rough table row format
- * Matches the actual table structure: Name, Type, Details, Point of Contact, Phone Number, Status, Post date, File, Stars, Notes
+ * Interface for vendor table row format
+ * All tables (Rough, Finish, Other) now have identical structure
  */
-export interface RoughTableRow {
-  Name: string;
-  Type: string; // multi-select rendered as comma+space string
-  Details: string;
-  "Point of Contact": string;
-  "Phone Number": string;
-  Status: string;
-  "Post date": string;
-  File: string;
-  Stars: string;
-  Notes: string;
-}
-
-/**
- * Interface for the Finish table row format
- * Matches the actual table structure: Name, Type, Email, Location, Phone, Point of Contact, Status, Post date, File, Stars, Notes
- */
-export interface FinishTableRow {
+export interface VendorTableRow {
   Name: string;
   Type: string; // multi-select rendered as comma+space string
   Email: string;
@@ -37,11 +24,6 @@ export interface FinishTableRow {
   Stars: string;
   Notes: string;
   "Website / Social": string;
-}
-
-// Helper function to extract English part from bilingual labels
-function toEnglish(label: string): string {
-  return label.split("/")[0].trim();
 }
 
 /** utility: Sheets wants "A, B, C" for multi-select cells */
@@ -71,140 +53,52 @@ function mapProductsToTypes(
   return out.size ? [...out] : [fallback];
 }
 
-function mapProductsToRoughTypes(products?: string[]): string[] {
+export function mapProductsToRoughTypes(products?: string[]): string[] {
   return mapProductsToTypes(products || [], "roughTypes", "All");
 }
 
-function mapProductsToFinishTypes(products?: string[]): string[] {
+export function mapProductsToFinishTypes(products?: string[]): string[] {
   return mapProductsToTypes(products || [], "finishTypes", "Supplier");
 }
 
-/**
- * Transforms Vendor data to match the Rough table structure.
- * NOTE: If your Rough "Type" column is single-select, replace the Type line with:
- *   Type: mapProductsToRoughTypes(vendor.roughProducts)[0] ?? "",
- */
-export function transformVendorToRoughTable(vendor: Vendor): RoughTableRow {
-  // Use all products for Type mapping since we need the original form data
-  const allProducts = [
-    ...(vendor.roughProducts || []),
-    ...(vendor.finishProducts || []),
-  ];
+export function mapProductsToOtherTypes(products?: string[]): string[] {
+  // For Other table, we only want products that are actually "Other" category
+  if (!products?.length) return ["Other"];
 
-  return {
-    Name: vendor.companyName,
-    Type: joinForChip(mapProductsToRoughTypes(allProducts)),
-    Details: "TBD - Need clarification",
-    "Point of Contact": "TBD - Need clarification",
-    "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
-    Status: VENDOR_STATUS_OPTIONS[0], // "New"
-    "Post date": vendor.submittedAt.toISOString().slice(0, 10), // YYYY-MM-DD
-    File: "", // Empty for Rough table
-    Stars: "", // Empty for new vendors
-    Notes: "TBD - Need clarification",
-  };
+  const otherProducts = products.filter((product) => {
+    const def = PRODUCT_BY_LABEL[toEnglish(product)];
+    return def?.category === VENDOR_CATEGORIES.OTHER;
+  });
+
+  // If we have Other products, map them to their types, otherwise use fallback
+  if (otherProducts.length > 0) {
+    return mapProductsToTypes(otherProducts, "roughTypes", "Other");
+  }
+
+  return ["Other"];
 }
 
 /**
- * Transforms Vendor data to match the Finish table structure.
+ * Transforms Vendor data to match the standardized table structure.
+ * All tables (Rough, Finish, Other) now use the same format.
  */
-export function transformVendorToFinishTable(vendor: Vendor): FinishTableRow {
-  // Use all products for Type mapping since we need the original form data
-  const allProducts = [
-    ...(vendor.roughProducts || []),
-    ...(vendor.finishProducts || []),
-  ];
-
+export function transformVendorToTable(
+  vendor: Vendor,
+  products: string[],
+  typeMapper: (products: string[]) => string[]
+): VendorTableRow {
   return {
     Name: vendor.companyName,
-    Type: joinForChip(mapProductsToFinishTypes(allProducts)),
-    Email: vendor.email,
-    Location: vendor.address, // leave plain or write URL chip elsewhere
-    Phone: formatPhoneNumber(vendor.phone, "parentheses"),
-    "Point of Contact": vendor.contactName,
-    Status: VENDOR_STATUS_OPTIONS[0], // "New"
-    "Post date": vendor.submittedAt.toISOString().slice(0, 10), // YYYY-MM-DD
-    File: "", // No files submitted via form
-    Stars: "", // New vendors start empty
-    "Website / Social": vendor.websiteOrSocial || "",
-    Notes: [
-      vendor.comments,
-      `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,
-      `Custom Orders: ${vendor.offersCustomOrders ? "Yes" : "No"}`,
-      `Delivery: ${vendor.offersDelivery ? "Yes" : "No"}`,
-      `Turnaround: ${vendor.turnaroundTime || "Not specified"}`,
-      `Contractor Pricing: ${vendor.offersContractorPricing ? "Yes" : "No"}`,
-      `Payment Methods: ${vendor.paymentMethods.join(", ")}`,
-      `Payment Details: ${vendor.paymentDetails}`,
-      `Email Catalogs: ${vendor.willEmailCatalogs ? "Yes" : "No"}`,
-    ]
-      .filter(Boolean)
-      .join(" | "),
-  };
-}
-
-/**
- * TEST MODE: Transforms vendor data with placeholder mappings (Rough)
- */
-export function transformVendorToRoughTableTest(vendor: Vendor): RoughTableRow {
-  // Use all products for Type mapping since we need the original form data
-  const allProducts = [
-    ...(vendor.roughProducts || []),
-    ...(vendor.finishProducts || []),
-  ];
-
-  return {
-    Name: vendor.companyName,
-    Type: joinForChip(mapProductsToRoughTypes(allProducts)),
-    Details: "TEST: Will be mapped by employees",
-    "Point of Contact": vendor.contactName,
-    "Phone Number": formatPhoneNumber(vendor.phone, "parentheses"),
-    Status: VENDOR_STATUS_OPTIONS[0], // "New"
-    "Post date": vendor.submittedAt.toISOString().slice(0, 10),
-    File: "",
-    Stars: "",
-    Notes: `TEST: ${vendor.comments || "No comments"} | Products: ${
-      allProducts.join(", ") || "None"
-    }`,
-  };
-}
-
-/**
- * TEST MODE: Transforms vendor data with placeholder mappings (Finish)
- */
-export function transformVendorToFinishTableTest(
-  vendor: Vendor
-): FinishTableRow {
-  // Use all products for Type mapping since we need the original form data
-  const allProducts = [
-    ...(vendor.roughProducts || []),
-    ...(vendor.finishProducts || []),
-  ];
-
-  return {
-    Name: vendor.companyName,
-    Type: joinForChip(mapProductsToFinishTypes(allProducts)),
+    Type: joinForChip(typeMapper(products)),
     Email: vendor.email,
     Location: vendor.address,
     Phone: formatPhoneNumber(vendor.phone, "parentheses"),
     "Point of Contact": vendor.contactName,
-    Status: VENDOR_STATUS_OPTIONS[0], // "New"
+    Status: VENDOR_STATUS.NEW,
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
     File: "",
     Stars: "",
     "Website / Social": vendor.websiteOrSocial || "",
-    Notes: [
-      vendor.comments,
-      `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,
-      `Custom Orders: ${vendor.offersCustomOrders ? "Yes" : "No"}`,
-      `Delivery: ${vendor.offersDelivery ? "Yes" : "No"}`,
-      `Turnaround: ${vendor.turnaroundTime || "Not specified"}`,
-      `Contractor Pricing: ${vendor.offersContractorPricing ? "Yes" : "No"}`,
-      `Payment Methods: ${vendor.paymentMethods.join(", ")}`,
-      `Payment Details: ${vendor.paymentDetails}`,
-      `Email Catalogs: ${vendor.willEmailCatalogs ? "Yes" : "No"}`,
-    ]
-      .filter(Boolean)
-      .join(" | "),
+    Notes: "",
   };
 }

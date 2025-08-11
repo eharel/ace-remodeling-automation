@@ -96,11 +96,9 @@ export function findLastRowWithContent(
     if (isFormula) continue;
 
     // If we get here, it's a real company name
-    console.log(`📊 Found data in row ${row}: "${nameValue}"`);
     return row;
   }
 
   // If no data found, return 1 (header row)
-  console.log(`📊 No data found, using header row (1)`);
   return 1;
 }
