@@ -7,10 +7,11 @@ import {
   PLACEHOLDER_KEYWORDS,
 } from "../../constants";
 import {
-  transformVendorToRoughTableTest,
-  transformVendorToFinishTableTest,
-  RoughTableRow,
-  FinishTableRow,
+  transformVendorToTable,
+  VendorTableRow,
+  mapProductsToRoughTypes,
+  mapProductsToFinishTypes,
+  mapProductsToOtherTypes,
 } from "../transformations/vendor-to-sheets";
 import {
   findLastRowWithContent,
@@ -33,7 +34,8 @@ export function decideDestinations(
 ): (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES][] {
   if (!products?.length) return [TABLE_NAMES.FINISH]; // safe default
   let rough = false,
-    finish = false;
+    finish = false,
+    other = false;
   for (const p of products) {
     const def = PRODUCT_BY_LABEL[toEnglish(p)];
     if (!def) continue;
@@ -47,10 +49,20 @@ export function decideDestinations(
       def.category === VENDOR_CATEGORIES.BOTH
     )
       finish = true;
+    if (def.category === VENDOR_CATEGORIES.OTHER) other = true;
   }
-  if (rough && finish) return [TABLE_NAMES.ROUGH, TABLE_NAMES.FINISH];
-  if (rough) return [TABLE_NAMES.ROUGH];
-  return [TABLE_NAMES.FINISH];
+
+  // Build the list of destinations
+  const destinations: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES][] = [];
+
+  if (rough) destinations.push(TABLE_NAMES.ROUGH);
+  if (finish) destinations.push(TABLE_NAMES.FINISH);
+  if (other) destinations.push(TABLE_NAMES.OTHER);
+
+  // If no destinations found, default to Finish
+  if (destinations.length === 0) return [TABLE_NAMES.FINISH];
+
+  return destinations;
 }
 
 /**
@@ -79,34 +91,23 @@ export function determineDestinationSheet(
  * Creates entries for both Rough and Finish tables if the vendor has products in both categories
  */
 export function saveVendorDataToSheetTest(vendorData: Vendor) {
-  console.log(
-    `🧪 TEST MODE: Processing vendor data for ${vendorData.companyName}`
-  );
-
-  // Get all products from both arrays (these are the categorized products)
+  // Get all products from all arrays (these are the categorized products)
   const allProducts = [
     ...(vendorData.roughProducts || []),
     ...(vendorData.finishProducts || []),
+    ...(vendorData.otherProducts || []),
   ];
-
-  console.log(
-    `🧪 TEST MODE: All products: ${allProducts.join(", ") || "None"}`
-  );
 
   // Determine which tables to create entries for based on the categorized products
   const destinations = decideDestinations(allProducts);
-  console.log(`🧪 TEST MODE: Destinations: ${destinations.join(", ")}`);
 
   // Create entries for each destination
   for (const destination of destinations) {
-    console.log(`🧪 TEST MODE: Creating ${destination} table entry`);
     saveVendorDataToSheetTestInternal(vendorData, destination);
   }
 
   if (destinations.length === 0) {
-    console.warn(
-      `⚠️ No destinations found for vendor: ${vendorData.companyName}`
-    );
+    // No destinations found for vendor
   }
 }
 
@@ -117,14 +118,12 @@ function saveVendorDataToSheetTestInternal(
   vendorData: Vendor,
   destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
 ) {
-  console.log(
-    `🧪 TEST MODE: Saving vendor data to ${destinationSheet} sheet, ID: ${VENDOR_SHEET_ID}`
-  );
-
   const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
   const sheetName =
     destinationSheet === TABLE_NAMES.ROUGH
       ? VENDOR_TABLES.ROUGH.name
+      : destinationSheet === TABLE_NAMES.OTHER
+      ? VENDOR_TABLES.OTHER.name
       : VENDOR_TABLES.FINISH.name;
   const sheet =
     spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
@@ -135,13 +134,21 @@ function saveVendorDataToSheetTestInternal(
     PLACEHOLDER_KEYWORDS
   );
 
-  // Transform data based on destination sheet
-  let transformedData: RoughTableRow | FinishTableRow;
+  // Transform data based on destination sheet using the appropriate type mapper
+  let transformedData: VendorTableRow;
 
   if (destinationSheet === TABLE_NAMES.ROUGH) {
-    transformedData = transformVendorToRoughTableTest(vendorData);
+    transformedData = transformVendorToTable(vendorData, (products) =>
+      mapProductsToRoughTypes(vendorData.roughProducts)
+    );
+  } else if (destinationSheet === TABLE_NAMES.OTHER) {
+    transformedData = transformVendorToTable(vendorData, (products) =>
+      mapProductsToOtherTypes(vendorData.otherProducts)
+    );
   } else {
-    transformedData = transformVendorToFinishTableTest(vendorData);
+    transformedData = transformVendorToTable(vendorData, (products) =>
+      mapProductsToFinishTypes(vendorData.finishProducts)
+    );
   }
 
   // Read existing headers from the sheet (order-independent)
@@ -156,7 +163,6 @@ function saveVendorDataToSheetTestInternal(
 
   // Write headers if sheet is empty (only header row exists)
   if (lastRowWithContent <= 1) {
-    console.log(`🧪 TEST MODE: Writing headers`);
     const expectedHeaders = Object.keys(transformedData);
     sheet
       .getRange(1, 1, 1, expectedHeaders.length)
@@ -180,48 +186,36 @@ function saveVendorDataToSheetTestInternal(
   targetRange.setValues([rowData]);
 
   // Apply Smart Chip formatting (email links, location chips, etc.)
-  // Only apply to Finish table since Rough table doesn't have Email/Location columns
-  if (destinationSheet === TABLE_NAMES.FINISH) {
-    const finishTableData = transformedData as FinishTableRow;
+  // All tables have identical structure, so apply to all
+  const tableData = transformedData as VendorTableRow;
 
-    // Apply email link - find column by name instead of position
-    const emailColumnIndex = normalizedHeaders.indexOf("Email") + 1;
-    if (emailColumnIndex > 0) {
-      const emailFormula = getEmailLinkFormula(finishTableData.Email);
-      if (emailFormula) {
-        const emailCell = sheet.getRange(insertRowNumber, emailColumnIndex);
-        emailCell.setFormula(emailFormula);
-      }
-    }
-
-    // Apply location link - find column by name instead of position
-    const locationColumnIndex = normalizedHeaders.indexOf("Location") + 1;
-    if (locationColumnIndex > 0) {
-      const locationFormula = getLocationLinkFormula(finishTableData.Location);
-      if (locationFormula) {
-        const locationCell = sheet.getRange(
-          insertRowNumber,
-          locationColumnIndex
-        );
-        locationCell.setFormula(locationFormula);
-      }
-    }
-
-    // Apply website link - find column by name instead of position
-    const websiteColumnIndex =
-      normalizedHeaders.indexOf("Website / Social") + 1;
-    if (websiteColumnIndex > 0) {
-      const websiteFormula = getWebsiteLinkFormula(
-        finishTableData["Website / Social"]
-      );
-      if (websiteFormula) {
-        const websiteCell = sheet.getRange(insertRowNumber, websiteColumnIndex);
-        websiteCell.setFormula(websiteFormula);
-      }
+  // Apply email link - find column by name instead of position
+  const emailColumnIndex = normalizedHeaders.indexOf("Email") + 1;
+  if (emailColumnIndex > 0) {
+    const emailFormula = getEmailLinkFormula(tableData.Email);
+    if (emailFormula) {
+      const emailCell = sheet.getRange(insertRowNumber, emailColumnIndex);
+      emailCell.setFormula(emailFormula);
     }
   }
 
-  console.log(
-    `🧪 TEST MODE: Added vendor data to ${destinationSheet} sheet: ${vendorData.companyName}`
-  );
+  // Apply location link - find column by name instead of position
+  const locationColumnIndex = normalizedHeaders.indexOf("Location") + 1;
+  if (locationColumnIndex > 0) {
+    const locationFormula = getLocationLinkFormula(tableData.Location);
+    if (locationFormula) {
+      const locationCell = sheet.getRange(insertRowNumber, locationColumnIndex);
+      locationCell.setFormula(locationFormula);
+    }
+  }
+
+  // Apply website link - find column by name instead of position
+  const websiteColumnIndex = normalizedHeaders.indexOf("Website / Social") + 1;
+  if (websiteColumnIndex > 0) {
+    const websiteFormula = getWebsiteLinkFormula(tableData["Website / Social"]);
+    if (websiteFormula) {
+      const websiteCell = sheet.getRange(insertRowNumber, websiteColumnIndex);
+      websiteCell.setFormula(websiteFormula);
+    }
+  }
 }

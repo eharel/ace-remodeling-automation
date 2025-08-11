@@ -6,6 +6,7 @@ export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
 export const TABLE_NAMES = {
   ROUGH: "Rough",
   FINISH: "Finish",
+  OTHER: "Other",
 } as const;
 
 export type TableName = (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES];
@@ -15,6 +16,7 @@ export const VENDOR_CATEGORIES = {
   ROUGH: "ROUGH",
   FINISH: "FINISH",
   BOTH: "BOTH",
+  OTHER: "OTHER",
 } as const;
 
 export type VendorCategory =
@@ -37,25 +39,44 @@ export const VENDOR_STATUS_OPTIONS = [
 
 export type VendorStatus = (typeof VENDOR_STATUS_OPTIONS)[number];
 
-// Table configurations for the vendor sheet
+// Table configurations for the vendor sheet - all tables now have identical structure
 export const VENDOR_TABLES = {
   ROUGH: {
     name: TABLE_NAMES.ROUGH,
     headers: [
-      "Names",
+      "Name",
       "Type",
-      "Details",
+      "Email",
+      "Location",
+      "Phone",
       "Point of Contact",
-      "Phone Number",
       "Status",
       "Post date",
       "File",
       "Stars",
       "Notes",
+      "Website / Social",
     ],
   },
   FINISH: {
     name: TABLE_NAMES.FINISH,
+    headers: [
+      "Name",
+      "Type",
+      "Email",
+      "Location",
+      "Phone",
+      "Point of Contact",
+      "Status",
+      "Post date",
+      "File",
+      "Stars",
+      "Notes",
+      "Website / Social",
+    ],
+  },
+  OTHER: {
+    name: TABLE_NAMES.OTHER,
     headers: [
       "Name",
       "Type",
@@ -82,6 +103,7 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   address: ["Business Address/ Dirección de negocio"],
   roughProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   finishProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
+  otherProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   websiteOrSocial: ["Website or Social Media"],
   hasShowroom: [
     "Do you have a physical showroom? / ¿Tiene una sala de exhibición física?",
@@ -128,6 +150,7 @@ export const DEFAULT_VENDOR_RESPONSE: Vendor = {
   address: "",
   roughProducts: [],
   finishProducts: [],
+  otherProducts: [],
   websiteOrSocial: "",
   hasShowroom: undefined,
   offersCustomOrders: undefined,

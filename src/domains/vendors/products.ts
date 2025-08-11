@@ -12,154 +12,210 @@ export interface ProductDef {
   category: VendorCategory; // which tables this contributes to
 }
 
-// NOTE: use English side only; we already strip "X / Y" to English
+// NOTE: Form and sheet dropdowns now match exactly - single source of truth
+// Form options include both English and Spanish versions
 export const PRODUCT_CATALOG: ProductDef[] = [
+  // OTHER CATEGORY
   {
-    key: "CABINETS",
-    formLabels: ["Cabinets"],
+    key: "ALL",
+    formLabels: ["All", "Todos"],
+    category: VENDOR_CATEGORIES.OTHER,
+    roughTypes: ["All"],
+    finishTypes: ["All"],
+  },
+  {
+    key: "BUILDING_SUPPLIES",
+    formLabels: ["Building Supplies", "Materiales de construcción"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Building Supplies"],
+  },
+  {
+    key: "CONCRETE",
+    formLabels: ["Concrete", "Concreto"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Concrete"],
+  },
+  {
+    key: "DRYWALL",
+    formLabels: ["Drywall", "Panel de yeso"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Drywall"],
+  },
+  {
+    key: "FABRICATOR",
+    formLabels: ["Fabricator", "Fabricante"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Fabricator"],
+  },
+  {
+    key: "FLOORS_ROUGH",
+    formLabels: ["Floors", "Pisos"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Floors"],
+  },
+  {
+    key: "FRAMING",
+    formLabels: ["Framing", "Estructura"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Framing"],
+  },
+  {
+    key: "INSULATION",
+    formLabels: ["Insulation", "Aislamiento"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Insulation"],
+  },
+  {
+    key: "METAL",
+    formLabels: ["Metal"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Metal"],
+  },
+  {
+    key: "ROOFS",
+    formLabels: ["Roofs", "Techos"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Roofs"],
+  },
+  {
+    key: "SHOWROOM_ROUGH",
+    formLabels: ["Showroom", "Sala de exposición"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Showroom"],
+  },
+  {
+    key: "WOOD",
+    formLabels: ["Wood", "Madera"],
+    category: VENDOR_CATEGORIES.ROUGH,
+    roughTypes: ["Wood"],
+  },
+
+  // FINISH CATEGORY
+  {
+    key: "APPLIANCES",
+    formLabels: ["Appliances", "Electrodomésticos"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Appliances"],
+  },
+  {
+    key: "CABINETRY",
+    formLabels: ["Cabinetry", "Gabinetes"],
     category: VENDOR_CATEGORIES.FINISH,
     finishTypes: ["Cabinetry"],
   },
-
+  {
+    key: "CARPET",
+    formLabels: ["Carpet", "Alfombra"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Carpet"],
+  },
   {
     key: "COUNTERTOPS",
-    formLabels: ["Countertops"],
+    formLabels: ["Countertops", "Encimeras"],
     category: VENDOR_CATEGORIES.FINISH,
     finishTypes: ["Countertops"],
   },
-
-  {
-    key: "FLOORING",
-    formLabels: ["Flooring"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Floors"],
-  },
-
-  {
-    key: "TILE",
-    formLabels: ["Tile"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Tiles"],
-  },
-
   {
     key: "DOORS",
-    formLabels: ["Doors"],
+    formLabels: ["Doors", "Puertas"],
     category: VENDOR_CATEGORIES.FINISH,
     finishTypes: ["Doors"],
   },
-
   {
-    key: "HARDWARE",
-    formLabels: ["Hardware"],
-    category: VENDOR_CATEGORIES.ROUGH,
-    roughTypes: ["Metal"],
+    key: "DRAWERS",
+    formLabels: ["Drawers", "Cajones"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Drawers"],
+  },
+  {
+    key: "FLOORS_FINISH",
+    formLabels: ["Floors", "Pisos"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Floors"],
+  },
+  {
+    key: "GATES_FENCES_ELECTRIC",
+    formLabels: ["Gates • Fences • Electric", "Portones • Cercas • Eléctrico"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Gates • Fences • Electric"],
+  },
+  {
+    key: "HARDWOOD",
+    formLabels: ["Hardwood", "Madera dura"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Hardwood"],
+  },
+  {
+    key: "LUMBER",
+    formLabels: ["Lumber", "Madera aserrada"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Lumber"],
+  },
+  {
+    key: "PAINT",
+    formLabels: ["Paint", "Pintura"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Paint"],
+  },
+  {
+    key: "PLYWOOD",
+    formLabels: ["Plywood", "Madera contrachapada"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Plywood"],
+  },
+  {
+    key: "SHOWROOM_FINISH",
+    formLabels: ["Showroom", "Sala de exposición"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Showroom"],
+  },
+  {
+    key: "SLABS_GRANITE_MARBLE",
+    formLabels: [
+      "Slabs • Granite • Marble • Quartz",
+      "Losas • Granito • Mármol • Cuarzo",
+    ],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Slabs • Granite • Marble • Quartz"],
+  },
+  {
+    key: "SUPPLIER",
+    formLabels: ["Supplier", "Proveedor"],
+    category: VENDOR_CATEGORIES.FINISH,
     finishTypes: ["Supplier"],
-  }, // can touch both if you want
-
+  },
   {
-    key: "GLASS",
-    formLabels: ["Glass"],
+    key: "TILES",
+    formLabels: ["Tiles", "Azulejos"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Tiles"],
+  },
+  {
+    key: "VINYL",
+    formLabels: ["Vinyl", "Vinilo"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Vinyl"],
+  },
+  {
+    key: "WALLPAPER",
+    formLabels: ["Wallpaper", "Papel tapiz"],
+    category: VENDOR_CATEGORIES.FINISH,
+    finishTypes: ["Wallpaper"],
+  },
+  {
+    key: "WINDOWS",
+    formLabels: ["Windows", "Ventanas"],
     category: VENDOR_CATEGORIES.FINISH,
     finishTypes: ["Windows"],
   },
 
-  {
-    key: "PLUMBING_FIXTURES",
-    formLabels: ["Plumbing Fixtures"],
-    category: VENDOR_CATEGORIES.ROUGH,
-    roughTypes: ["Building Supplies"],
-    finishTypes: ["Appliances"],
-  },
-
-  {
-    key: "LIGHTING",
-    formLabels: ["Lighting"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Appliances"],
-  },
-
-  {
-    key: "PAINT",
-    formLabels: ["Paint"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Paint"],
-    roughTypes: ["Building Supplies"],
-  },
-
-  {
-    key: "DRYWALL",
-    formLabels: ["Drywall"],
-    category: VENDOR_CATEGORIES.ROUGH,
-    roughTypes: ["Drywall"],
-    finishTypes: ["Paint"],
-  },
-
-  {
-    key: "STUCCO",
-    formLabels: ["Stucco"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Paint"],
-  },
-
-  {
-    key: "SIDING",
-    formLabels: ["Siding"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Vinyl"],
-  },
-
-  {
-    key: "FENCE",
-    formLabels: ["Fence"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Gates / Fences / Electric"],
-  },
-
-  {
-    key: "GUTTER",
-    formLabels: ["Gutter"],
-    category: VENDOR_CATEGORIES.ROUGH,
-    roughTypes: ["Roofs"],
-    finishTypes: ["Vinyl"],
-  },
-
-  {
-    key: "DECKING",
-    formLabels: ["Decking"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Floors"],
-  },
-
-  {
-    key: "ROOFING",
-    formLabels: ["Roofing"],
-    category: VENDOR_CATEGORIES.ROUGH,
-    roughTypes: ["Roofs"],
-    finishTypes: ["Vinyl"],
-  },
-
-  {
-    key: "STONE",
-    formLabels: ["Stone"],
-    category: VENDOR_CATEGORIES.FINISH,
-    finishTypes: ["Slabs / Granite / Marble / Quartz"],
-  },
-
-  {
-    key: "IRON_METAL",
-    formLabels: ["Iron & Metal", "Iron", "Metal"],
-    category: VENDOR_CATEGORIES.BOTH,
-    roughTypes: ["Metal"],
-    finishTypes: ["Gates / Fences / Electric"],
-  },
-
+  // OTHER - goes to separate tab
   {
     key: "OTHER",
-    formLabels: ["Other"],
-    category: VENDOR_CATEGORIES.BOTH,
-    roughTypes: ["All"],
-    finishTypes: ["Supplier"],
+    formLabels: ["Other", "Otro"],
+    category: VENDOR_CATEGORIES.OTHER,
+    roughTypes: ["Other"],
+    finishTypes: ["Other"],
   },
 ];
 

@@ -38,6 +38,9 @@ const fieldHandlers: Record<
   finishProducts: (value: string, parsed: Partial<Vendor>) => {
     // This field is populated by the productsOffered handler
   },
+  otherProducts: (value: string, parsed: Partial<Vendor>) => {
+    // This field is populated by the productsOffered handler
+  },
   websiteOrSocial: (value: string, parsed: Partial<Vendor>) => {
     parsed.websiteOrSocial = value;
   },
@@ -79,7 +82,6 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
   for (const [rawKey, value] of Object.entries(raw)) {
     const fieldKey = RAW_TO_VENDOR_KEY[rawKey];
     if (!fieldKey) {
-      console.warn(`⚠️ Unrecognized form field: ${rawKey}`);
       continue;
     }
 
@@ -88,6 +90,7 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
       const products = value.split(",").map((s: string) => s.trim());
       const roughProducts: string[] = [];
       const finishProducts: string[] = [];
+      const otherProducts: string[] = [];
 
       for (const product of products) {
         const productDef = PRODUCT_BY_LABEL[toEnglish(product)];
@@ -105,8 +108,11 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
           ) {
             finishProducts.push(product);
           }
+          if (productDef.category === VENDOR_CATEGORIES.OTHER) {
+            // OTHER category products go to Other table only
+            otherProducts.push(product);
+          }
         } else {
-          console.warn(`⚠️ Unknown product type: ${product}`);
           // Default to both tables for unknown products
           roughProducts.push(product);
           finishProducts.push(product);
@@ -118,6 +124,9 @@ export function parseVendorResponse(raw: Record<string, string>): Vendor {
       }
       if (finishProducts.length > 0) {
         parsed.finishProducts = finishProducts;
+      }
+      if (otherProducts.length > 0) {
+        parsed.otherProducts = otherProducts;
       }
       continue;
     }
