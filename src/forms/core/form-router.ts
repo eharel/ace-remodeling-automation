@@ -3,7 +3,11 @@ import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboa
 
 // Form IDs - we'll need to get these from your actual Google Forms
 const FORM_IDS = {
-  VENDOR: "1ZJjubXrTZY32t4XDYzfCtruf5kdsrNrl2e8RFURGjhU", // Copy for testing
+  // Developer form IDs (for testing)
+  // VENDOR: "1ZJjubXrTZY32t4XDYzfCtruf5kdsrNrl2e8RFURGjhU", // Copy for testing
+
+  // Production form IDs (commented out for easy switching)
+  VENDOR: "1RJvElIltYNylJMebgqCn_1AsqlkhcVA3lkRU1rseUwY", // Production vendor form
   ONBOARDING: "1j7FMuDRHRQ47ee_M5yZCrjW8gEIoMG7y8XehaIM7RjY", // Dev onboarding form
   TRADES: "your-trades-form-id-here", // Replace with actual form ID
   KITCHEN_REMODEL: "your-kitchen-form-id-here", // Replace with actual form ID
@@ -14,7 +18,6 @@ const FORM_IDS = {
  * Main form submission handler that routes to the appropriate domain handler
  */
 export function onFormSubmit(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
-
   const formId = FormApp.getActiveForm().getId();
 
   try {

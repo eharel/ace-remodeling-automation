@@ -99,18 +99,6 @@ export function transformVendorToTable(
     File: "",
     Stars: "",
     "Website / Social": vendor.websiteOrSocial || "",
-    Notes: [
-      vendor.comments,
-      `Has Showroom: ${vendor.hasShowroom ? "Yes" : "No"}`,
-      `Custom Orders: ${vendor.offersCustomOrders ? "Yes" : "No"}`,
-      `Delivery: ${vendor.offersDelivery ? "Yes" : "No"}`,
-      `Turnaround: ${vendor.turnaroundTime || "Not specified"}`,
-      `Contractor Pricing: ${vendor.offersContractorPricing ? "Yes" : "No"}`,
-      `Payment Methods: ${vendor.paymentMethods.join(", ")}`,
-      `Payment Details: ${vendor.paymentDetails}`,
-      `Email Catalogs: ${vendor.willEmailCatalogs ? "Yes" : "No"}`,
-    ]
-      .filter(Boolean)
-      .join(" | "),
+    Notes: "",
   };
 }

@@ -1,6 +1,10 @@
 import { Vendor } from "./types";
 
-export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
+// Developer sheet ID (for testing)
+// export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
+
+// Production sheet ID (commented out for easy switching)
+export const VENDOR_SHEET_ID = "1cMAGOIsPl5chA9cP3hYMyn9i3xLJL8bOALG_mygNY0w";
 
 // Table name constants
 export const TABLE_NAMES = {
@@ -54,7 +58,7 @@ export const VENDOR_STATUS = {
   LICENSED: VENDOR_STATUS_OPTIONS[10],
 } as const;
 
-// Table configurations for the vendor sheet - all tables now have identical structure
+// Table configurations for the vendor sheet - all tables have identical structure
 export const VENDOR_TABLES = {
   ROUGH: {
     name: TABLE_NAMES.ROUGH,
