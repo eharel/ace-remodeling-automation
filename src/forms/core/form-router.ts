@@ -1,14 +1,11 @@
 import { handleVendorForm } from "../../domains/vendors/core/handle-vendor-form";
 import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboarding-form";
+import { getVendorFormId, getOnboardingFormId } from "../config/environment";
 
 // Form IDs - we'll need to get these from your actual Google Forms
 const FORM_IDS = {
-  // Developer form IDs (for testing)
-  // VENDOR: "1ZJjubXrTZY32t4XDYzfCtruf5kdsrNrl2e8RFURGjhU", // Copy for testing
-
-  // Production form IDs (commented out for easy switching)
-  VENDOR: "1RJvElIltYNylJMebgqCn_1AsqlkhcVA3lkRU1rseUwY", // Production vendor form
-  ONBOARDING: "1j7FMuDRHRQ47ee_M5yZCrjW8gEIoMG7y8XehaIM7RjY", // Dev onboarding form
+  VENDOR: getVendorFormId(),
+  ONBOARDING: getOnboardingFormId(),
   TRADES: "your-trades-form-id-here", // Replace with actual form ID
   KITCHEN_REMODEL: "your-kitchen-form-id-here", // Replace with actual form ID
   BATHROOM_REMODEL: "your-bathroom-form-id-here", // Replace with actual form ID

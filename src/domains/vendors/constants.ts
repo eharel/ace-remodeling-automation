@@ -1,10 +1,9 @@
 import { Vendor } from "./types";
 
-// Developer sheet ID (for testing)
-// export const VENDOR_SHEET_ID = "1AjvpYaXI9d_6zO6OTUUVxNT4B7NCNRgAPt80KRltKb0";
+import { getVendorSheetId } from "../../forms/config/environment";
 
-// Production sheet ID (commented out for easy switching)
-export const VENDOR_SHEET_ID = "1cMAGOIsPl5chA9cP3hYMyn9i3xLJL8bOALG_mygNY0w";
+// Sheet ID - automatically determined by environment
+export const VENDOR_SHEET_ID = getVendorSheetId();
 
 // Table name constants
 export const TABLE_NAMES = {
