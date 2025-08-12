@@ -1,13 +1,19 @@
+// src/apps-scripts/forms-library/src/index.ts
 import { registerGlobals } from "@utils/register-globals";
-
-// Import the main function from the forms router
 import { onFormSubmit } from "@forms/core/form-router";
 
-// Register the global function that Apps Script will call
+// ✅ add these two imports
+import { peekEnv, peekRouterContext } from "@forms/core/peek-env";
+
+// Extend the global declarations
 declare global {
   var onFormSubmit: (e: GoogleAppsScript.Events.FormsOnFormSubmit) => void;
+  var peekEnv: () => void; // ✅ add
+  var peekRouterContext: () => void; // ✅ add
 }
 
 registerGlobals({
   onFormSubmit,
+  peekEnv, // ✅ add
+  peekRouterContext, // ✅ add
 });

@@ -27,7 +27,10 @@
       "@utils/*": ["utils/*"],
       "@tables/*": ["tables/*"],
       "@domains/*": ["domains/*"],
-      "@forms/*": ["forms/*"]
+      "@forms/*": ["forms/*"],
+      "@/env/*": ["env/*"],
+      "@/forms/*": ["forms/*"],
+      "@/config/*": ["config/*"]
     }
   },
   "include": ["sandbox"],

@@ -5,10 +5,16 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": ".",
-    "outDir": "build"
+    "rootDir": "../..",
+    "outDir": "build",
+    "baseUrl": "../..",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/env/*": ["src/env/*"],
+      "@/config/*": ["src/config/*"]
+    }
   },
-  "include": ["**/*"],
+  "include": ["**/*", "../config/**/*", "../env/**/*"],
   "references": [
     { "path": "../domains/vendors" },
     { "path": "../domains/onboarding" }
