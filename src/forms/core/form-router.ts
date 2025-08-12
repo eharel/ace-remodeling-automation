@@ -3,7 +3,7 @@ import { handleVendorForm } from "../../domains/vendors/core/handle-vendor-form"
 import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboarding-form";
 
 import { getFormsConfig } from "@/forms/config/config";
-import type { EnvName } from "@/config/env-types";
+import type { EnvName } from "@/config/env-name";
 
 /**
  * Library entry. The HOST should pass `mode` based on its Script Properties.
@@ -33,14 +33,22 @@ export function onFormSubmit(
 
   Logger.log("[FORM ROUTER] mode=%s formId=%s", effectiveMode, formId);
 
+  // Safety check: ensure formId is in expected IDs for current mode
+  const expectedFormIds = Object.values(FORM_IDS);
+  if (!expectedFormIds.includes(formId)) {
+    throw new Error(
+      `Form ID ${formId} not found in expected IDs for mode ${effectiveMode}: ${expectedFormIds.join(
+        ", "
+      )}`
+    );
+  }
+
   try {
     switch (formId) {
       case FORM_IDS.VENDOR:
-        return handleVendorForm(e);
+        return handleVendorForm(e, ids);
       case FORM_IDS.ONBOARDING:
-        return handleOnboardingForm(e);
-      default:
-        throw new Error(`Unknown form ID: ${formId}`);
+        return handleOnboardingForm(e, ids);
     }
   } catch (err) {
     throw err;

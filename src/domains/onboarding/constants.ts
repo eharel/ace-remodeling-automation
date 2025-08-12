@@ -2,9 +2,6 @@
  * Onboarding domain constants
  */
 
-export const ONBOARDING_SHEET_ID =
-  "14tetnSOCutrgXL_9osxsN3964n534-rXWF787gPwzlM";
-
 export const ONBOARDING_FORM_FIELDS = {
   // Contact Information
   NAME: "Name / Nombre",
@@ -58,7 +55,6 @@ export const PROFESSIONS = {
 } as const;
 
 export const ONBOARDING_SHEET_CONFIG = {
-  SHEET_NAME: "Onboarding Contacts",
   HEADERS: [
     "Name",
     "Company",

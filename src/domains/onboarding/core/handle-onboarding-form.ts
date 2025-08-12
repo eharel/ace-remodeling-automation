@@ -1,11 +1,13 @@
 import { parseOnboardingResponse } from "./parse-onboarding-response";
 import { saveOnboardingDataToSheet } from "./integrations/sheets-integration";
+import type { FormsIds } from "@/forms/config/config";
 
 /**
  * Handles onboarding form submissions
  */
 export function handleOnboardingForm(
-  e: GoogleAppsScript.Events.FormsOnFormSubmit
+  e: GoogleAppsScript.Events.FormsOnFormSubmit,
+  ids: FormsIds
 ) {
   console.log("🛠️ Processing onboarding form submission...");
 
@@ -36,7 +38,11 @@ export function handleOnboardingForm(
     console.log("✅ Onboarding data parsed successfully");
 
     // Save to Google Sheets
-    saveOnboardingDataToSheet(onboardingData);
+    saveOnboardingDataToSheet(
+      onboardingData,
+      ids.ONBOARDING_SHEET,
+      ids.ONBOARDING_TAB
+    );
     console.log("📊 Onboarding data saved to Google Sheets");
 
     console.log("🎉 Onboarding form processed successfully");

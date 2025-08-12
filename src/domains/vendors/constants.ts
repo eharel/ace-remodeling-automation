@@ -1,19 +1,5 @@
 import { Vendor } from "./types";
 
-import { env } from "@/env/index-gas";
-import { getFormsConfig } from "@/forms/config/config";
-
-const DOMAIN = "forms";
-
-// Option A: compute once per execution and export the value
-const VENDOR_SHEET_ID_COMPUTED = (() => {
-  const mode = env.resolve(DOMAIN);
-  const ids = getFormsConfig(mode);
-  return ids.VENDOR_SHEET;
-})();
-
-export const VENDOR_SHEET_ID = VENDOR_SHEET_ID_COMPUTED;
-
 // Table name constants
 export const TABLE_NAMES = {
   ROUGH: "Rough",
