@@ -1,6 +1,5 @@
 import { Vendor } from "../../types";
 import {
-  VENDOR_SHEET_ID,
   VENDOR_TABLES,
   TABLE_NAMES,
   VENDOR_CATEGORIES,
@@ -98,10 +97,14 @@ export interface SheetsTableConfig {
 }
 
 /**
- * TEST MODE: Saves vendor data to the appropriate sheets based on their products
+ * Saves vendor data to the appropriate sheets based on their products
  * Creates entries for both Rough and Finish tables if the vendor has products in both categories
  */
-export function saveVendorDataToSheetTest(vendorData: Vendor) {
+export function saveVendorDataToSheet(
+  vendorData: Vendor,
+  vendorSheetId: string,
+  vendorTabName: string
+) {
   // Get all products from all arrays (these are the categorized products)
   const allProducts = [
     ...(vendorData.roughProducts || []),
@@ -114,7 +117,12 @@ export function saveVendorDataToSheetTest(vendorData: Vendor) {
 
   // Create entries for each destination
   for (const destination of destinations) {
-    saveVendorDataToSheetTestInternal(vendorData, destination);
+    saveVendorDataToSheetInternal(
+      vendorData,
+      destination,
+      vendorSheetId,
+      vendorTabName
+    );
   }
 
   if (destinations.length === 0) {
@@ -126,13 +134,15 @@ export function saveVendorDataToSheetTest(vendorData: Vendor) {
  * Gets the sheet and headers for a specific destination
  */
 function getSheetAndHeaders(
-  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
+  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES],
+  vendorSheetId: string,
+  vendorTabName: string
 ): {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;
   lastRowWithContent: number;
   normalizedHeaders: string[];
 } {
-  const spreadsheet = SpreadsheetApp.openById(VENDOR_SHEET_ID);
+  const spreadsheet = SpreadsheetApp.openById(vendorSheetId);
   const sheetName =
     destinationSheet === TABLE_NAMES.ROUGH
       ? VENDOR_TABLES.ROUGH.name
@@ -200,12 +210,17 @@ function writeDataToSheet(
 /**
  * Internal function to save vendor data to a specific sheet
  */
-function saveVendorDataToSheetTestInternal(
+function saveVendorDataToSheetInternal(
   vendorData: Vendor,
-  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES]
+  destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES],
+  vendorSheetId: string,
+  vendorTabName: string
 ) {
-  const { sheet, lastRowWithContent, normalizedHeaders } =
-    getSheetAndHeaders(destinationSheet);
+  const { sheet, lastRowWithContent, normalizedHeaders } = getSheetAndHeaders(
+    destinationSheet,
+    vendorSheetId,
+    vendorTabName
+  );
 
   // Transform data based on destination sheet using the appropriate type mapper
   let transformedData: VendorTableRow;

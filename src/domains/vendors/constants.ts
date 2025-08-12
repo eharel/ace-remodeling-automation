@@ -1,10 +1,5 @@
 import { Vendor } from "./types";
 
-import { getVendorSheetId } from "../../forms/config/environment";
-
-// Sheet ID - automatically determined by environment
-export const VENDOR_SHEET_ID = getVendorSheetId();
-
 // Table name constants
 export const TABLE_NAMES = {
   ROUGH: "Rough",

@@ -1,11 +1,15 @@
 import { parseVendorResponse } from "./parse-vendor-response";
-import { saveVendorDataToSheetTest } from "./integrations/sheets-integration";
+import { saveVendorDataToSheet } from "./integrations/sheets-integration";
+import type { FormsIds } from "@/forms/config/config";
 
 /**
  * Handles vendor form submissions
  * Currently using TEST MODE with placeholder mappings
  */
-export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
+export function handleVendorForm(
+  e: GoogleAppsScript.Events.FormsOnFormSubmit,
+  ids: FormsIds
+) {
   try {
     // Extract raw form data
     const rawFormData = e.response
@@ -29,8 +33,8 @@ export function handleVendorForm(e: GoogleAppsScript.Events.FormsOnFormSubmit) {
     // Parse the raw data into our Vendor type
     const vendorData = parseVendorResponse(rawFormData);
 
-    // Save to Google Sheets (TEST MODE)
-    saveVendorDataToSheetTest(vendorData);
+    // Save to Google Sheets
+    saveVendorDataToSheet(vendorData, ids.VENDOR_SHEET, ids.VENDOR_TAB);
   } catch (error) {
     console.error("❌ Error processing vendor form:", error);
     throw error;

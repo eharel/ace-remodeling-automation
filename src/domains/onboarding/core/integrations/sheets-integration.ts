@@ -1,9 +1,5 @@
 import { OnboardingFormData } from "../../types";
-import {
-  ONBOARDING_SHEET_CONFIG,
-  ONBOARDING_STATUS,
-  ONBOARDING_SHEET_ID,
-} from "../../constants";
+import { ONBOARDING_SHEET_CONFIG, ONBOARDING_STATUS } from "../../constants";
 import {
   createEmailLinkFormula,
   createMapsLinkFormula,
@@ -12,19 +8,23 @@ import {
 /**
  * Saves onboarding data to Google Sheets
  */
-export function saveOnboardingDataToSheet(data: OnboardingFormData): void {
+export function saveOnboardingDataToSheet(
+  data: OnboardingFormData,
+  onboardingSheetId: string,
+  onboardingTabName: string
+): void {
   console.log("📊 Saving onboarding data to Google Sheets...");
 
   try {
-    const spreadsheet = SpreadsheetApp.openById(ONBOARDING_SHEET_ID);
-    let sheet = spreadsheet.getSheetByName(ONBOARDING_SHEET_CONFIG.SHEET_NAME);
+    const spreadsheet = SpreadsheetApp.openById(onboardingSheetId);
+    let sheet = spreadsheet.getSheetByName(onboardingTabName);
 
     // Create sheet if it doesn't exist
     if (!sheet) {
-      sheet = spreadsheet.insertSheet(ONBOARDING_SHEET_CONFIG.SHEET_NAME);
+      sheet = spreadsheet.insertSheet(onboardingTabName);
       sheet
         .getRange(1, 1, 1, ONBOARDING_SHEET_CONFIG.HEADERS.length)
-        .setValues([ONBOARDING_SHEET_CONFIG.HEADERS]);
+        .setValues([[...ONBOARDING_SHEET_CONFIG.HEADERS]]);
       console.log("📋 Created new onboarding sheet with headers");
     }
 
