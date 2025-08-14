@@ -1,7 +1,7 @@
 import { parseVendorResponse } from "./parse-vendor-response";
 import { saveVendorDataToSheet } from "./integrations/sheets-integration";
 import type { FormsIds } from "@/forms/config/config";
-import { createLogger } from "@lib/logging/log";
+import { createLogger, errFields } from "@lib/logging/log";
 
 /**
  * Handles vendor form submissions
@@ -52,7 +52,7 @@ export function handleVendorForm(
     });
   } catch (err) {
     error = err as Error;
-    vendorsLog.error("Error processing vendor form", { error: String(error) });
+    vendorsLog.error("Error processing vendor form", errFields(error));
     throw error;
   } finally {
     span.end({ success: !error });

@@ -96,9 +96,29 @@ export function createLogger(
 /** Shared default logger (no module tag, default level=info). */
 export const log = createLogger();
 
+// Helper: turn unknown error into structured fields
+export function errFields(err: unknown): LogFields {
+  if (err instanceof Error) {
+    return { name: err.name, message: err.message, stack: err.stack };
+  }
+  return { error: String(err) };
+}
+
+// Safer JSON: handles Error + circular references
 function safeJson(obj: unknown): string {
   try {
-    return JSON.stringify(obj);
+    const seen = new WeakSet<object>();
+    const replacer = (_key: string, value: any) => {
+      if (value instanceof Error) {
+        return { name: value.name, message: value.message, stack: value.stack };
+      }
+      if (value && typeof value === "object") {
+        if (seen.has(value)) return "[Circular]";
+        seen.add(value);
+      }
+      return value;
+    };
+    return JSON.stringify(obj, replacer);
   } catch {
     return '"<unserializable fields>"';
   }
