@@ -1,4 +1,4 @@
-// src/lib/logging/log.ts
+import { getRunContext } from "./run-context";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 export type LogFields = Record<string, unknown>;
@@ -53,8 +53,10 @@ export function createLogger(
     if (!shouldLog(level)) return;
     const ts = new Date().toISOString();
     const mod = module ? ` [${module}]` : "";
+    const ctx = getRunContext();
+    const corr = ctx ? ` (req ${ctx.reqId} ${ctx.env})` : "";
     const json = fields ? " " + safeJson(fields) : "";
-    const line = `${ts} ${level.toUpperCase()}${mod} ${msg}${json}`;
+    const line = `${ts} ${level.toUpperCase()}${mod}${corr} ${msg}${json}`;
     switch (level) {
       case "warn":
         console.warn(line);
