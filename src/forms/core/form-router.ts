@@ -4,7 +4,7 @@ import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboa
 
 import { getFormsConfig } from "@/forms/config/config";
 import type { EnvName } from "@/config/env-name";
-import { createLogger } from "@lib/logging/log";
+import { createLogger } from "@/lib/logging/log";
 
 /**
  * Library entry. The HOST should pass `mode` based on its Script Properties.

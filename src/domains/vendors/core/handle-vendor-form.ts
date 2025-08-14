@@ -11,7 +11,7 @@ export function handleVendorForm(
   e: GoogleAppsScript.Events.FormsOnFormSubmit,
   ids: FormsIds
 ) {
-  const vendorsLog = createLogger("Vendor");
+  const vendorsLog = createLogger("Vendor", { level: "info" });
   try {
     // Extract raw form data
     vendorsLog.info("Extracting raw form data", {
@@ -40,7 +40,7 @@ export function handleVendorForm(
 
     // Save to Google Sheets
     saveVendorDataToSheet(vendorData, ids.VENDOR_SHEET, ids.VENDOR_TAB);
-    vendorsLog.info("Parsed vendor data", { name: vendorData.companyName }); // avoid full PII
+    vendorsLog.debug("Parsed vendor data", { name: vendorData.companyName }); // avoid full PII
     vendorsLog.info("Saved vendor to sheet", {
       sheetId: ids.VENDOR_SHEET,
       tab: ids.VENDOR_TAB,
