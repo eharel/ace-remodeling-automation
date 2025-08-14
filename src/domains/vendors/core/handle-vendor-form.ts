@@ -11,7 +11,12 @@ export function handleVendorForm(
   e: GoogleAppsScript.Events.FormsOnFormSubmit,
   ids: FormsIds
 ) {
-  const vendorsLog = createLogger("Vendor", { level: "info" });
+  const vendorsLog = createLogger("Vendor");
+  const span = vendorsLog.start("Handle vendor form", {
+    formId: ids.VENDOR_FORM,
+  });
+
+  let error: Error | undefined;
   try {
     // Extract raw form data
     vendorsLog.info("Extracting raw form data", {
@@ -45,8 +50,11 @@ export function handleVendorForm(
       sheetId: ids.VENDOR_SHEET,
       tab: ids.VENDOR_TAB,
     });
-  } catch (error) {
+  } catch (err) {
+    error = err as Error;
     vendorsLog.error("Error processing vendor form", { error: String(error) });
     throw error;
+  } finally {
+    span.end({ success: !error });
   }
 }

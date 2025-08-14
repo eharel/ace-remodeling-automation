@@ -3,11 +3,23 @@
 export type LogLevel = "debug" | "info" | "warn" | "error";
 export type LogFields = Record<string, unknown>;
 
+// per-execution global min level
+let GLOBAL_MIN_LEVEL: LogLevel = "info";
+export function setGlobalLogLevel(level: LogLevel) {
+  GLOBAL_MIN_LEVEL = level;
+}
+
 export type Logger = {
   debug: (msg: string, fields?: LogFields) => void;
   info: (msg: string, fields?: LogFields) => void;
   warn: (msg: string, fields?: LogFields) => void;
   error: (msg: string, fields?: LogFields) => void;
+
+  /** Start a span (logs START ...), returns an object with end() that logs END ... with duration (ms). */
+  start: (
+    operation: string,
+    fields?: LogFields
+  ) => { end: (fields?: LogFields) => void };
 };
 
 export type LoggerOptions = {
@@ -15,12 +27,11 @@ export type LoggerOptions = {
   level?: LogLevel;
 };
 
-/** Factory function — create a module-scoped logger with a min-level filter. */
 export function createLogger(
   module?: string,
   options: LoggerOptions = {}
 ): Logger {
-  const minLevel: LogLevel = options.level ?? "info";
+  const minLevel: LogLevel = options.level ?? GLOBAL_MIN_LEVEL;
 
   function levelValue(l: LogLevel): number {
     switch (l) {
@@ -40,12 +51,10 @@ export function createLogger(
 
   function write(level: LogLevel, msg: string, fields?: LogFields): void {
     if (!shouldLog(level)) return;
-
     const ts = new Date().toISOString();
     const mod = module ? ` [${module}]` : "";
     const json = fields ? " " + safeJson(fields) : "";
     const line = `${ts} ${level.toUpperCase()}${mod} ${msg}${json}`;
-
     switch (level) {
       case "warn":
         console.warn(line);
@@ -54,8 +63,23 @@ export function createLogger(
         console.error(line);
         break;
       default:
-        console.info(line); // "debug" & "info" go here
+        console.info(line); // "debug" & "info"
     }
+  }
+
+  /** Spans: START/END with duration at info level */
+  function start(operation: string, fields?: LogFields) {
+    write("info", `START ${operation}`, fields);
+    const t0 = Date.now();
+    let ended = false;
+    return {
+      end(endFields?: LogFields) {
+        if (ended) return; // idempotent
+        ended = true;
+        const ms = Date.now() - t0;
+        write("info", `END ${operation}`, { ...endFields, ms });
+      },
+    };
   }
 
   return {
@@ -63,6 +87,7 @@ export function createLogger(
     info: (m, f) => write("info", m, f),
     warn: (m, f) => write("warn", m, f),
     error: (m, f) => write("error", m, f),
+    start,
   };
 }
 

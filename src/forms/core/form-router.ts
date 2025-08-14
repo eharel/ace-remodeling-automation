@@ -4,7 +4,10 @@ import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboa
 
 import { getFormsConfig } from "@/forms/config/config";
 import type { EnvName } from "@/config/env-name";
-import { createLogger } from "@/lib/logging/log";
+import { createLogger, setGlobalLogLevel } from "@/lib/logging/log";
+
+const levelForEnv = (env: EnvName) =>
+  env === "development" || env === "staging" ? "debug" : "info";
 
 /**
  * Library entry. The HOST should pass `mode` based on its Script Properties.
@@ -18,6 +21,8 @@ export function onFormSubmit(
     mode === "production" || mode === "staging" || mode === "development"
       ? mode
       : "development";
+
+  setGlobalLogLevel(levelForEnv(effectiveMode));
 
   const ids = getFormsConfig(effectiveMode);
 
@@ -41,6 +46,7 @@ export function onFormSubmit(
   // Safety check: ensure formId is in expected IDs for current mode
   const expectedFormIds = Object.values(FORM_IDS);
   if (!expectedFormIds.includes(formId)) {
+    log.error("Form ID not found in expected IDs", { formId, expectedFormIds });
     throw new Error(
       `Form ID ${formId} not found in expected IDs for mode ${effectiveMode}: ${expectedFormIds.join(
         ", "
