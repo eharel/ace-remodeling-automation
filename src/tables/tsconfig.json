@@ -4,6 +4,6 @@
     "composite": true,
     "typeRoots": ["../../node_modules/@types"]
   },
-  "include": ["./**/*.ts", "../shared/columns/summary.ts"],
-  "references": [{ "path": "../shared" }, { "path": "../utils" }]
+  "include": ["./**/*.ts", "../sheets/columns/summary.ts"],
+  "references": [{ "path": "../sheets" }, { "path": "../utils" }]
 }

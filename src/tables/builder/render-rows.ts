@@ -1,5 +1,5 @@
-import { BaseColumn } from "@shared/columns";
-import { StylizeOptions } from "@shared/styles";
+import { BaseColumn } from "@sheets/columns";
+import { StylizeOptions } from "@sheets/styles";
 
 /**
  * Renders data rows with optional rowSpan merging for grouped data.
@@ -25,7 +25,7 @@ export function renderRows<RowType extends Record<string, any>>(
   });
 
   let currentRow = startRow;
-  
+
   // Render each row with appropriate spanning
   for (let i = 0; i < values.length; i++) {
     const rowValues = values[i];

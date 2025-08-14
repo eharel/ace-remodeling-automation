@@ -1,6 +1,7 @@
 import { parseVendorResponse } from "./parse-vendor-response";
 import { saveVendorDataToSheet } from "./integrations/sheets-integration";
 import type { FormsIds } from "@/forms/config/config";
+import { createLogger } from "@lib/logging/log";
 
 /**
  * Handles vendor form submissions
@@ -10,8 +11,12 @@ export function handleVendorForm(
   e: GoogleAppsScript.Events.FormsOnFormSubmit,
   ids: FormsIds
 ) {
+  const vendorsLog = createLogger("Vendor");
   try {
     // Extract raw form data
+    vendorsLog.info("Extracting raw form data", {
+      formId: ids.VENDOR_FORM,
+    });
     const rawFormData = e.response
       .getItemResponses()
       .reduce((acc, itemResponse) => {
@@ -35,8 +40,13 @@ export function handleVendorForm(
 
     // Save to Google Sheets
     saveVendorDataToSheet(vendorData, ids.VENDOR_SHEET, ids.VENDOR_TAB);
+    vendorsLog.info("Parsed vendor data", { name: vendorData.companyName }); // avoid full PII
+    vendorsLog.info("Saved vendor to sheet", {
+      sheetId: ids.VENDOR_SHEET,
+      tab: ids.VENDOR_TAB,
+    });
   } catch (error) {
-    console.error("❌ Error processing vendor form:", error);
+    vendorsLog.error("Error processing vendor form", { error: String(error) });
     throw error;
   }
 }

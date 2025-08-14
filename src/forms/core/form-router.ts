@@ -4,6 +4,7 @@ import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboa
 
 import { getFormsConfig } from "@/forms/config/config";
 import type { EnvName } from "@/config/env-name";
+import { createLogger } from "@lib/logging/log";
 
 /**
  * Library entry. The HOST should pass `mode` based on its Script Properties.
@@ -31,7 +32,11 @@ export function onFormSubmit(
     (e?.source as GoogleAppsScript.Forms.Form)?.getId() ??
     FormApp.getActiveForm().getId();
 
-  Logger.log("[FORM ROUTER] mode=%s formId=%s", effectiveMode, formId);
+  const log = createLogger("FormRouter");
+  log.info("Received form submission", {
+    formId,
+    effectiveMode,
+  });
 
   // Safety check: ensure formId is in expected IDs for current mode
   const expectedFormIds = Object.values(FORM_IDS);

@@ -9,5 +9,9 @@
     "rootDir": "."
   },
   "include": ["**/*.ts"],
-  "references": [{ "path": "../../utils" }, { "path": "../../forms" }]
+  "references": [
+    { "path": "../../utils" },
+    { "path": "../../forms" },
+    { "path": "../../lib" }
+  ]
 }

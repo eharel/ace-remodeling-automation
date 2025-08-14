@@ -1,5 +1,9 @@
-import { BaseColumn } from "@shared/columns";
-import { CellStyling, StylizeOptions, SummaryOperationsMap } from "@shared/styles";
+import { BaseColumn } from "@sheets/columns";
+import {
+  CellStyling,
+  StylizeOptions,
+  SummaryOperationsMap,
+} from "@sheets/styles";
 
 /**
  * Parameters for generating a table with data rows, headers, and optional summary.

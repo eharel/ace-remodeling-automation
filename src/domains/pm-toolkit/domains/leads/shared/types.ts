@@ -1,4 +1,4 @@
-import { BaseColumn } from "@shared/columns";
+import { BaseColumn } from "@sheets/columns";
 import { DashboardKey, DashboardLabel } from "./columns/types";
 import { LeadsRowContext, QuarterRowContext } from "./rows/types";
 import { QuarterlyKey, QuarterlyLabel } from "./columns/labels";

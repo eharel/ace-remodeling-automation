@@ -31,7 +31,7 @@ When adding a new domain:
    - Define types in `types.ts`
    - Export public API through `index.ts`
    - Keep domain-specific constants in `constants.ts`
-3. Import shared utilities from `src/shared/`, `src/utils/`, etc.
+3. Import shared utilities from `src/sheets/`, `src/utils/`, etc.
 4. Avoid cross-domain dependencies - use shared utilities instead
 
 ## Shared Utilities

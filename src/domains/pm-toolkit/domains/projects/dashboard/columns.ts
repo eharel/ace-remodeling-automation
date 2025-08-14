@@ -4,7 +4,7 @@ import {
 } from "../../../constants";
 import * as GF from "./transform-functions";
 import { ProjectColumn, ProjectContext } from "./types";
-import { SummaryOperationConfig, SummaryOperationsMap } from "@shared/styles";
+import { SummaryOperationConfig, SummaryOperationsMap } from "@sheets/styles";
 
 export const DASHBOARD_KEYS = {
   PROJECT_NO: "COL_PROJECT_NO",
@@ -145,7 +145,7 @@ export const DASHBOARD_COLUMNS: ProjectColumn[] = [
   },
 ];
 
-import { buildLabelKeyMaps } from "@shared/columns/utils";
+import { buildLabelKeyMaps } from "@sheets/columns/utils";
 
 const labelMaps = buildLabelKeyMaps<DashboardColumnKey, DashboardColumnLabel>(
   DASHBOARD_COLUMNS

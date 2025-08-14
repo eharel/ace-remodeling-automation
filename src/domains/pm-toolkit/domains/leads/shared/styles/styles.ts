@@ -1,6 +1,6 @@
 import { QUARTER_TO_MONTHS } from "../constants";
-import { TableInfo } from "@shared/styles";
-import { BaseColumn } from "@shared/columns";
+import { TableInfo } from "@sheets/styles";
+import { BaseColumn } from "@sheets/columns";
 import { quarterlyKeys } from "../columns";
 import { QUARTER_COLORS } from "./colors";
 
@@ -74,8 +74,14 @@ export function applyQuarterBorders<T extends string>(
   const column = table.startCol + targetColIndex;
   const numRows = rowCount;
   const numColumns = 1;
-  
-  const rawValues = extractGroupingValues(sheet, row, column, numRows, numColumns);
+
+  const rawValues = extractGroupingValues(
+    sheet,
+    row,
+    column,
+    numRows,
+    numColumns
+  );
 
   const groupMap = groupRowsByQuarter(rawValues);
 

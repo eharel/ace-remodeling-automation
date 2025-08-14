@@ -1,14 +1,15 @@
 {
   "files": [],
   "references": [
-    { "path": "src/shared" },
+    { "path": "src/sheets" },
     { "path": "src/tables" },
     { "path": "src/forms" },
     { "path": "src/domains/pm-toolkit" },
     { "path": "src/domains/vendors" },
     { "path": "src/apps-scripts/forms-library" },
     { "path": "src/ui" },
-    { "path": "src/utils" }
+    { "path": "src/utils" },
+    { "path": "src/lib" }
   ],
   "compilerOptions": {
     "target": "ES2020",
@@ -21,13 +22,14 @@
     "rootDir": "src",
     "baseUrl": "src",
     "paths": {
-      "@shared/*": ["shared/*"],
+      "@sheets/*": ["sheets/*"],
       "@pm/*": ["domains/pm-toolkit/*"],
       "@ui/*": ["ui/*"],
       "@utils/*": ["utils/*"],
       "@tables/*": ["tables/*"],
       "@domains/*": ["domains/*"],
       "@forms/*": ["forms/*"],
+      "@lib/*": ["lib/*"],
       "@/env/*": ["env/*"],
       "@/forms/*": ["forms/*"],
       "@/config/*": ["config/*"]

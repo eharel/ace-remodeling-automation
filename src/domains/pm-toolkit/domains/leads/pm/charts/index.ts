@@ -1,4 +1,4 @@
-import { TableInfo } from "@shared/styles";
+import { TableInfo } from "@sheets/styles";
 import { clearExistingCharts } from "../../../../charts";
 import {
   addMonthlyConversionRateChart,

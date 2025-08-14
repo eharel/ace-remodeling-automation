@@ -1,11 +1,11 @@
-import { BaseColumn } from "@shared/columns";
+import { BaseColumn } from "@sheets/columns";
 import {
   OPERATION_SYMBOLS,
   StylizeOptions,
   SummaryOperation,
   SummaryOperationsMap,
   ValueFormat,
-} from "@shared/styles";
+} from "@sheets/styles";
 
 /**
  * Renders a summary row with calculated values based on the provided operations.
