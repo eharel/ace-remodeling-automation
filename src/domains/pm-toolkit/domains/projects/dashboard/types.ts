@@ -1,4 +1,4 @@
-import { BaseColumn } from "@shared/columns";
+import { BaseColumn } from "@sheets/columns";
 import { DashboardColumnKey, DashboardColumnLabel } from "./columns";
 import { PROJECT_DATA_FIELDS } from "./fields";
 

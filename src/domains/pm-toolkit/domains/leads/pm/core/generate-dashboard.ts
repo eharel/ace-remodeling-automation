@@ -4,7 +4,7 @@ import { extractLeadsData } from "./data-extraction";
 import { createMonthlyDashboardRows } from "../../shared/data-transformation";
 import { addBottomBorderBandaidFix } from "../../shared/styles";
 import { generateCharts } from "../charts";
-import { addTimestamp } from "@shared/styles";
+import { addTimestamp } from "@sheets/styles";
 import { renderMonthlyAndQuarterlyBreakdowns } from "../../shared/dashboard/render-dual-tables";
 import { createQuarterlyDashboardRows } from "../../shared/data-transformation";
 import { getQuarterRowSpanMap } from "../../shared/dashboard/utils";

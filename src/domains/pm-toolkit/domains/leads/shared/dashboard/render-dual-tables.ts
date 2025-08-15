@@ -1,5 +1,5 @@
 import { QuarterDashboardRow } from "../rows/types";
-import { TableInfo } from "@shared/styles";
+import { TableInfo } from "@sheets/styles";
 import { LEADS_COLUMNS } from "../columns";
 import { applyQuarterColoring } from "../styles";
 import { applyVerticalBorders } from "../styles";
@@ -10,7 +10,7 @@ import { QUARTER_COLUMNS } from "../columns";
 import { dashboardKeys } from "../columns";
 import { inputKeys } from "../columns";
 import { quarterlyKeys } from "../columns";
-import { extractSummaryOps } from "@shared/columns";
+import { extractSummaryOps } from "@sheets/columns";
 
 export type RenderDualTablesParams = {
   sheet: GoogleAppsScript.Spreadsheet.Sheet;

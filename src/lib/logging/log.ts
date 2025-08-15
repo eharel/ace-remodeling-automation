@@ -1,0 +1,171 @@
+import { getRunContext } from "./run-context";
+
+/**
+ * -----------------------------------------------------------------------------
+ * Logging — Future Enhancements (Parking Lot)
+ * -----------------------------------------------------------------------------
+ * Scoped improvements (inside this module):
+ * - Child loggers: `log.child("save", { ... })` to suffix module tags (e.g., [Vendor:save]).
+ * - Temporary presets: `log.with({ ...fields })` to pre-bind fields for a short scope.
+ * - Error normalization++: include `cause` chain and well-known props from custom errors.
+ * - Sampling / rate-limiting: drop/keep `debug` at a % or per-key to reduce noise.
+ * - Lazy fields: allow values as functions so expensive data is computed only if emitted.
+ * - Field sanitization: helpers to mask or drop keys by allowlist/denylist.
+ * - maskFields(obj): walk an object and apply maskPII to all string values.
+ * - JSON-only mode: emit a single JSON blob per line with consistent keys.
+ * - Tests: unit tests for level filtering, spans, errFields, safeJson (circular refs).
+ *
+ * Cross-cutting (outside this module, but related):
+ * - Log-level override (Script Property): temporarily force level in prod (debug/info/...).
+ * - Request-level span in entrypoints (router): bracket entire execution with START/END.
+ * - Secondary transport: write key events to a Google Sheet (batched + retry/backoff).
+ * - Structured event names: standardize `event` field (e.g., "vendor.saved") + schemas.
+ * - PII policy: central place for redaction rules and a review checklist.
+ * - Performance: measure stringify cost; consider truncation of large payloads.
+ * -----------------------------------------------------------------------------
+ */
+
+export type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogFields = Record<string, unknown>;
+
+// per-execution global min level
+let GLOBAL_MIN_LEVEL: LogLevel = "info";
+export function setGlobalLogLevel(level: LogLevel) {
+  GLOBAL_MIN_LEVEL = level;
+}
+
+export type LoggerOptions = {
+  level?: LogLevel;
+  bound?: LogFields;
+};
+
+export type Logger = {
+  debug: (msg: string, fields?: LogFields) => void;
+  info: (msg: string, fields?: LogFields) => void;
+  warn: (msg: string, fields?: LogFields) => void;
+  error: (msg: string, fields?: LogFields) => void;
+
+  /** Start a span (logs START ...), returns an object with end() that logs END ... with duration (ms). */
+  start: (
+    operation: string,
+    fields?: LogFields
+  ) => { end: (fields?: LogFields) => void };
+};
+
+export function createLogger(
+  module?: string,
+  options: LoggerOptions = {}
+): Logger {
+  const minLevel: LogLevel = options.level ?? GLOBAL_MIN_LEVEL;
+  const boundBase: LogFields | undefined = options.bound;
+
+  function levelValue(l: LogLevel): number {
+    switch (l) {
+      case "debug":
+        return 10;
+      case "info":
+        return 20;
+      case "warn":
+        return 30;
+      case "error":
+        return 40;
+    }
+  }
+  function shouldLog(level: LogLevel): boolean {
+    return levelValue(level) >= levelValue(minLevel);
+  }
+
+  function write(level: LogLevel, msg: string, fields?: LogFields): void {
+    if (!shouldLog(level)) return;
+
+    // NEW: merge preset (bound) fields first; call-site overrides bound on conflicts
+    const mergedFields: LogFields | undefined = boundBase
+      ? fields
+        ? { ...boundBase, ...fields }
+        : boundBase
+      : fields;
+
+    const ts = new Date().toISOString();
+    const mod = module ? ` [${module}]` : "";
+    const ctx = getRunContext();
+    const corr = ctx ? ` (req ${ctx.reqId} ${ctx.env})` : "";
+    const json = mergedFields ? " " + safeJson(mergedFields) : "";
+    const line = `${ts} ${level.toUpperCase()}${mod}${corr} ${msg}${json}`;
+    switch (level) {
+      case "warn":
+        console.warn(line);
+        break;
+      case "error":
+        console.error(line);
+        break;
+      default:
+        console.info(line); // "debug" & "info"
+    }
+  }
+
+  /** Spans: START/END with duration at info level */
+  function start(operation: string, fields?: LogFields) {
+    write("info", `START ${operation}`, fields);
+    const t0 = Date.now();
+    let ended = false;
+    return {
+      end(endFields?: LogFields) {
+        if (ended) return; // idempotent
+        ended = true;
+        const ms = Date.now() - t0;
+        write("info", `END ${operation}`, { ...endFields, ms });
+      },
+    };
+  }
+
+  return {
+    debug: (m, f) => write("debug", m, f),
+    info: (m, f) => write("info", m, f),
+    warn: (m, f) => write("warn", m, f),
+    error: (m, f) => write("error", m, f),
+    start,
+  };
+}
+
+/** Shared default logger (no module tag, default level=info). */
+export const log = createLogger();
+
+// Helper: turn unknown error into structured fields
+export function errFields(err: unknown): LogFields {
+  if (err instanceof Error) {
+    return { name: err.name, message: err.message, stack: err.stack };
+  }
+  return { error: String(err) };
+}
+
+// Safer JSON: handles Error + circular references
+function safeJson(obj: unknown): string {
+  try {
+    const seen = new WeakSet<object>();
+    const replacer = (_key: string, value: any) => {
+      if (value instanceof Error) {
+        return { name: value.name, message: value.message, stack: value.stack };
+      }
+      if (value && typeof value === "object") {
+        if (seen.has(value)) return "[Circular]";
+        seen.add(value);
+      }
+      return value;
+    };
+    return JSON.stringify(obj, replacer);
+  } catch {
+    return '"<unserializable fields>"';
+  }
+}
+
+// Mask common PII patterns in a string. Opt-in at call sites.
+export function maskPII(s: string): string {
+  if (typeof s !== "string") return String(s);
+  return (
+    s
+      // emails
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+      // phone-like sequences (loose, international-ish)
+      .replace(/\b(?:\+?\d[\d\s().-]{6,}\d)\b/g, "[phone]")
+  );
+}

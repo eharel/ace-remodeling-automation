@@ -1,5 +1,5 @@
 import { ChartPosition } from "../../../../charts/positioner";
-import { TableInfo } from "@shared/styles";
+import { TableInfo } from "@sheets/styles";
 import { buildChart } from "../../../../charts/build-chart";
 import { ChartFunction } from "./types";
 import { QUARTER_COLUMNS } from "../../shared/columns";

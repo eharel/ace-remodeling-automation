@@ -1,4 +1,4 @@
-import { BaseColumn } from "@shared/columns/types";
+import { BaseColumn } from "@sheets/columns/types";
 import {
   MONTH_NAMES,
   TEMPLATE_BLANK_SHEET,

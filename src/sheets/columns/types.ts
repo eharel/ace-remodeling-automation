@@ -1,6 +1,6 @@
 // Note: SummaryOperationConfig moved to @tables/summary - import directly from there when needed
 
-import { SummaryOperationConfig } from "@shared/columns/summary";
+import { SummaryOperationConfig } from "@sheets/columns/summary";
 
 // 📊 Formatting and alignment
 export type ColumnFormat = "currency" | "text" | "number" | "percent" | "date";

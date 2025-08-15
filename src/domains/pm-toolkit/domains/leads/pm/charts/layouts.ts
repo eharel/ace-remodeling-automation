@@ -1,5 +1,5 @@
 import { getCenteredStartCol } from ".";
-import { TableInfo } from "@shared/styles";
+import { TableInfo } from "@sheets/styles";
 import { ChartFunction } from "./types";
 import {
   ChartLayoutConfig,

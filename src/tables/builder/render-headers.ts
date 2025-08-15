@@ -1,4 +1,4 @@
-import { BaseColumn } from "@shared/columns";
+import { BaseColumn } from "@sheets/columns";
 
 /**
  * Renders table headers and optional description row.

@@ -8,9 +8,9 @@ import { generateAndStylizeTableFromRows } from "@tables/builder/";
 import { extractAllProjectData } from "./data-extraction";
 import { transformExtractedDataToDashboardRows } from "./data-transformation";
 import { setDashboardStatus } from "./utils";
-import { addTimestamp } from "@shared/styles";
+import { addTimestamp } from "@sheets/styles";
 import { toA1Notation } from "../../../utils/helpers";
-import { extractSummaryOps } from "@shared/columns";
+import { extractSummaryOps } from "@sheets/columns";
 
 const PROJECT_COLOR_KEYS = [
   DASHBOARD_KEYS.EXPECTED_PROFIT,

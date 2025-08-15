@@ -12,7 +12,8 @@
   "references": [
     { "path": "../../utils" },
     { "path": "../../forms" },
-    { "path": "../../shared" },
-    { "path": "../../domains/vendors" }
+    { "path": "../../sheets" },
+    { "path": "../../domains/vendors" },
+    { "path": "../../lib" }
   ]
 }

@@ -14,7 +14,7 @@
     { "path": "../../ui" },
     { "path": "../../globals" },
     { "path": "../../tables" },
-    { "path": "../../shared" },
+    { "path": "../../sheets" },
     { "path": "../../utils" }
   ]
 }

@@ -1,4 +1,4 @@
-import type { SummaryOperationConfig } from "@shared/styles";
+import type { SummaryOperationConfig } from "@sheets/styles";
 
 export const revenueOps: SummaryOperationConfig = {
   operation: "sum",

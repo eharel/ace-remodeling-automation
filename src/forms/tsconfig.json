@@ -17,6 +17,7 @@
   "include": ["**/*", "../config/**/*", "../env/**/*"],
   "references": [
     { "path": "../domains/vendors" },
-    { "path": "../domains/onboarding" }
+    { "path": "../domains/onboarding" },
+    { "path": "../lib" }
   ]
 }

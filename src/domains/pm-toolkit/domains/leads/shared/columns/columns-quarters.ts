@@ -1,5 +1,5 @@
 import { LeadsQuarterColumn } from "../types";
-import { buildLabelKeyMaps } from "shared/columns";
+import { buildLabelKeyMaps } from "@sheets/columns";
 import { formatPercent } from "../../../../utils/helpers";
 import {
   QuarterlyKey,

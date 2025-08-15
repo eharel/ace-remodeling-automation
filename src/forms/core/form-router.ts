@@ -3,54 +3,67 @@ import { handleVendorForm } from "../../domains/vendors/core/handle-vendor-form"
 import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboarding-form";
 
 import { getFormsConfig } from "@/forms/config/config";
-import type { EnvName } from "@/config/env-name";
+import { normalizeEnv, type EnvName } from "@/lib/env/env";
+import { createLogger, errFields, setGlobalLogLevel } from "@/lib/logging/log";
+import { withRunContext } from "@/lib/logging/run-context";
 
-/**
- * Library entry. The HOST should pass `mode` based on its Script Properties.
- * If `mode` is omitted, we default to 'development' as a safe fallback.
- */
+// Accept the lib's EnvName here to avoid mixing names
+const levelForEnv = (env: EnvName) =>
+  env === "development" || env === "staging" ? "debug" : "info";
+
 export function onFormSubmit(
   e: GoogleAppsScript.Events.FormsOnFormSubmit,
   mode?: EnvName
 ) {
-  const effectiveMode: EnvName =
-    mode === "production" || mode === "staging" || mode === "development"
-      ? mode
-      : "development";
+  // 1) Normalize ONCE at the boundary
+  const env: EnvName = normalizeEnv(mode);
 
-  const ids = getFormsConfig(effectiveMode);
+  // 2) Set reqId/env for this execution; everything else happens inside
+  return withRunContext(() => {
+    // 3) Apply global log level from env
+    setGlobalLogLevel(levelForEnv(env));
 
-  // ID table for routing in this execution
-  const FORM_IDS = {
-    VENDOR: ids.VENDOR_FORM,
-    ONBOARDING: ids.ONBOARDING_FORM,
-  } as const;
+    // 4) Pull config using the same env
+    const ids = getFormsConfig(env);
 
-  // Prefer e.source in installable triggers; fallback to active form
-  const formId =
-    (e?.source as GoogleAppsScript.Forms.Form)?.getId() ??
-    FormApp.getActiveForm().getId();
+    const FORM_IDS = {
+      VENDOR: ids.VENDOR_FORM,
+      ONBOARDING: ids.ONBOARDING_FORM,
+    } as const;
 
-  Logger.log("[FORM ROUTER] mode=%s formId=%s", effectiveMode, formId);
+    const formId =
+      (e?.source as GoogleAppsScript.Forms.Form)?.getId() ??
+      FormApp.getActiveForm().getId();
 
-  // Safety check: ensure formId is in expected IDs for current mode
-  const expectedFormIds = Object.values(FORM_IDS);
-  if (!expectedFormIds.includes(formId)) {
-    throw new Error(
-      `Form ID ${formId} not found in expected IDs for mode ${effectiveMode}: ${expectedFormIds.join(
-        ", "
-      )}`
-    );
-  }
+    const log = createLogger("FormRouter");
+    log.info("Received form submission", { formId, env });
 
-  try {
-    switch (formId) {
-      case FORM_IDS.VENDOR:
-        return handleVendorForm(e, ids);
-      case FORM_IDS.ONBOARDING:
-        return handleOnboardingForm(e, ids);
+    const expectedFormIds = Object.values(FORM_IDS);
+    try {
+      if (!expectedFormIds.includes(formId)) {
+        throw new Error(
+          `Form ID ${formId} not found in expected IDs for ${env}: ${expectedFormIds.join(
+            ", "
+          )}`
+        );
+      }
+
+      switch (formId) {
+        case FORM_IDS.VENDOR:
+          return handleVendorForm(e, ids);
+        case FORM_IDS.ONBOARDING:
+          return handleOnboardingForm(e, ids);
+        default:
+          throw new Error(`Unknown form ID: ${formId}`);
+      }
+    } catch (error) {
+      log.error("Error processing form", {
+        ...errFields(error),
+        formId,
+        env,
+        expectedFormIds,
+      });
+      throw error;
     }
-  } catch (err) {
-    throw err;
-  }
+  }, env);
 }

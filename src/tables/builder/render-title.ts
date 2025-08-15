@@ -1,5 +1,5 @@
-import { BaseColumn } from "@shared/columns";
-import { CellStyling } from "@shared/styles";
+import { BaseColumn } from "@sheets/columns";
+import { CellStyling } from "@sheets/styles";
 import { applySplitMergeRange } from "@utils/sheets";
 
 /**

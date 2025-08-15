@@ -1,7 +1,7 @@
 import { InputKey } from "../columns/types";
 
 import { QuarterlyKey } from "../columns/labels";
-import { DashboardRow } from "@shared/rows/types";
+import { DashboardRow } from "@sheets/rows/types";
 
 export type QuarterDashboardRow = DashboardRow<QuarterlyKey>;
 

@@ -1,5 +1,5 @@
-import { BaseColumn } from "@shared/columns";
-import { TableInfo, stylizeTable } from "@shared/styles";
+import { BaseColumn } from "@sheets/columns";
+import { TableInfo, stylizeTable } from "@sheets/styles";
 import { GenerateTableParams } from "./types";
 import { renderTitle, renderSplitTitle } from "./render-title";
 import { renderHeaders, getHeaderRowCount } from "./render-headers";

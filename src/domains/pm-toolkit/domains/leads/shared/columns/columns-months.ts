@@ -1,7 +1,7 @@
 import { LeadsColumn } from "../types";
 import { getMonthName, formatPercent } from "../../../../utils/helpers";
 
-import { buildLabelKeyMaps } from "shared/columns";
+import { buildLabelKeyMaps } from "@sheets/columns";
 import { DashboardKey, dashboardKeys, DashboardLabel, inputKeys } from ".";
 import { dashboardLabels } from "./labels";
 import { leadsOps, percentAvgOps, revenueOps } from "./summary-presets";
