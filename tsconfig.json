@@ -30,7 +30,6 @@
       "@domains/*": ["domains/*"],
       "@forms/*": ["forms/*"],
       "@lib/*": ["lib/*"],
-      "@/env/*": ["env/*"],
       "@/forms/*": ["forms/*"],
       "@/config/*": ["config/*"]
     }

@@ -9,6 +9,11 @@ export function setGlobalLogLevel(level: LogLevel) {
   GLOBAL_MIN_LEVEL = level;
 }
 
+export type LoggerOptions = {
+  level?: LogLevel;
+  bound?: LogFields;
+};
+
 export type Logger = {
   debug: (msg: string, fields?: LogFields) => void;
   info: (msg: string, fields?: LogFields) => void;
@@ -22,16 +27,12 @@ export type Logger = {
   ) => { end: (fields?: LogFields) => void };
 };
 
-export type LoggerOptions = {
-  /** Minimum level to emit. Defaults to "info". */
-  level?: LogLevel;
-};
-
 export function createLogger(
   module?: string,
   options: LoggerOptions = {}
 ): Logger {
   const minLevel: LogLevel = options.level ?? GLOBAL_MIN_LEVEL;
+  const boundBase: LogFields | undefined = options.bound;
 
   function levelValue(l: LogLevel): number {
     switch (l) {
@@ -51,11 +52,19 @@ export function createLogger(
 
   function write(level: LogLevel, msg: string, fields?: LogFields): void {
     if (!shouldLog(level)) return;
+
+    // NEW: merge preset (bound) fields first; call-site overrides bound on conflicts
+    const mergedFields: LogFields | undefined = boundBase
+      ? fields
+        ? { ...boundBase, ...fields }
+        : boundBase
+      : fields;
+
     const ts = new Date().toISOString();
     const mod = module ? ` [${module}]` : "";
     const ctx = getRunContext();
     const corr = ctx ? ` (req ${ctx.reqId} ${ctx.env})` : "";
-    const json = fields ? " " + safeJson(fields) : "";
+    const json = mergedFields ? " " + safeJson(mergedFields) : "";
     const line = `${ts} ${level.toUpperCase()}${mod}${corr} ${msg}${json}`;
     switch (level) {
       case "warn":

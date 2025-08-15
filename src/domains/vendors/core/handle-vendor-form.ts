@@ -11,17 +11,15 @@ export function handleVendorForm(
   e: GoogleAppsScript.Events.FormsOnFormSubmit,
   ids: FormsIds
 ) {
-  const vendorsLog = createLogger("Vendor");
-  const span = vendorsLog.start("Handle vendor form", {
-    formId: ids.VENDOR_FORM,
+  const vendorsLog = createLogger("Vendor", {
+    bound: { formId: ids.VENDOR_FORM },
   });
+  const span = vendorsLog.start("Handle vendor form");
 
   let error: Error | undefined;
   try {
     // Extract raw form data
-    vendorsLog.info("Extracting raw form data", {
-      formId: ids.VENDOR_FORM,
-    });
+    vendorsLog.info("Extracting raw form data");
     const rawFormData = e.response
       .getItemResponses()
       .reduce((acc, itemResponse) => {
