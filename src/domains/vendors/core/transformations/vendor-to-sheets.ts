@@ -24,6 +24,8 @@ export interface VendorTableRow {
   Stars: string;
   Notes: string;
   "Website / Social": string;
+  UUID: string; // For future two-way sync
+  "Submitted At": string; // ISO timestamp for traceability
 }
 
 /** utility: Sheets wants "A, B, C" for multi-select cells */
@@ -85,7 +87,9 @@ export function mapProductsToOtherTypes(products?: string[]): string[] {
 export function transformVendorToTable(
   vendor: Vendor,
   products: string[],
-  typeMapper: (products: string[]) => string[]
+  typeMapper: (products: string[]) => string[],
+  uuid: string,
+  submittedAt: string
 ): VendorTableRow {
   return {
     Name: vendor.companyName,
@@ -100,5 +104,7 @@ export function transformVendorToTable(
     Stars: "",
     "Website / Social": vendor.websiteOrSocial || "",
     Notes: "",
+    UUID: uuid,
+    "Submitted At": submittedAt,
   };
 }

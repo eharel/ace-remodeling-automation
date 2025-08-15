@@ -1,70 +1,41 @@
-import { OnboardingFormData, OnboardingFormResponse } from "../types";
-import { ONBOARDING_FORM_FIELDS } from "../constants";
-import { formatPhoneNumber } from "../../../utils";
+import { FORM_FIELDS } from "../constants";
+import { OnboardingData } from "../types";
+import { parseYesNo, validateRequiredFields } from "@/forms/utils/parse-fields";
 
 /**
- * Parses profession string into array of selected professions
- */
-function parseProfession(professionString: string): string[] {
-  if (!professionString) return [];
-
-  // Split by comma and clean up whitespace
-  return professionString
-    .split(",")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
-}
-
-/**
- * Parses payment method string into array of selected methods
- */
-function parsePaymentMethod(paymentMethodString: string): string[] {
-  if (!paymentMethodString) return [];
-
-  // Split by comma and clean up whitespace
-  return paymentMethodString
-    .split(",")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0);
-}
-
-/**
- * Parses raw form response into structured onboarding data
+ * Parses raw form response data into structured OnboardingData
  */
 export function parseOnboardingResponse(
-  rawData: OnboardingFormResponse
-): OnboardingFormData {
-  console.log("🔍 Parsing onboarding form response...");
+  rawData: Record<string, string>
+): OnboardingData {
+  // Validate required fields
+  const requiredFields = [
+    FORM_FIELDS.name,
+    FORM_FIELDS.company_name,
+    FORM_FIELDS.professions,
+    FORM_FIELDS.insurance,
+    FORM_FIELDS.phone,
+    FORM_FIELDS.email,
+    FORM_FIELDS.address,
+    FORM_FIELDS.payment_methods,
+    FORM_FIELDS.payment_info,
+  ];
 
-  // Extract contact information
-  const contactInfo = {
-    name: rawData[ONBOARDING_FORM_FIELDS.NAME] || "",
-    company: rawData[ONBOARDING_FORM_FIELDS.COMPANY] || "",
-    profession: parseProfession(
-      rawData[ONBOARDING_FORM_FIELDS.PROFESSION] || ""
-    ),
-    insurance: rawData[ONBOARDING_FORM_FIELDS.INSURANCE] || "",
-    phone: formatPhoneNumber(rawData[ONBOARDING_FORM_FIELDS.PHONE] || ""),
-    email: rawData[ONBOARDING_FORM_FIELDS.EMAIL] || "",
-    address: rawData[ONBOARDING_FORM_FIELDS.ADDRESS] || "",
+  validateRequiredFields(rawData, requiredFields);
+
+  // Map form field names to our structured data
+  const data: OnboardingData = {
+    name: rawData[FORM_FIELDS.name] || "",
+    companyName: rawData[FORM_FIELDS.company_name] || "",
+    profession: rawData[FORM_FIELDS.professions] || "",
+    hasInsurance: parseYesNo(rawData[FORM_FIELDS.insurance] || ""),
+    phone: rawData[FORM_FIELDS.phone] || "",
+    email: rawData[FORM_FIELDS.email] || "",
+    address: rawData[FORM_FIELDS.address] || "",
+    paymentMethod: rawData[FORM_FIELDS.payment_methods] || "",
+    paymentInfo: rawData[FORM_FIELDS.payment_info] || "",
+    comments: rawData[FORM_FIELDS.comments] || undefined,
   };
 
-  // Extract payment details
-  const paymentDetails = {
-    paymentMethod: parsePaymentMethod(
-      rawData[ONBOARDING_FORM_FIELDS.PAYMENT_METHOD] || ""
-    ),
-    paymentInfo: rawData[ONBOARDING_FORM_FIELDS.PAYMENT_INFO] || "",
-  };
-
-  // Create the complete onboarding data object
-  const onboardingData: OnboardingFormData = {
-    contactInfo,
-    paymentDetails,
-    comments: rawData[ONBOARDING_FORM_FIELDS.COMMENTS] || "",
-    submissionDate: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
-  };
-
-  console.log("✅ Onboarding data parsed successfully");
-  return onboardingData;
+  return data;
 }

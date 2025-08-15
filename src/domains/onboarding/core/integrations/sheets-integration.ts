@@ -1,56 +1,75 @@
-import { OnboardingFormData } from "../../types";
-import { ONBOARDING_SHEET_CONFIG, ONBOARDING_STATUS } from "../../constants";
-import {
-  createEmailLinkFormula,
-  createMapsLinkFormula,
-} from "../../../../utils";
+import { OnboardingData } from "../../types";
+import { findLastRowWithContent } from "@utils/sheets";
+import { createLogger, maskPII } from "@lib/logging/log";
+import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
 
 /**
- * Saves onboarding data to Google Sheets
+ * Saves onboarding data to Google Sheets with thread safety and traceability
  */
 export function saveOnboardingDataToSheet(
-  data: OnboardingFormData,
-  onboardingSheetId: string,
-  onboardingTabName: string
+  formData: FormDataWithMetadata<OnboardingData>,
+  spreadsheetId: string,
+  tabName: string
 ): void {
-  console.log("📊 Saving onboarding data to Google Sheets...");
+  const log = createLogger("OnboardingSheets");
+  const { data, uuid, submittedAt } = formData;
 
+  // Use LockService to prevent concurrent write conflicts
+  const lock = LockService.getScriptLock();
   try {
-    const spreadsheet = SpreadsheetApp.openById(onboardingSheetId);
-    let sheet = spreadsheet.getSheetByName(onboardingTabName);
-
-    // Create sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(onboardingTabName);
-      sheet
-        .getRange(1, 1, 1, ONBOARDING_SHEET_CONFIG.HEADERS.length)
-        .setValues([[...ONBOARDING_SHEET_CONFIG.HEADERS]]);
-      console.log("📋 Created new onboarding sheet with headers");
+    // Wait up to 10 seconds for the lock
+    if (!lock.tryLock(10000)) {
+      throw new Error("Could not acquire lock for sheet write operation");
     }
 
-    // Prepare row data
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheet = spreadsheet.getSheetByName(tabName);
+
+    if (!sheet) {
+      throw new Error(
+        `Sheet "${tabName}" not found in spreadsheet ${spreadsheetId}`
+      );
+    }
+
+    // Find the next available row
+    const lastRow = findLastRowWithContent(sheet, []);
+    const insertRow = lastRow + 1;
+
+    // Prepare the row data with UUID and timestamp for traceability
     const rowData = [
-      data.contactInfo.name,
-      data.contactInfo.company,
-      data.contactInfo.profession.join(", "),
-      data.contactInfo.insurance,
-      data.contactInfo.phone,
-      createEmailLinkFormula(data.contactInfo.email),
-      createMapsLinkFormula(data.contactInfo.address),
-      data.paymentDetails.paymentMethod.join(", "),
-      data.paymentDetails.paymentInfo,
+      data.name,
+      data.companyName,
+      data.profession,
+      data.hasInsurance ? "Yes" : "No",
+      maskPII(data.phone),
+      maskPII(data.email),
+      data.address,
+      data.paymentMethod,
+      data.paymentInfo,
       data.comments || "",
-      data.submissionDate,
+      uuid, // UUID for future two-way sync
+      submittedAt, // ISO timestamp for traceability
     ];
 
-    // Append the new row
-    const lastRow = sheet.getLastRow();
-    const range = sheet.getRange(lastRow + 1, 1, 1, rowData.length);
-    range.setValues([rowData]);
+    // Insert the data
+    sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
 
-    console.log("✅ Onboarding data saved successfully");
+    log.info("Onboarding data saved successfully", {
+      row: insertRow,
+      uuid,
+      name: data.name,
+      company: data.companyName,
+    });
   } catch (error) {
-    console.error("❌ Error saving onboarding data to sheet:", error);
+    log.error("Failed to save onboarding data to sheet", {
+      error: String(error),
+      spreadsheetId,
+      tabName,
+      uuid,
+    });
     throw error;
+  } finally {
+    // Always release the lock
+    lock.releaseLock();
   }
 }

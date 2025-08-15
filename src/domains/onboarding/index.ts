@@ -7,3 +7,4 @@ export * from "./constants";
 export * from "./core/handle-onboarding-form";
 export * from "./core/parse-onboarding-response";
 export * from "./core/utils";
+export * from "./core/integrations";

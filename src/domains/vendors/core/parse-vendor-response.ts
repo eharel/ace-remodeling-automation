@@ -3,7 +3,7 @@ import {
   RAW_TO_VENDOR_KEY,
   VENDOR_CATEGORIES,
 } from "../constants";
-import { parseYesNo } from "./utils";
+import { parseYesNo } from "@/forms/utils/parse-fields";
 import { Vendor } from "../types";
 import { PRODUCT_BY_LABEL } from "../products";
 import { toEnglish } from "@utils/index";

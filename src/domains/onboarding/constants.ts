@@ -2,23 +2,18 @@
  * Onboarding domain constants
  */
 
-export const ONBOARDING_FORM_FIELDS = {
-  // Contact Information
-  NAME: "Name / Nombre",
-  COMPANY: "Company Name/ Nombre de la Compañía",
-  PROFESSION: "Profession/ Profesión",
-  INSURANCE: "Do you have insurance?/ Tienes seguransa?",
-  PHONE: "Phone Number/ Número de teléfono",
-  EMAIL: "Email/ Correo electrónico",
-  ADDRESS: "Full Home Address/ Dirreccion domicilio",
-
-  // Payment Details
-  PAYMENT_METHOD: "Preferred payment method/ Método de pago",
-  PAYMENT_INFO:
-    "Please provide payment information for ACH, Zelle, or Check: / Proporcione los detalles de pago para ACH, Zelle o Cheque:",
-
-  // Additional Information
-  COMMENTS: "Any comments or requests/ Cualquier comentario o petición",
+export const FORM_FIELDS = {
+  name: "Name / Nombre",
+  company_name: "Company Name/ Nombre de la Compañía",
+  professions: "Profession/ Profesión",
+  insurance: "Do you have insurance?/ Tienes seguransa?",
+  phone: "Phone Number/ Número de teléfono",
+  email: "Email/ Correo electrónico",
+  address: "Full Home Address/ Dirreccion domicilio", // keep exact spelling from form
+  payment_methods: "Preferred payment method/ Método de pago",
+  payment_info:
+    "Please provide payment information for ACH, Zelle, or Check: / Proporcione los detalles de pago para ACH, Zelle o Cheque:", // full bilingual prompt
+  comments: "Any comments or requests/ Cualquier comentario o petición",
 } as const;
 
 export const PAYMENT_METHODS = {

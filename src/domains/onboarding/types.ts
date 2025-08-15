@@ -1,29 +1,20 @@
-/**
- * Onboarding domain types
- */
+import { FORM_FIELDS } from "./constants";
 
-export interface OnboardingContactInfo {
+export type OnboardingFormFields = typeof FORM_FIELDS;
+
+export type OnboardingFormResponse = {
+  [K in keyof OnboardingFormFields]: string;
+};
+
+export type OnboardingData = {
   name: string;
-  company: string;
-  profession: string[];
-  insurance: string;
+  companyName: string;
+  profession: string;
+  hasInsurance: boolean;
   phone: string;
   email: string;
   address: string;
-}
-
-export interface OnboardingPaymentDetails {
-  paymentMethod: string[];
+  paymentMethod: string;
   paymentInfo: string;
-}
-
-export interface OnboardingFormData {
-  contactInfo: OnboardingContactInfo;
-  paymentDetails: OnboardingPaymentDetails;
   comments?: string;
-  submissionDate: string;
-}
-
-export interface OnboardingFormResponse {
-  [key: string]: string;
-}
+};
