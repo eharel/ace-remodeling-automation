@@ -1,5 +1,30 @@
 import { getRunContext } from "./run-context";
 
+/**
+ * -----------------------------------------------------------------------------
+ * Logging — Future Enhancements (Parking Lot)
+ * -----------------------------------------------------------------------------
+ * Scoped improvements (inside this module):
+ * - Child loggers: `log.child("save", { ... })` to suffix module tags (e.g., [Vendor:save]).
+ * - Temporary presets: `log.with({ ...fields })` to pre-bind fields for a short scope.
+ * - Error normalization++: include `cause` chain and well-known props from custom errors.
+ * - Sampling / rate-limiting: drop/keep `debug` at a % or per-key to reduce noise.
+ * - Lazy fields: allow values as functions so expensive data is computed only if emitted.
+ * - Field sanitization: helpers to mask or drop keys by allowlist/denylist.
+ * - maskFields(obj): walk an object and apply maskPII to all string values.
+ * - JSON-only mode: emit a single JSON blob per line with consistent keys.
+ * - Tests: unit tests for level filtering, spans, errFields, safeJson (circular refs).
+ *
+ * Cross-cutting (outside this module, but related):
+ * - Log-level override (Script Property): temporarily force level in prod (debug/info/...).
+ * - Request-level span in entrypoints (router): bracket entire execution with START/END.
+ * - Secondary transport: write key events to a Google Sheet (batched + retry/backoff).
+ * - Structured event names: standardize `event` field (e.g., "vendor.saved") + schemas.
+ * - PII policy: central place for redaction rules and a review checklist.
+ * - Performance: measure stringify cost; consider truncation of large payloads.
+ * -----------------------------------------------------------------------------
+ */
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 export type LogFields = Record<string, unknown>;
 
@@ -131,4 +156,16 @@ function safeJson(obj: unknown): string {
   } catch {
     return '"<unserializable fields>"';
   }
+}
+
+// Mask common PII patterns in a string. Opt-in at call sites.
+export function maskPII(s: string): string {
+  if (typeof s !== "string") return String(s);
+  return (
+    s
+      // emails
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+      // phone-like sequences (loose, international-ish)
+      .replace(/\b(?:\+?\d[\d\s().-]{6,}\d)\b/g, "[phone]")
+  );
 }
