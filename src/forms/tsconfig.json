@@ -18,6 +18,7 @@
   "references": [
     { "path": "../domains/vendors" },
     { "path": "../domains/onboarding" },
-    { "path": "../lib" }
+    { "path": "../lib" },
+    { "path": "../utils" }
   ]
 }

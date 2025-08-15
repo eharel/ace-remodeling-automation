@@ -31,3 +31,6 @@ export function validateRequiredFields(
     throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
   }
 }
+
+// Re-export the shared string normalization utility
+export { normalizeString } from "@utils/normalize";

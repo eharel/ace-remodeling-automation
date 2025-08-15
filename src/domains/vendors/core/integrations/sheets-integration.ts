@@ -21,6 +21,7 @@ import {
 } from "@utils/sheets";
 import { PRODUCT_BY_LABEL } from "../../products";
 import { toEnglish } from "@utils/index";
+import { normalizeString } from "@utils/normalize";
 import { SMART_CHIP_COLUMNS } from "../../constants";
 
 /**
@@ -182,9 +183,7 @@ function getSheetAndHeaders(
     .getValues()[0] as string[];
 
   // Normalize headers to handle Google Sheets Smart Table formatting
-  const normalizedHeaders = existingHeaders.map((header) =>
-    header.replace(/[:：]/g, "").trim()
-  );
+  const normalizedHeaders = existingHeaders.map(normalizeString);
 
   return { sheet, lastRowWithContent, normalizedHeaders };
 }

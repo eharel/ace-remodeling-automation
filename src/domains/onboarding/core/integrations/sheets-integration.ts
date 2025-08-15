@@ -1,5 +1,6 @@
 import { OnboardingData } from "../../types";
 import { findLastRowWithContent } from "@utils/sheets";
+import { normalizeString } from "@utils/normalize";
 import { createLogger, maskPII } from "@lib/logging/log";
 import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
 
@@ -36,21 +37,34 @@ export function saveOnboardingDataToSheet(
     const lastRow = findLastRowWithContent(sheet, []);
     const insertRow = lastRow + 1;
 
-    // Prepare the row data with UUID and timestamp for traceability
-    const rowData = [
-      data.name,
-      data.companyName,
-      data.profession,
-      data.hasInsurance ? "Yes" : "No",
-      maskPII(data.phone),
-      maskPII(data.email),
-      data.address,
-      data.paymentMethod,
-      data.paymentInfo,
-      data.comments || "",
-      uuid, // UUID for future two-way sync
-      submittedAt, // ISO timestamp for traceability
-    ];
+    // Read existing headers and normalize them
+    const existingHeaders = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0] as string[];
+
+    const normalizedHeaders = existingHeaders.map(normalizeString);
+
+    // Create data object with all possible fields
+    const transformedData = {
+      name: data.name,
+      "company name": data.companyName,
+      profession: data.profession,
+      insurance: data.hasInsurance ? "Yes" : "No",
+      phone: maskPII(data.phone),
+      email: maskPII(data.email),
+      address: data.address,
+      "payment method": data.paymentMethod,
+      "payment info": data.paymentInfo,
+      comments: data.comments || "",
+      uuid: uuid,
+      "submitted at": submittedAt,
+    };
+
+    // Map data to match the actual header order in the sheet
+    const rowData = normalizedHeaders.map((header) => {
+      const value = transformedData[header as keyof typeof transformedData];
+      return value ?? "";
+    });
 
     // Insert the data
     sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
