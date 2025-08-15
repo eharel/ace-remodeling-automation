@@ -4,7 +4,7 @@ import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboa
 
 import { getFormsConfig } from "@/forms/config/config";
 import { normalizeEnv, type EnvName } from "@/lib/env/env";
-import { createLogger, setGlobalLogLevel } from "@/lib/logging/log";
+import { createLogger, errFields, setGlobalLogLevel } from "@/lib/logging/log";
 import { withRunContext } from "@/lib/logging/run-context";
 
 // Accept the lib's EnvName here to avoid mixing names
@@ -39,24 +39,31 @@ export function onFormSubmit(
     log.info("Received form submission", { formId, env });
 
     const expectedFormIds = Object.values(FORM_IDS);
-    if (!expectedFormIds.includes(formId)) {
-      log.error("Form ID not found in expected IDs", {
-        formId,
-        expectedFormIds,
-        env,
-      });
-      throw new Error(
-        `Form ID ${formId} not found in expected IDs for ${env}: ${expectedFormIds.join(
-          ", "
-        )}`
-      );
-    }
+    try {
+      if (!expectedFormIds.includes(formId)) {
+        throw new Error(
+          `Form ID ${formId} not found in expected IDs for ${env}: ${expectedFormIds.join(
+            ", "
+          )}`
+        );
+      }
 
-    switch (formId) {
-      case FORM_IDS.VENDOR:
-        return handleVendorForm(e, ids);
-      case FORM_IDS.ONBOARDING:
-        return handleOnboardingForm(e, ids);
+      switch (formId) {
+        case FORM_IDS.VENDOR:
+          return handleVendorForm(e, ids);
+        case FORM_IDS.ONBOARDING:
+          return handleOnboardingForm(e, ids);
+        default:
+          throw new Error(`Unknown form ID: ${formId}`);
+      }
+    } catch (error) {
+      log.error("Error processing form", {
+        ...errFields(error),
+        formId,
+        env,
+        expectedFormIds,
+      });
+      throw error;
     }
   }, env);
 }
