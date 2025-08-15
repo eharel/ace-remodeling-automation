@@ -9,10 +9,11 @@ import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
 export function saveOnboardingDataToSheet(
   formData: FormDataWithMetadata<OnboardingData>,
   spreadsheetId: string,
-  tabName: string
+  tabName: string // This is now the base tab name, we'll use data.targetTab
 ): void {
   const log = createLogger("OnboardingSheets");
   const { data, uuid, submittedAt } = formData;
+  const targetTabName = data.targetTab;
 
   // Use LockService to prevent concurrent write conflicts
   const lock = LockService.getScriptLock();
@@ -23,11 +24,11 @@ export function saveOnboardingDataToSheet(
     }
 
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    const sheet = spreadsheet.getSheetByName(tabName);
+    const sheet = spreadsheet.getSheetByName(targetTabName);
 
     if (!sheet) {
       throw new Error(
-        `Sheet "${tabName}" not found in spreadsheet ${spreadsheetId}`
+        `Sheet "${targetTabName}" not found in spreadsheet ${spreadsheetId}`
       );
     }
 
@@ -59,12 +60,13 @@ export function saveOnboardingDataToSheet(
       uuid,
       name: data.name,
       company: data.companyName,
+      targetTab: targetTabName,
     });
   } catch (error) {
     log.error("Failed to save onboarding data to sheet", {
       error: String(error),
       spreadsheetId,
-      tabName,
+      targetTab: targetTabName,
       uuid,
     });
     throw error;

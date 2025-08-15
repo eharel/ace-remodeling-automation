@@ -17,4 +17,5 @@ export type OnboardingData = {
   paymentMethod: string;
   paymentInfo: string;
   comments?: string;
+  targetTab: string; // The sheet tab where this data should be saved
 };

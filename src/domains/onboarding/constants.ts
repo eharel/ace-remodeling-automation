@@ -16,6 +16,54 @@ export const FORM_FIELDS = {
   comments: "Any comments or requests/ Cualquier comentario o petición",
 } as const;
 
+/**
+ * Mapping from form profession answers (English part) to sheet tabs
+ */
+export const PROFESSION_TO_TAB_MAPPING = {
+  Carpenter: "Framing & Insulation",
+  Electrician: "MEP",
+  Plumber: "MEP",
+  Drywall: "Drywall",
+  Sheetrock: "Sheetrock & Paint",
+  Painter: "Sheetrock & Paint",
+  HVAC: "MEP",
+  Flooring: "Flooring",
+  Framer: "Framing & Insulation",
+  Roofer: "Roofing",
+  Stucco: "Exterior",
+  Demolition: "Demo & Concrete",
+  Glazier: "Windows",
+  Masonry: "Demo & Concrete",
+  Landscaper: "Exterior",
+  "Pool Technician": "Exterior",
+  "Window, Door Installer": "Windows",
+  Photography: "Other",
+  Cleaners: "Cleaning",
+  Designer: "Design & Engineering",
+  Architect: "Design & Engineering",
+  "General Contractor": "Other",
+  Other: "Other",
+} as const;
+
+/**
+ * All available sheet tabs
+ */
+export const SHEET_TABS = [
+  "MEP",
+  "Design & Engineering",
+  "Demo & Concrete",
+  "Framing & Insulation",
+  "Exterior",
+  "Roofing",
+  "Drywall",
+  "Sheetrock & Paint",
+  "Windows",
+  "Doors",
+  "Flooring",
+  "Cleaning",
+  "Other",
+] as const;
+
 export const PAYMENT_METHODS = {
   ACH: "ACH",
   ZELLE: "Zelle",
