@@ -1,4 +1,8 @@
-import { FORM_FIELDS, PROFESSION_TO_TAB_MAPPING } from "../constants";
+import {
+  FORM_FIELDS,
+  PROFESSION_TO_TAB_MAPPING,
+  PROFESSION_TO_VENDOR_TYPE_MAPPING,
+} from "../constants";
 import { OnboardingData } from "../types";
 import { parseYesNo, validateRequiredFields } from "@/forms/utils/parse-fields";
 import { toEnglish } from "@utils/index";
@@ -24,13 +28,16 @@ export function parseOnboardingResponse(
 
   validateRequiredFields(rawData, requiredFields);
 
-  // Determine target tab based on profession
+  // Determine target tab and vendor type based on profession
   const profession = rawData[FORM_FIELDS.professions] || "";
   const professionEnglish = toEnglish(profession);
   const targetTab =
     PROFESSION_TO_TAB_MAPPING[
       professionEnglish as keyof typeof PROFESSION_TO_TAB_MAPPING
     ] || "Other";
+  const vendorType = PROFESSION_TO_VENDOR_TYPE_MAPPING[
+    professionEnglish as keyof typeof PROFESSION_TO_VENDOR_TYPE_MAPPING
+  ] || ["Other"];
 
   // Map form field names to our structured data
   const data: OnboardingData = {
@@ -45,6 +52,7 @@ export function parseOnboardingResponse(
     paymentInfo: rawData[FORM_FIELDS.payment_info] || "",
     comments: rawData[FORM_FIELDS.comments] || undefined,
     targetTab,
+    vendorType,
   };
 
   return data;

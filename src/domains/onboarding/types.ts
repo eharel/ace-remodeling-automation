@@ -18,4 +18,5 @@ export type OnboardingData = {
   paymentInfo: string;
   comments?: string;
   targetTab: string; // The sheet tab where this data should be saved
+  vendorType: string[]; // The vendor type dropdown values for the target tab
 };

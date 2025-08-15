@@ -46,6 +46,29 @@ export const PROFESSION_TO_TAB_MAPPING = {
 } as const;
 
 /**
+ * Mapping from form profession answers (English part) to vendor type dropdown values
+ * Each profession can map to multiple vendor types
+ */
+export const PROFESSION_TO_VENDOR_TYPE_MAPPING = {
+  Carpenter: ["Carpentry"],
+  Plumber: ["Plumbing"],
+  Drywall: ["Drywall"],
+  Sheetrock: ["Sheetrock"],
+  HVAC: ["Ventilating & AC Service"],
+  Framer: ["Carpentry"],
+  Roofer: ["Roofing"],
+  Stucco: ["Stucco"],
+  Demolition: ["Demolition"],
+  Glazier: ["Glass"],
+  Masonry: ["Masonry"],
+  "Window, Door Installer": ["Installation"],
+  Cleaners: ["Cleaning"],
+  Designer: ["Designer"],
+  Architect: ["Architecture"],
+  "General Contractor": ["General Contractor"],
+} as const;
+
+/**
  * All available sheet tabs
  */
 export const SHEET_TABS = [

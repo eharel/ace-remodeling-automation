@@ -3,6 +3,10 @@ import { findLastRowWithContent } from "@utils/sheets";
 import { normalizeString } from "@utils/normalize";
 import { createLogger, maskPII } from "@lib/logging/log";
 import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
+import {
+  transformOnboardingToTable,
+  OnboardingTableRow,
+} from "../transformations";
 
 /**
  * Saves onboarding data to Google Sheets with thread safety and traceability
@@ -44,25 +48,12 @@ export function saveOnboardingDataToSheet(
 
     const normalizedHeaders = existingHeaders.map(normalizeString);
 
-    // Create data object with all possible fields
-    const transformedData = {
-      name: data.name,
-      "company name": data.companyName,
-      profession: data.profession,
-      insurance: data.hasInsurance ? "Yes" : "No",
-      phone: maskPII(data.phone),
-      email: maskPII(data.email),
-      address: data.address,
-      "payment method": data.paymentMethod,
-      "payment info": data.paymentInfo,
-      comments: data.comments || "",
-      uuid: uuid,
-      "submitted at": submittedAt,
-    };
+    // Transform data to sheet row format
+    const transformedData = transformOnboardingToTable(data, uuid, submittedAt);
 
     // Map data to match the actual header order in the sheet
     const rowData = normalizedHeaders.map((header) => {
-      const value = transformedData[header as keyof typeof transformedData];
+      const value = transformedData[header as keyof OnboardingTableRow];
       return value ?? "";
     });
 
