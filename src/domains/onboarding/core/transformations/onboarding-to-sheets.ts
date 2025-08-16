@@ -1,7 +1,7 @@
 import { OnboardingData } from "../../types";
 import { PROFESSION_TO_VENDOR_TYPE_MAPPING } from "../../constants";
 import { maskPII } from "@lib/logging/log";
-import { formatPhoneNumber } from "@utils/index";
+import { normalizePhoneCell } from "@utils/index";
 
 /**
  * Mapping from profession to MEP Type column values
@@ -81,7 +81,7 @@ export function transformOnboardingToTable(
     Status: "New", // Default status for new submissions
     Insurance: data.hasInsurance ? "Yes" : "No",
     "COI Expiration": "", // Not collected in form
-    Phone: formatPhoneNumber(data.phone, "parentheses"),
+    Phone: normalizePhoneCell(data.phone),
     Website: "", // Not collected in form
     "Quality of Work": "", // Not collected in form
     Details: data.paymentInfo, // Use payment info as details
