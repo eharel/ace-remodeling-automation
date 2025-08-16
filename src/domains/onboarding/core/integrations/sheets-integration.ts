@@ -1,5 +1,5 @@
 import { OnboardingData } from "../../types";
-import { findLastRowWithContent } from "@utils/sheets";
+import { findLastRowWithContent, getLocationLinkFormula } from "@utils/sheets";
 import { normalizeString } from "@utils/normalize";
 import { createLogger, maskPII } from "@lib/logging/log";
 import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
@@ -7,6 +7,37 @@ import {
   transformOnboardingToTable,
   OnboardingTableRow,
 } from "../transformations";
+
+// Smart chip column configuration for onboarding
+const SMART_CHIP_COLUMNS = {
+  ADDRESS: "Address",
+} as const;
+
+/**
+ * Applies smart chip formatting to a specific column
+ */
+function applySmartChipToColumn(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  insertRowNumber: number,
+  normalizedHeaders: string[],
+  columnName: keyof typeof SMART_CHIP_COLUMNS,
+  tableData: OnboardingTableRow,
+  formulaGetter: (value: string) => string
+): void {
+  const columnIndex =
+    normalizedHeaders.indexOf(SMART_CHIP_COLUMNS[columnName]) + 1;
+  if (columnIndex > 0) {
+    const formula = formulaGetter(
+      tableData[
+        SMART_CHIP_COLUMNS[columnName] as keyof OnboardingTableRow
+      ] as string
+    );
+    if (formula) {
+      const cell = sheet.getRange(insertRowNumber, columnIndex);
+      cell.setFormula(formula);
+    }
+  }
+}
 
 /**
  * Saves onboarding data to Google Sheets with thread safety and traceability
@@ -81,6 +112,16 @@ export function saveOnboardingDataToSheet(
 
       // Insert the data
       sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
+
+      // Apply Smart Chip formatting for address links
+      const addressColumnIndex = normalizedHeaders.indexOf("address") + 1;
+      if (addressColumnIndex > 0) {
+        const addressFormula = getLocationLinkFormula(transformedData.Address);
+        if (addressFormula) {
+          const addressCell = sheet.getRange(insertRow, addressColumnIndex);
+          addressCell.setFormula(addressFormula);
+        }
+      }
 
       log.info("Onboarding data saved successfully", {
         row: insertRow,
