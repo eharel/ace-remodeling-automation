@@ -62,11 +62,15 @@ export function transformOnboardingToTable(
   // Remove duplicates
   const uniqueVendorTypes = [...new Set(vendorTypes)];
 
-  // Map profession to MEP Type if applicable (use first profession for MEP type)
-  const firstProfession = tabProfessions[0] || "";
-  const mepType =
-    MEP_TYPE_MAPPING[firstProfession as keyof typeof MEP_TYPE_MAPPING];
-  const typeValue = mepType || ""; // Use MEP type if available, otherwise empty
+  // Map professions to MEP Types if applicable (handle multiple MEP professions)
+  const mepTypes: string[] = [];
+  for (const prof of tabProfessions) {
+    const mepType = MEP_TYPE_MAPPING[prof as keyof typeof MEP_TYPE_MAPPING];
+    if (mepType) {
+      mepTypes.push(mepType);
+    }
+  }
+  const typeValue = mepTypes.join(", "); // Join multiple MEP types with commas
 
   return {
     Vendor: data.companyName,
