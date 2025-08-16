@@ -1,4 +1,5 @@
 import { OnboardingData } from "../../types";
+import { PROFESSION_TO_VENDOR_TYPE_MAPPING } from "../../constants";
 import { maskPII } from "@lib/logging/log";
 
 /**
@@ -34,21 +35,42 @@ export interface OnboardingTableRow {
 
 /**
  * Transforms OnboardingData to match the standardized table structure
+ * @param data - The onboarding data
+ * @param targetTab - The specific tab this transformation is for
+ * @param uuid - Unique identifier for the submission
+ * @param submittedAt - ISO timestamp of submission
  */
 export function transformOnboardingToTable(
   data: OnboardingData,
+  targetTab: string,
   uuid: string,
   submittedAt: string
 ): OnboardingTableRow {
-  // Map profession to MEP Type if applicable
+  // Get professions for this specific tab
+  const tabProfessions = data.professionsByTab[targetTab] || [];
+
+  // Map professions to vendor types for this tab
+  const vendorTypes: string[] = [];
+  for (const prof of tabProfessions) {
+    const vendorType = PROFESSION_TO_VENDOR_TYPE_MAPPING[
+      prof as keyof typeof PROFESSION_TO_VENDOR_TYPE_MAPPING
+    ] || ["Other"];
+    vendorTypes.push(...vendorType);
+  }
+
+  // Remove duplicates
+  const uniqueVendorTypes = [...new Set(vendorTypes)];
+
+  // Map profession to MEP Type if applicable (use first profession for MEP type)
+  const firstProfession = tabProfessions[0] || "";
   const mepType =
-    MEP_TYPE_MAPPING[data.profession as keyof typeof MEP_TYPE_MAPPING];
+    MEP_TYPE_MAPPING[firstProfession as keyof typeof MEP_TYPE_MAPPING];
   const typeValue = mepType || ""; // Use MEP type if available, otherwise empty
 
   return {
     Vendor: data.companyName,
     Contact: data.name,
-    "Vendor type": data.vendorType.join(", "), // Join multiple vendor types with commas
+    "Vendor type": uniqueVendorTypes.join(", "), // Join vendor types for this tab
     Type: typeValue, // Only populated for MEP professions
     Address: data.address,
     Status: "New", // Default status for new submissions

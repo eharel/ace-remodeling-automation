@@ -12,7 +12,7 @@ export const FORM_FIELDS = {
   address: "Full Home Address/ Dirreccion domicilio", // keep exact spelling from form
   payment_methods: "Preferred payment method/ Método de pago",
   payment_info:
-    "Please provide payment information for ACH, Zelle, or Check: / Proporcione los detalles de pago para ACH, Zelle o Cheque:", // full bilingual prompt
+    "Please provide payment information for ACH, Zelle, or Check:\n-If ACH, please provide both routing and account number.\n-If Zelle, please provide phone number or email associated.\n-If Check, please provide the name in which the check is to be made out to. \n/\nProporcione los detalles de pago para ACH, Zelle o Cheque:\n-Para ACH, incluya el número de ruta y el número de cuenta.\n-Para Zelle, el número de teléfono o correo electrónico asociado.\n-Para Cheque, el nombre a quien se debe emitir.", // full bilingual prompt
   comments: "Any comments or requests/ Cualquier comentario o petición",
 } as const;
 
@@ -51,21 +51,28 @@ export const PROFESSION_TO_TAB_MAPPING = {
  */
 export const PROFESSION_TO_VENDOR_TYPE_MAPPING = {
   Carpenter: ["Carpentry"],
+  Electrician: ["Electrical"],
   Plumber: ["Plumbing"],
   Drywall: ["Drywall"],
   Sheetrock: ["Sheetrock"],
+  Painter: ["Painting"],
   HVAC: ["Ventilating & AC Service"],
+  Flooring: ["Flooring"],
   Framer: ["Carpentry"],
   Roofer: ["Roofing"],
   Stucco: ["Stucco"],
   Demolition: ["Demolition"],
   Glazier: ["Glass"],
   Masonry: ["Masonry"],
+  Landscaper: ["Landscaping"],
+  "Pool Technician": ["Pool Service"],
   "Window, Door Installer": ["Installation"],
+  Photography: ["Photography"],
   Cleaners: ["Cleaning"],
   Designer: ["Designer"],
   Architect: ["Architecture"],
   "General Contractor": ["General Contractor"],
+  Other: ["Other"],
 } as const;
 
 /**

@@ -10,15 +10,16 @@ import {
 
 /**
  * Saves onboarding data to Google Sheets with thread safety and traceability
+ * Creates entries for all target tabs if the person has multiple professions
  */
 export function saveOnboardingDataToSheet(
   formData: FormDataWithMetadata<OnboardingData>,
   spreadsheetId: string,
-  tabName: string // This is now the base tab name, we'll use data.targetTab
+  tabName: string // This is now the base tab name, we'll use data.targetTabs
 ): void {
   const log = createLogger("OnboardingSheets");
   const { data, uuid, submittedAt } = formData;
-  const targetTabName = data.targetTab;
+  const targetTabNames = data.targetTabs;
 
   // Use LockService to prevent concurrent write conflicts
   const lock = LockService.getScriptLock();
@@ -28,50 +29,72 @@ export function saveOnboardingDataToSheet(
       throw new Error("Could not acquire lock for sheet write operation");
     }
 
-    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-    const sheet = spreadsheet.getSheetByName(targetTabName);
+    // Create entries for each target tab
+    for (const targetTabName of targetTabNames) {
+      const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+      const sheet = spreadsheet.getSheetByName(targetTabName);
 
-    if (!sheet) {
-      throw new Error(
-        `Sheet "${targetTabName}" not found in spreadsheet ${spreadsheetId}`
+      if (!sheet) {
+        throw new Error(
+          `Sheet "${targetTabName}" not found in spreadsheet ${spreadsheetId}`
+        );
+      }
+
+      // Find the next available row
+      const lastRow = findLastRowWithContent(sheet, []);
+      const insertRow = lastRow + 1;
+
+      // Read existing headers and normalize them
+      const existingHeaders = sheet
+        .getRange(1, 1, 1, sheet.getLastColumn())
+        .getValues()[0] as string[];
+
+      console.log("🔍 Existing headers in sheet:", existingHeaders);
+      const normalizedHeaders = existingHeaders.map(normalizeString);
+      console.log("🔍 Normalized headers:", normalizedHeaders);
+
+      // Transform data to sheet row format for this specific tab
+      const transformedData = transformOnboardingToTable(
+        data,
+        targetTabName,
+        uuid,
+        submittedAt
       );
+      console.log(
+        "🔍 Transformed data:",
+        JSON.stringify(transformedData, null, 2)
+      );
+
+      // Map data to match the actual header order in the sheet
+      const rowData = normalizedHeaders.map((header) => {
+        // Find the matching key in transformedData by normalizing both sides
+        const matchingKey = Object.keys(transformedData).find(
+          (key) => normalizeString(key) === header
+        );
+        const value = matchingKey
+          ? transformedData[matchingKey as keyof OnboardingTableRow]
+          : "";
+        return value ?? "";
+      });
+      console.log("🔍 Normalized headers:", normalizedHeaders);
+      console.log("🔍 Final row data:", JSON.stringify(rowData, null, 2));
+
+      // Insert the data
+      sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
+
+      log.info("Onboarding data saved successfully", {
+        row: insertRow,
+        uuid,
+        name: data.name,
+        company: data.companyName,
+        targetTab: targetTabName,
+      });
     }
-
-    // Find the next available row
-    const lastRow = findLastRowWithContent(sheet, []);
-    const insertRow = lastRow + 1;
-
-    // Read existing headers and normalize them
-    const existingHeaders = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0] as string[];
-
-    const normalizedHeaders = existingHeaders.map(normalizeString);
-
-    // Transform data to sheet row format
-    const transformedData = transformOnboardingToTable(data, uuid, submittedAt);
-
-    // Map data to match the actual header order in the sheet
-    const rowData = normalizedHeaders.map((header) => {
-      const value = transformedData[header as keyof OnboardingTableRow];
-      return value ?? "";
-    });
-
-    // Insert the data
-    sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
-
-    log.info("Onboarding data saved successfully", {
-      row: insertRow,
-      uuid,
-      name: data.name,
-      company: data.companyName,
-      targetTab: targetTabName,
-    });
   } catch (error) {
     log.error("Failed to save onboarding data to sheet", {
       error: String(error),
       spreadsheetId,
-      targetTab: targetTabName,
+      targetTabs: targetTabNames,
       uuid,
     });
     throw error;

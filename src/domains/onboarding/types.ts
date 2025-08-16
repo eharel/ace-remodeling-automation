@@ -17,6 +17,6 @@ export type OnboardingData = {
   paymentMethod: string;
   paymentInfo: string;
   comments?: string;
-  targetTab: string; // The sheet tab where this data should be saved
-  vendorType: string[]; // The vendor type dropdown values for the target tab
+  targetTabs: string[]; // The sheet tabs where this data should be saved (multiple for multiple professions)
+  professionsByTab: Record<string, string[]>; // Professions categorized by tab
 };

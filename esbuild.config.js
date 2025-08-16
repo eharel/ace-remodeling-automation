@@ -19,7 +19,7 @@ const aliases = {
   "@ui": path.resolve(__dirname, "src/ui"),
   "@utils": path.resolve(__dirname, "src/utils"),
   "@": path.resolve(__dirname, "src"),
-  "@/env": path.resolve(__dirname, "src/env"),
+
   "@/config": path.resolve(__dirname, "src/config"),
   "@/forms": path.resolve(__dirname, "src/forms"),
 };

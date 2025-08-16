@@ -37,15 +37,12 @@ export function createFormHandler<T>(config: FormHandlerConfig<T>) {
 
     let error: Error | undefined;
     try {
-      // Extract raw form data
       log.info("Extracting raw form data");
       const rawFormData = extractResponse(e);
 
-      // Parse the raw data into structured type
       log.info("Parsing form data");
       const parsedData = config.parseFunction(rawFormData);
 
-      // Add metadata for traceability
       const formDataWithMetadata: FormDataWithMetadata<T> = {
         data: parsedData,
         uuid: Utilities.getUuid(),
