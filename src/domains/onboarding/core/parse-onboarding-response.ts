@@ -75,6 +75,7 @@ export function parseOnboardingResponse(
     phone: rawData[FORM_FIELDS.phone] || "",
     email: rawData[FORM_FIELDS.email] || "",
     address: rawData[FORM_FIELDS.address] || "",
+    website: rawData[FORM_FIELDS.website] || "",
     paymentMethod: rawData[FORM_FIELDS.payment_methods] || "",
     paymentInfo: rawData[FORM_FIELDS.payment_info] || "",
     comments: rawData[FORM_FIELDS.comments] || undefined,

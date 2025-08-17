@@ -74,7 +74,7 @@ export function transformOnboardingToTable(
 
   return {
     Vendor: data.companyName,
-    Contact: data.name,
+    Contact: data.email,
     "Vendor type": uniqueVendorTypes.join(", "), // Join vendor types for this tab
     Type: typeValue, // Only populated for MEP professions
     Address: data.address,
@@ -82,7 +82,7 @@ export function transformOnboardingToTable(
     Insurance: data.hasInsurance ? "Yes" : "No",
     "COI Expiration": "", // Not collected in form
     Phone: normalizePhoneCell(data.phone),
-    Website: "", // Not collected in form
+    Website: data.website,
     "Quality of Work": "", // Not collected in form
     Details: data.paymentInfo, // Use payment info as details
     Notes: data.comments || "",

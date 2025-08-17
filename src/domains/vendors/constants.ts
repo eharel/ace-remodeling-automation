@@ -109,11 +109,11 @@ export const VENDOR_TABLES = {
 
 // Map Vendor fields to their possible form titles (exact matches from Google Forms)
 export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
-  companyName: ["Company Name/ Nombre de la Empresa"],
+  companyName: ["Company Name / Nombre de la Empresa"],
   contactName: ["Main Contact Name / Persona de Contacto Principal"],
-  phone: ["Phone Number/ Número de teléfono"],
-  email: ["Email/ Correo electrónico"],
-  address: ["Business Address/ Dirección de negocio"],
+  phone: ["Phone Number / Número de teléfono"],
+  email: ["Email / Correo electrónico"],
+  address: ["Business Address / Dirección de negocio"],
   roughProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   finishProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
   otherProducts: ["Type of Products You Offer / Tipo de Productos que Ofrece"],
@@ -125,7 +125,7 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
     "Do you offer Custom Orders? / ¿Ofrece pedidos personalizados?",
   ],
   offersDelivery: [
-    "Do you offer delivery to job sites? /  ¿Ofrece entrega en sitios de trabajo?",
+    "Do you offer delivery to job sites? / ¿Ofrece entrega en sitios de trabajo?",
   ],
   turnaroundTime: [
     "What's the turnaround for standard orders? / ¿Cuál es el tiempo de entrega para pedidos estándar?",
@@ -133,14 +133,14 @@ export const VENDOR_FORM_KEYS: Record<keyof Vendor, string[]> = {
   offersContractorPricing: [
     "Do you offer contractor or volume pricing? / ¿Ofrece precios especiales para contratistas o compras al por mayor?",
   ],
-  paymentMethods: ["Preferred payment method/ Método de pago"],
+  paymentMethods: ["Preferred payment method / Método de pago"],
   paymentDetails: [
-    "Please provide payment information for ACH, Zelle, or Check:\n-If ACH, please provide both routing and account number.\n-If Zelle, please provide phone number or email associated.\n-If Check, please provide the name in which the check is to be made out to. \n/\nProporcione los detalles de pago para ACH, Zelle o Cheque:\n-Para ACH, incluya el número de ruta y el número de cuenta.\n-Para Zelle, el número de teléfono o correo electrónico asociado.\n-Para Cheque, el nombre a quien se debe emitir.",
+    "Please provide payment information for ACH, Zelle, or Check: -If ACH, please provide both routing and account number. -If Zelle, please provide phone number or email associated. -If Check, please provide the name in which the check is to be made out to. / Proporcione los detalles de pago para ACH, Zelle o Cheque: -Para ACH, incluya el número de ruta y el número de cuenta. -Para Zelle, el número de teléfono o correo electrónico asociado. -Para Cheque, el nombre a quien se debe emitir.",
   ],
   willEmailCatalogs: [
-    "If any, please upload any catalogs or brochures to our email: info@aceremodelingtx.com/ Cargue cualquier folleto o catálogo: info@aceremodelingtx.com",
+    "If any, please upload any catalogs or brochures to our email: info@aceremodelingtx.com / Cargue cualquier folleto o catálogo: info@aceremodelingtx.com",
   ],
-  comments: ["Any comments or requests/ Cualquier comentario o petición"],
+  comments: ["Any comments or requests / Cualquier comentario o petición"],
   submittedAt: [], // This is set programmatically
 } as const;
 

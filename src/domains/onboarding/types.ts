@@ -14,6 +14,7 @@ export type OnboardingData = {
   phone: string;
   email: string;
   address: string;
+  website: string;
   paymentMethod: string;
   paymentInfo: string;
   comments?: string;

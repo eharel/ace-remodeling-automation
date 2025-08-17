@@ -1,5 +1,10 @@
 import { OnboardingData } from "../../types";
-import { findLastRowWithContent, getLocationLinkFormula } from "@utils/sheets";
+import {
+  findLastRowWithContent,
+  getLocationLinkFormula,
+  getWebsiteLinkFormula,
+  getEmailLinkFormula,
+} from "@utils/sheets";
 import { normalizeString } from "@utils/normalize";
 import { createLogger, maskPII } from "@lib/logging/log";
 import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
@@ -11,6 +16,8 @@ import {
 // Smart chip column configuration for onboarding
 const SMART_CHIP_COLUMNS = {
   ADDRESS: "Address",
+  WEBSITE: "Website",
+  CONTACT: "Contact",
 } as const;
 
 /**
@@ -120,6 +127,26 @@ export function saveOnboardingDataToSheet(
         if (addressFormula) {
           const addressCell = sheet.getRange(insertRow, addressColumnIndex);
           addressCell.setFormula(addressFormula);
+        }
+      }
+
+      // Apply Smart Chip formatting for website links
+      const websiteColumnIndex = normalizedHeaders.indexOf("website") + 1;
+      if (websiteColumnIndex > 0) {
+        const websiteFormula = getWebsiteLinkFormula(transformedData.Website);
+        if (websiteFormula) {
+          const websiteCell = sheet.getRange(insertRow, websiteColumnIndex);
+          websiteCell.setFormula(websiteFormula);
+        }
+      }
+
+      // Apply Smart Chip formatting for email links
+      const contactColumnIndex = normalizedHeaders.indexOf("contact") + 1;
+      if (contactColumnIndex > 0) {
+        const emailFormula = getEmailLinkFormula(transformedData.Contact);
+        if (emailFormula) {
+          const contactCell = sheet.getRange(insertRow, contactColumnIndex);
+          contactCell.setFormula(emailFormula);
         }
       }
 

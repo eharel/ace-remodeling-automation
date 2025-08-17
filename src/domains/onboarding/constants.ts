@@ -4,16 +4,17 @@
 
 export const FORM_FIELDS = {
   name: "Name / Nombre",
-  company_name: "Company Name/ Nombre de la Compañía",
-  professions: "Profession/ Profesión",
-  insurance: "Do you have insurance?/ Tienes seguransa?",
-  phone: "Phone Number/ Número de teléfono",
-  email: "Email/ Correo electrónico",
-  address: "Full Home Address/ Dirreccion domicilio", // keep exact spelling from form
-  payment_methods: "Preferred payment method/ Método de pago",
+  company_name: "Company Name / Nombre de la Compañía",
+  professions: "Profession / Profesión",
+  insurance: "Do you have insurance? / Tienes seguransa?",
+  phone: "Phone Number / Número de teléfono",
+  email: "Email / Correo electrónico",
+  address: "Full Home Address / Dirreccion domicilio", // keep exact spelling from form
+  website: "Website / Sitio web",
+  payment_methods: "Preferred payment method / Método de pago",
   payment_info:
-    "Please provide payment information for ACH, Zelle, or Check:\n-If ACH, please provide both routing and account number.\n-If Zelle, please provide phone number or email associated.\n-If Check, please provide the name in which the check is to be made out to. \n/\nProporcione los detalles de pago para ACH, Zelle o Cheque:\n-Para ACH, incluya el número de ruta y el número de cuenta.\n-Para Zelle, el número de teléfono o correo electrónico asociado.\n-Para Cheque, el nombre a quien se debe emitir.", // full bilingual prompt
-  comments: "Any comments or requests/ Cualquier comentario o petición",
+    "Please provide payment information for ACH, Zelle, or Check: -If ACH, please provide both routing and account number. -If Zelle, please provide phone number or email associated. -If Check, please provide the name in which the check is to be made out to. / Proporcione los detalles de pago para ACH, Zelle o Cheque: -Para ACH, incluya el número de ruta y el número de cuenta. -Para Zelle, el número de teléfono o correo electrónico asociado. -Para Cheque, el nombre a quien se debe emitir.", // full bilingual prompt
+  comments: "Any comments or requests / Cualquier comentario o petición",
 } as const;
 
 /**
