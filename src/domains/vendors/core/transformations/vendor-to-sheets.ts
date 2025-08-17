@@ -4,7 +4,7 @@ import {
   VENDOR_CATEGORIES,
   VENDOR_STATUS,
 } from "../../constants";
-import { formatPhoneNumber, toEnglish } from "@utils/index";
+import { normalizePhoneCell, toEnglish } from "@utils/index";
 import { PRODUCT_BY_LABEL } from "../../products";
 
 /**
@@ -24,6 +24,8 @@ export interface VendorTableRow {
   Stars: string;
   Notes: string;
   "Website / Social": string;
+  UUID: string; // For future two-way sync
+  "Submitted At": string; // ISO timestamp for traceability
 }
 
 /** utility: Sheets wants "A, B, C" for multi-select cells */
@@ -85,14 +87,16 @@ export function mapProductsToOtherTypes(products?: string[]): string[] {
 export function transformVendorToTable(
   vendor: Vendor,
   products: string[],
-  typeMapper: (products: string[]) => string[]
+  typeMapper: (products: string[]) => string[],
+  uuid: string,
+  submittedAt: string
 ): VendorTableRow {
   return {
     Name: vendor.companyName,
     Type: joinForChip(typeMapper(products)),
     Email: vendor.email,
     Location: vendor.address,
-    Phone: formatPhoneNumber(vendor.phone, "parentheses"),
+    Phone: normalizePhoneCell(vendor.phone),
     "Point of Contact": vendor.contactName,
     Status: VENDOR_STATUS.NEW,
     "Post date": vendor.submittedAt.toISOString().slice(0, 10),
@@ -100,5 +104,7 @@ export function transformVendorToTable(
     Stars: "",
     "Website / Social": vendor.websiteOrSocial || "",
     Notes: "",
+    UUID: uuid,
+    "Submitted At": submittedAt,
   };
 }

@@ -2,24 +2,98 @@
  * Onboarding domain constants
  */
 
-export const ONBOARDING_FORM_FIELDS = {
-  // Contact Information
-  NAME: "Name / Nombre",
-  COMPANY: "Company Name/ Nombre de la Compañía",
-  PROFESSION: "Profession/ Profesión",
-  INSURANCE: "Do you have insurance?/ Tienes seguransa?",
-  PHONE: "Phone Number/ Número de teléfono",
-  EMAIL: "Email/ Correo electrónico",
-  ADDRESS: "Full Home Address/ Dirreccion domicilio",
-
-  // Payment Details
-  PAYMENT_METHOD: "Preferred payment method/ Método de pago",
-  PAYMENT_INFO:
-    "Please provide payment information for ACH, Zelle, or Check: / Proporcione los detalles de pago para ACH, Zelle o Cheque:",
-
-  // Additional Information
-  COMMENTS: "Any comments or requests/ Cualquier comentario o petición",
+export const FORM_FIELDS = {
+  name: "Name / Nombre",
+  company_name: "Company Name / Nombre de la Compañía",
+  professions: "Profession / Profesión",
+  insurance: "Do you have insurance? / Tienes seguransa?",
+  phone: "Phone Number / Número de teléfono",
+  email: "Email / Correo electrónico",
+  address: "Full Home Address / Dirreccion domicilio", // keep exact spelling from form
+  website: "Website / Sitio web",
+  payment_methods: "Preferred payment method / Método de pago",
+  payment_info:
+    "Please provide payment information for ACH, Zelle, or Check: -If ACH, please provide both routing and account number. -If Zelle, please provide phone number or email associated. -If Check, please provide the name in which the check is to be made out to. / Proporcione los detalles de pago para ACH, Zelle o Cheque: -Para ACH, incluya el número de ruta y el número de cuenta. -Para Zelle, el número de teléfono o correo electrónico asociado. -Para Cheque, el nombre a quien se debe emitir.", // full bilingual prompt
+  comments: "Any comments or requests / Cualquier comentario o petición",
 } as const;
+
+/**
+ * Mapping from form profession answers (English part) to sheet tabs
+ */
+export const PROFESSION_TO_TAB_MAPPING = {
+  Carpenter: "Framing & Insulation",
+  Electrician: "MEP",
+  Plumber: "MEP",
+  Drywall: "Drywall",
+  Sheetrock: "Sheetrock & Paint",
+  Painter: "Sheetrock & Paint",
+  HVAC: "MEP",
+  Flooring: "Flooring",
+  Framer: "Framing & Insulation",
+  Roofer: "Roofing",
+  Stucco: "Exterior",
+  Demolition: "Demo & Concrete",
+  Glazier: "Windows",
+  Masonry: "Demo & Concrete",
+  Landscaper: "Exterior",
+  "Pool Technician": "Exterior",
+  "Window, Door Installer": "Windows",
+  Photography: "Other",
+  Cleaners: "Cleaning",
+  Designer: "Design & Engineering",
+  Architect: "Design & Engineering",
+  "General Contractor": "Other",
+  Other: "Other",
+} as const;
+
+/**
+ * Mapping from form profession answers (English part) to vendor type dropdown values
+ * Each profession can map to multiple vendor types
+ */
+export const PROFESSION_TO_VENDOR_TYPE_MAPPING = {
+  Carpenter: ["Carpentry"],
+  Electrician: ["Electrical"],
+  Plumber: ["Plumbing"],
+  Drywall: ["Drywall"],
+  Sheetrock: ["Sheetrock"],
+  Painter: ["Painting"],
+  HVAC: ["Ventilating & AC Service"],
+  Flooring: ["Flooring"],
+  Framer: ["Carpentry"],
+  Roofer: ["Roofing"],
+  Stucco: ["Stucco"],
+  Demolition: ["Demolition"],
+  Glazier: ["Glass"],
+  Masonry: ["Masonry"],
+  Landscaper: ["Landscaping"],
+  "Pool Technician": ["Pool Service"],
+  "Window, Door Installer": ["Installation"],
+  Photography: ["Photography"],
+  Cleaners: ["Cleaning"],
+  Designer: ["Designer"],
+  Architect: ["Architecture"],
+  "General Contractor": ["General Contractor"],
+  Other: ["Other"],
+} as const;
+
+/**
+ * All available sheet tabs
+ */
+export const SHEET_TABS = [
+  "MEP",
+  "Design & Engineering",
+  "Demo & Concrete",
+  "Framing & Insulation",
+  "Exterior",
+  "Roofing",
+  "Drywall",
+  "Sheetrock & Paint",
+  "Windows",
+  "Doors",
+  "Flooring",
+  "Cleaning",
+  "Other",
+] as const;
 
 export const PAYMENT_METHODS = {
   ACH: "ACH",

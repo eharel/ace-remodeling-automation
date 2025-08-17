@@ -5,6 +5,7 @@ import {
   VENDOR_CATEGORIES,
   PLACEHOLDER_KEYWORDS,
 } from "../../constants";
+import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
 import {
   transformVendorToTable,
   VendorTableRow,
@@ -20,6 +21,7 @@ import {
 } from "@utils/sheets";
 import { PRODUCT_BY_LABEL } from "../../products";
 import { toEnglish } from "@utils/index";
+import { normalizeString } from "@utils/normalize";
 import { SMART_CHIP_COLUMNS } from "../../constants";
 
 /**
@@ -99,34 +101,51 @@ export interface SheetsTableConfig {
 /**
  * Saves vendor data to the appropriate sheets based on their products
  * Creates entries for both Rough and Finish tables if the vendor has products in both categories
+ * Uses LockService for thread safety and includes UUID/timestamp for traceability
  */
 export function saveVendorDataToSheet(
-  vendorData: Vendor,
+  formData: FormDataWithMetadata<Vendor>,
   vendorSheetId: string,
   vendorTabName: string
 ) {
-  // Get all products from all arrays (these are the categorized products)
-  const allProducts = [
-    ...(vendorData.roughProducts || []),
-    ...(vendorData.finishProducts || []),
-    ...(vendorData.otherProducts || []),
-  ];
+  const { data: vendorData, uuid, submittedAt } = formData;
 
-  // Determine which tables to create entries for based on the categorized products
-  const destinations = decideDestinations(allProducts);
+  // Use LockService to prevent concurrent write conflicts
+  const lock = LockService.getScriptLock();
+  try {
+    // Wait up to 10 seconds for the lock
+    if (!lock.tryLock(10000)) {
+      throw new Error("Could not acquire lock for sheet write operation");
+    }
 
-  // Create entries for each destination
-  for (const destination of destinations) {
-    saveVendorDataToSheetInternal(
-      vendorData,
-      destination,
-      vendorSheetId,
-      vendorTabName
-    );
-  }
+    // Get all products from all arrays (these are the categorized products)
+    const allProducts = [
+      ...(vendorData.roughProducts || []),
+      ...(vendorData.finishProducts || []),
+      ...(vendorData.otherProducts || []),
+    ];
 
-  if (destinations.length === 0) {
-    // No destinations found for vendor
+    // Determine which tables to create entries for based on the categorized products
+    const destinations = decideDestinations(allProducts);
+
+    // Create entries for each destination
+    for (const destination of destinations) {
+      saveVendorDataToSheetInternal(
+        vendorData,
+        destination,
+        vendorSheetId,
+        vendorTabName,
+        uuid,
+        submittedAt
+      );
+    }
+
+    if (destinations.length === 0) {
+      // No destinations found for vendor
+    }
+  } finally {
+    // Always release the lock
+    lock.releaseLock();
   }
 }
 
@@ -164,9 +183,7 @@ function getSheetAndHeaders(
     .getValues()[0] as string[];
 
   // Normalize headers to handle Google Sheets Smart Table formatting
-  const normalizedHeaders = existingHeaders.map((header) =>
-    header.replace(/[:：]/g, "").trim()
-  );
+  const normalizedHeaders = existingHeaders.map(normalizeString);
 
   return { sheet, lastRowWithContent, normalizedHeaders };
 }
@@ -214,7 +231,9 @@ function saveVendorDataToSheetInternal(
   vendorData: Vendor,
   destinationSheet: (typeof TABLE_NAMES)[keyof typeof TABLE_NAMES],
   vendorSheetId: string,
-  vendorTabName: string
+  vendorTabName: string,
+  uuid: string,
+  submittedAt: string
 ) {
   const { sheet, lastRowWithContent, normalizedHeaders } = getSheetAndHeaders(
     destinationSheet,
@@ -229,19 +248,25 @@ function saveVendorDataToSheetInternal(
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.roughProducts || [],
-      mapProductsToRoughTypes
+      mapProductsToRoughTypes,
+      uuid,
+      submittedAt
     );
   } else if (destinationSheet === TABLE_NAMES.OTHER) {
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.otherProducts || [],
-      mapProductsToOtherTypes
+      mapProductsToOtherTypes,
+      uuid,
+      submittedAt
     );
   } else {
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.finishProducts || [],
-      mapProductsToFinishTypes
+      mapProductsToFinishTypes,
+      uuid,
+      submittedAt
     );
   }
 

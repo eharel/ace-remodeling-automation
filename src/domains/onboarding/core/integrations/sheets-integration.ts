@@ -1,56 +1,173 @@
-import { OnboardingFormData } from "../../types";
-import { ONBOARDING_SHEET_CONFIG, ONBOARDING_STATUS } from "../../constants";
+import { OnboardingData } from "../../types";
 import {
-  createEmailLinkFormula,
-  createMapsLinkFormula,
-} from "../../../../utils";
+  findLastRowWithContent,
+  getLocationLinkFormula,
+  getWebsiteLinkFormula,
+  getEmailLinkFormula,
+} from "@utils/sheets";
+import { normalizeString } from "@utils/normalize";
+import { createLogger, maskPII } from "@lib/logging/log";
+import type { FormDataWithMetadata } from "@/forms/core/base-form-handler";
+import {
+  transformOnboardingToTable,
+  OnboardingTableRow,
+} from "../transformations";
+
+// Smart chip column configuration for onboarding
+const SMART_CHIP_COLUMNS = {
+  ADDRESS: "Address",
+  WEBSITE: "Website",
+  CONTACT: "Contact",
+} as const;
 
 /**
- * Saves onboarding data to Google Sheets
+ * Applies smart chip formatting to a specific column
+ */
+function applySmartChipToColumn(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  insertRowNumber: number,
+  normalizedHeaders: string[],
+  columnName: keyof typeof SMART_CHIP_COLUMNS,
+  tableData: OnboardingTableRow,
+  formulaGetter: (value: string) => string
+): void {
+  const columnIndex =
+    normalizedHeaders.indexOf(SMART_CHIP_COLUMNS[columnName]) + 1;
+  if (columnIndex > 0) {
+    const formula = formulaGetter(
+      tableData[
+        SMART_CHIP_COLUMNS[columnName] as keyof OnboardingTableRow
+      ] as string
+    );
+    if (formula) {
+      const cell = sheet.getRange(insertRowNumber, columnIndex);
+      cell.setFormula(formula);
+    }
+  }
+}
+
+/**
+ * Saves onboarding data to Google Sheets with thread safety and traceability
+ * Creates entries for all target tabs if the person has multiple professions
  */
 export function saveOnboardingDataToSheet(
-  data: OnboardingFormData,
-  onboardingSheetId: string,
-  onboardingTabName: string
+  formData: FormDataWithMetadata<OnboardingData>,
+  spreadsheetId: string,
+  tabName: string // This is now the base tab name, we'll use data.targetTabs
 ): void {
-  console.log("📊 Saving onboarding data to Google Sheets...");
+  const log = createLogger("OnboardingSheets");
+  const { data, uuid, submittedAt } = formData;
+  const targetTabNames = data.targetTabs;
 
+  // Use LockService to prevent concurrent write conflicts
+  const lock = LockService.getScriptLock();
   try {
-    const spreadsheet = SpreadsheetApp.openById(onboardingSheetId);
-    let sheet = spreadsheet.getSheetByName(onboardingTabName);
-
-    // Create sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(onboardingTabName);
-      sheet
-        .getRange(1, 1, 1, ONBOARDING_SHEET_CONFIG.HEADERS.length)
-        .setValues([[...ONBOARDING_SHEET_CONFIG.HEADERS]]);
-      console.log("📋 Created new onboarding sheet with headers");
+    // Wait up to 10 seconds for the lock
+    if (!lock.tryLock(10000)) {
+      throw new Error("Could not acquire lock for sheet write operation");
     }
 
-    // Prepare row data
-    const rowData = [
-      data.contactInfo.name,
-      data.contactInfo.company,
-      data.contactInfo.profession.join(", "),
-      data.contactInfo.insurance,
-      data.contactInfo.phone,
-      createEmailLinkFormula(data.contactInfo.email),
-      createMapsLinkFormula(data.contactInfo.address),
-      data.paymentDetails.paymentMethod.join(", "),
-      data.paymentDetails.paymentInfo,
-      data.comments || "",
-      data.submissionDate,
-    ];
+    // Create entries for each target tab
+    for (const targetTabName of targetTabNames) {
+      const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+      const sheet = spreadsheet.getSheetByName(targetTabName);
 
-    // Append the new row
-    const lastRow = sheet.getLastRow();
-    const range = sheet.getRange(lastRow + 1, 1, 1, rowData.length);
-    range.setValues([rowData]);
+      if (!sheet) {
+        throw new Error(
+          `Sheet "${targetTabName}" not found in spreadsheet ${spreadsheetId}`
+        );
+      }
 
-    console.log("✅ Onboarding data saved successfully");
+      // Find the next available row
+      const lastRow = findLastRowWithContent(sheet, []);
+      const insertRow = lastRow + 1;
+
+      // Read existing headers and normalize them
+      const existingHeaders = sheet
+        .getRange(1, 1, 1, sheet.getLastColumn())
+        .getValues()[0] as string[];
+
+      console.log("🔍 Existing headers in sheet:", existingHeaders);
+      const normalizedHeaders = existingHeaders.map(normalizeString);
+      console.log("🔍 Normalized headers:", normalizedHeaders);
+
+      // Transform data to sheet row format for this specific tab
+      const transformedData = transformOnboardingToTable(
+        data,
+        targetTabName,
+        uuid,
+        submittedAt
+      );
+      console.log(
+        "🔍 Transformed data:",
+        JSON.stringify(transformedData, null, 2)
+      );
+
+      // Map data to match the actual header order in the sheet
+      const rowData = normalizedHeaders.map((header) => {
+        // Find the matching key in transformedData by normalizing both sides
+        const matchingKey = Object.keys(transformedData).find(
+          (key) => normalizeString(key) === header
+        );
+        const value = matchingKey
+          ? transformedData[matchingKey as keyof OnboardingTableRow]
+          : "";
+        return value ?? "";
+      });
+      console.log("🔍 Normalized headers:", normalizedHeaders);
+      console.log("🔍 Final row data:", JSON.stringify(rowData, null, 2));
+
+      // Insert the data
+      sheet.getRange(insertRow, 1, 1, rowData.length).setValues([rowData]);
+
+      // Apply Smart Chip formatting for address links
+      const addressColumnIndex = normalizedHeaders.indexOf("address") + 1;
+      if (addressColumnIndex > 0) {
+        const addressFormula = getLocationLinkFormula(transformedData.Address);
+        if (addressFormula) {
+          const addressCell = sheet.getRange(insertRow, addressColumnIndex);
+          addressCell.setFormula(addressFormula);
+        }
+      }
+
+      // Apply Smart Chip formatting for website links
+      const websiteColumnIndex = normalizedHeaders.indexOf("website") + 1;
+      if (websiteColumnIndex > 0) {
+        const websiteFormula = getWebsiteLinkFormula(transformedData.Website);
+        if (websiteFormula) {
+          const websiteCell = sheet.getRange(insertRow, websiteColumnIndex);
+          websiteCell.setFormula(websiteFormula);
+        }
+      }
+
+      // Apply Smart Chip formatting for email links
+      const contactColumnIndex = normalizedHeaders.indexOf("contact") + 1;
+      if (contactColumnIndex > 0) {
+        const emailFormula = getEmailLinkFormula(transformedData.Contact);
+        if (emailFormula) {
+          const contactCell = sheet.getRange(insertRow, contactColumnIndex);
+          contactCell.setFormula(emailFormula);
+        }
+      }
+
+      log.info("Onboarding data saved successfully", {
+        row: insertRow,
+        uuid,
+        name: data.name,
+        company: data.companyName,
+        targetTab: targetTabName,
+      });
+    }
   } catch (error) {
-    console.error("❌ Error saving onboarding data to sheet:", error);
+    log.error("Failed to save onboarding data to sheet", {
+      error: String(error),
+      spreadsheetId,
+      targetTabs: targetTabNames,
+      uuid,
+    });
     throw error;
+  } finally {
+    // Always release the lock
+    lock.releaseLock();
   }
 }

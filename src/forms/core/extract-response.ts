@@ -1,3 +1,5 @@
+import { canonicalizeTitle } from "../utils/canonicalize-title";
+
 export function extractResponse(
   e: GoogleAppsScript.Events.FormsOnFormSubmit
 ): Record<string, string> {
@@ -5,14 +7,13 @@ export function extractResponse(
   const result: Record<string, string> = {};
 
   for (const item of responses) {
-    const title = item.getItem().getTitle();
+    const rawTitle = item.getItem().getTitle();
+    const title = canonicalizeTitle(rawTitle); // normalize here
     const answer = item.getResponse();
 
-    if (Array.isArray(answer)) {
-      result[title] = answer.join(", ").trim();
-    } else {
-      result[title] = String(answer).trim();
-    }
+    result[title] = Array.isArray(answer)
+      ? answer.join(", ").trim()
+      : String(answer).trim();
   }
 
   return result;
