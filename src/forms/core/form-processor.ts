@@ -17,13 +17,15 @@ import {
  *
  * @param formName - The name of the form (e.g., 'vendor', 'onboarding')
  * @param response - The Google Apps Script form response
+ * @param environment - The environment to use for field mapping
  * @returns Object with field names as keys and values as strings
  */
 export function processFormResponse<T extends FormName>(
   formName: T,
-  response: GoogleAppsScript.Forms.FormResponse
+  response: GoogleAppsScript.Forms.FormResponse,
+  environment: "development" | "production" = "development"
 ): Record<FormItemName<T>, string> {
-  const formConfig = FORM_IDS[formName];
+  const formConfig = FORM_IDS[formName][environment];
   const itemResponses = response.getItemResponses();
   const result: any = {};
 
@@ -61,9 +63,10 @@ export function processFormResponse<T extends FormName>(
  */
 export function validateFormResponse<T extends FormName>(
   formName: T,
-  response: GoogleAppsScript.Forms.FormResponse
+  response: GoogleAppsScript.Forms.FormResponse,
+  environment: "development" | "production" = "development"
 ): { isValid: boolean; errors: string[] } {
-  const formConfig = FORM_IDS[formName];
+  const formConfig = FORM_IDS[formName][environment];
   const itemResponses = response.getItemResponses();
   const errors: string[] = [];
 
@@ -73,12 +76,7 @@ export function validateFormResponse<T extends FormName>(
   // Check for missing required fields (for now, we'll assume all fields are required)
   // In the future, this can be enhanced with metadata about which fields are required
   for (const [itemName, itemId] of Object.entries(formConfig.items)) {
-    if (itemId === 0) {
-      // Skip placeholder IDs (not yet extracted)
-      continue;
-    }
-
-    if (!responseIds.includes(itemId)) {
+    if (!responseIds.includes(itemId as number)) {
       errors.push(`Missing required field: ${itemName}`);
     }
   }
