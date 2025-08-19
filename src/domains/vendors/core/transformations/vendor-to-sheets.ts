@@ -103,7 +103,7 @@ export function transformVendorToTable(
     File: "",
     Stars: "",
     "Website / Social": vendor.websiteOrSocial || "",
-    Notes: "",
+    Notes: vendor.comments || "",
     UUID: uuid,
     "Submitted At": submittedAt,
   };

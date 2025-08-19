@@ -35,8 +35,10 @@ function applySmartChipToColumn(
   tableData: VendorTableRow,
   formulaGetter: (value: string) => string
 ): void {
-  const columnIndex =
-    normalizedHeaders.indexOf(SMART_CHIP_COLUMNS[columnName]) + 1;
+  const normalizedTargetHeader = normalizeString(
+    SMART_CHIP_COLUMNS[columnName]
+  );
+  const columnIndex = normalizedHeaders.indexOf(normalizedTargetHeader) + 1;
   if (columnIndex > 0) {
     const formula = formulaGetter(
       tableData[
@@ -110,6 +112,13 @@ export function saveVendorDataToSheet(
 ) {
   const { data: vendorData, uuid, submittedAt } = formData;
 
+  console.log("🔍 Starting vendor sheet save process", {
+    vendorSheetId,
+    vendorTabName,
+    uuid,
+    companyName: vendorData.companyName,
+  });
+
   // Use LockService to prevent concurrent write conflicts
   const lock = LockService.getScriptLock();
   try {
@@ -125,11 +134,16 @@ export function saveVendorDataToSheet(
       ...(vendorData.otherProducts || []),
     ];
 
+    console.log("🔍 All products for vendor:", allProducts);
+
     // Determine which tables to create entries for based on the categorized products
     const destinations = decideDestinations(allProducts);
 
+    console.log("🔍 Destinations determined:", destinations);
+
     // Create entries for each destination
     for (const destination of destinations) {
+      console.log("🔍 Processing destination:", destination);
       saveVendorDataToSheetInternal(
         vendorData,
         destination,
@@ -141,7 +155,7 @@ export function saveVendorDataToSheet(
     }
 
     if (destinations.length === 0) {
-      // No destinations found for vendor
+      console.log("🔍 No destinations found for vendor");
     }
   } finally {
     // Always release the lock
@@ -168,8 +182,24 @@ function getSheetAndHeaders(
       : destinationSheet === TABLE_NAMES.OTHER
       ? VENDOR_TABLES.OTHER.name
       : VENDOR_TABLES.FINISH.name;
+
+  console.log(
+    "🔍 Looking for sheet:",
+    sheetName,
+    "in spreadsheet:",
+    vendorSheetId
+  );
+
   const sheet =
     spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+
+  console.log(
+    "🔍 Sheet found/created:",
+    sheet.getName(),
+    "with",
+    sheet.getLastRow(),
+    "rows"
+  );
 
   // Find the actual last row with content (not just empty rows)
   const lastRowWithContent = findLastRowWithContent(
@@ -177,10 +207,14 @@ function getSheetAndHeaders(
     PLACEHOLDER_KEYWORDS
   );
 
+  console.log("🔍 Last row with content:", lastRowWithContent);
+
   // Read existing headers from the sheet (order-independent)
   const existingHeaders = sheet
     .getRange(1, 1, 1, sheet.getLastColumn())
     .getValues()[0] as string[];
+
+  console.log("🔍 Existing headers:", existingHeaders);
 
   // Normalize headers to handle Google Sheets Smart Table formatting
   const normalizedHeaders = existingHeaders.map(normalizeString);
@@ -197,22 +231,44 @@ function writeDataToSheet(
   normalizedHeaders: string[],
   transformedData: VendorTableRow
 ): number {
+  console.log("🔍 Writing data to sheet:", sheet.getName());
+  console.log("🔍 Transformed data:", transformedData);
+
   // Write headers if sheet is empty (only header row exists)
   if (lastRowWithContent <= 1) {
     const expectedHeaders = Object.keys(transformedData);
+    console.log("🔍 Writing headers:", expectedHeaders);
     sheet
       .getRange(1, 1, 1, expectedHeaders.length)
       .setValues([expectedHeaders]);
   }
 
-  // Map data to match the actual header order in the sheet
-  const rowData = normalizedHeaders.map((header) => {
-    const value = transformedData[header as keyof VendorTableRow];
+  // Prepare effective headers for mapping
+  const expectedHeaders = Object.keys(transformedData);
+  const effectiveNormalizedHeaders =
+    normalizedHeaders && normalizedHeaders.length
+      ? normalizedHeaders
+      : expectedHeaders.map((h) => normalizeString(h));
+
+  // Map data to match the actual header order in the sheet using normalized key matching
+  const rowData = effectiveNormalizedHeaders.map((normalizedHeader) => {
+    const matchingKey = Object.keys(transformedData).find(
+      (key) => normalizeString(key) === normalizedHeader
+    );
+    const value = matchingKey
+      ? (transformedData[
+          matchingKey as keyof VendorTableRow
+        ] as unknown as string)
+      : "";
     return value ?? "";
   });
 
+  console.log("🔍 Row data to write:", rowData);
+
   // Insert the new row AFTER the last row with content (not at the very end)
   const insertRowNumber = lastRowWithContent + 1;
+
+  console.log("🔍 Inserting at row:", insertRowNumber);
 
   // Insert a new row at the correct position
   sheet.insertRowAfter(lastRowWithContent);
@@ -220,6 +276,8 @@ function writeDataToSheet(
   // Write the data to the newly inserted row
   const targetRange = sheet.getRange(insertRowNumber, 1, 1, rowData.length);
   targetRange.setValues([rowData]);
+
+  console.log("🔍 Data written successfully to row:", insertRowNumber);
 
   return insertRowNumber;
 }
@@ -245,6 +303,10 @@ function saveVendorDataToSheetInternal(
   let transformedData: VendorTableRow;
 
   if (destinationSheet === TABLE_NAMES.ROUGH) {
+    console.log(
+      "🔍 Transforming for ROUGH with products:",
+      vendorData.roughProducts
+    );
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.roughProducts || [],
@@ -253,6 +315,10 @@ function saveVendorDataToSheetInternal(
       submittedAt
     );
   } else if (destinationSheet === TABLE_NAMES.OTHER) {
+    console.log(
+      "🔍 Transforming for OTHER with products:",
+      vendorData.otherProducts
+    );
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.otherProducts || [],
@@ -261,6 +327,10 @@ function saveVendorDataToSheetInternal(
       submittedAt
     );
   } else {
+    console.log(
+      "🔍 Transforming for FINISH with products:",
+      vendorData.finishProducts
+    );
     transformedData = transformVendorToTable(
       vendorData,
       vendorData.finishProducts || [],
