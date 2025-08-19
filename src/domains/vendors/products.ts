@@ -19,7 +19,7 @@ export const PRODUCT_CATALOG: ProductDef[] = [
   {
     key: "ALL",
     formLabels: ["All", "Todos"],
-    category: VENDOR_CATEGORIES.OTHER,
+    category: VENDOR_CATEGORIES.BOTH,
     roughTypes: ["All"],
     finishTypes: ["All"],
   },
@@ -48,10 +48,11 @@ export const PRODUCT_CATALOG: ProductDef[] = [
     roughTypes: ["Fabricator"],
   },
   {
-    key: "FLOORS_ROUGH",
+    key: "FLOORS",
     formLabels: ["Floors", "Pisos"],
-    category: VENDOR_CATEGORIES.ROUGH,
+    category: VENDOR_CATEGORIES.BOTH,
     roughTypes: ["Floors"],
+    finishTypes: ["Floors"],
   },
   {
     key: "FRAMING",
@@ -78,10 +79,11 @@ export const PRODUCT_CATALOG: ProductDef[] = [
     roughTypes: ["Roofs"],
   },
   {
-    key: "SHOWROOM_ROUGH",
+    key: "SHOWROOM",
     formLabels: ["Showroom", "Sala de exposición"],
-    category: VENDOR_CATEGORIES.ROUGH,
+    category: VENDOR_CATEGORIES.BOTH,
     roughTypes: ["Showroom"],
+    finishTypes: ["Showroom"],
   },
   {
     key: "WOOD",

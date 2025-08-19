@@ -1,6 +1,6 @@
 // src/forms/core/form-router.ts
-import { handleVendorForm } from "../../domains/vendors/core/handle-vendor-form";
-import { handleOnboardingForm } from "../../domains/onboarding/core/handle-onboarding-form";
+import { handleVendorFormById } from "../../domains/vendors/core/handle-vendor-form-id";
+import { handleOnboardingFormById } from "../../domains/onboarding/core/handle-onboarding-form-id";
 
 import { getFormsConfig } from "@/forms/config/config";
 import { normalizeEnv, type EnvName } from "@/lib/env/env";
@@ -50,9 +50,13 @@ export function onFormSubmit(
 
       switch (formId) {
         case FORM_IDS.VENDOR:
-          return handleVendorForm(e, ids);
+          // Convert staging to development for the ID-based handler
+          const vendorEnv = env === "staging" ? "development" : env;
+          return handleVendorFormById(e, ids, vendorEnv);
         case FORM_IDS.ONBOARDING:
-          return handleOnboardingForm(e, ids);
+          // Convert staging to development for the ID-based handler
+          const onboardingEnv = env === "staging" ? "development" : env;
+          return handleOnboardingFormById(e, ids, onboardingEnv);
         default:
           throw new Error(`Unknown form ID: ${formId}`);
       }
