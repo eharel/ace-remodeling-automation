@@ -339,33 +339,25 @@ function applyPMColorCoding(
  * This function should be called on monthly sheets when the Asaf column changes
  */
 export function applyAsafCheckboxFormatting(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet
+  sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  row: number
 ): void {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return;
+  if (row < 2) return;
 
   // Asaf column is column B (column 2)
   const asafColumn = 2; // Column B
 
-  // Get the Asaf column values (checkboxes)
-  const asafRange = sheet.getRange(2, asafColumn, lastRow - 1, 1);
-  const asafValues = asafRange.getValues();
+  // Get the Asaf checkbox value for the specific row
+  const asafValue = sheet.getRange(row, asafColumn).getValue();
+  const isChecked = asafValue === true;
 
   // Get the range for columns D-H (Project, Amount, How, Comment, Confirmation)
-  const targetRange = sheet.getRange(2, 4, lastRow - 1, 5); // D-H = columns 4-8
+  const targetRange = sheet.getRange(row, 4, 1, 5); // D-H = columns 4-8
 
-  // Clear existing background colors first
-  targetRange.setBackground(null);
-
-  // Apply grey background where Asaf checkbox is checked
-  for (let i = 0; i < asafValues.length; i++) {
-    const isChecked = asafValues[i][0] === true;
-    if (isChecked) {
-      // Apply grey background to the entire row in columns D-H
-      const rowRange = sheet.getRange(i + 2, 4, 1, 5); // +2 because we start from row 2
-      rowRange.setBackground("#e0e0e0"); // Light grey
-    }
+  // Apply or clear grey background based on checkbox state
+  if (isChecked) {
+    targetRange.setBackground("#e0e0e0"); // Light grey
+  } else {
+    targetRange.setBackground(null); // Clear background
   }
-
-  log.info(`Applied Asaf checkbox formatting to ${lastRow - 1} rows`);
 }

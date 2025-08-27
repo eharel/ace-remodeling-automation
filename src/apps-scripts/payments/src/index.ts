@@ -16,9 +16,14 @@ declare global {
   var autoUpdatePipeline: () => void;
   var onEdit: (e: GoogleAppsScript.Events.SheetsOnEdit) => void;
   var onOpen: () => void;
-  var applyPipelineFormatting: () => void;
+  var applyPipelineFormatting: (
+    sheet: GoogleAppsScript.Spreadsheet.Sheet
+  ) => void;
   var applyEnhancedFormatting: () => void;
-  var applyAsafCheckboxFormatting: () => void;
+  var applyAsafCheckboxFormatting: (
+    sheet: GoogleAppsScript.Spreadsheet.Sheet,
+    row: number
+  ) => void;
   var getPipelineStats: () => any;
 }
 

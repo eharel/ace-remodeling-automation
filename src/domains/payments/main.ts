@@ -27,8 +27,6 @@ export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   const sheet = e.range.getSheet();
   const sheetName = sheet.getName();
 
-  log.info(`📝 onEdit triggered in sheet: ${sheetName}`);
-
   // Handle edits in monthly sheets
   if (isMonthlySheet(sheetName)) {
     handleMonthlySheetEdit(e);

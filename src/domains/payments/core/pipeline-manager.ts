@@ -2,11 +2,12 @@
  * Main pipeline manager for payments processing
  */
 
-import { log } from "@/lib/logging";
+import { log } from "../../../lib/logging";
 import {
   PIPELINE_SHEET_NAME,
   BUSINESS_HOURS,
   DATA_COLUMNS,
+  PIPELINE_COLUMNS,
 } from "../constants";
 import { PipelineUpdateOptions } from "../types";
 import { extractPipelineData } from "./data-extraction";
@@ -20,6 +21,7 @@ import {
   handleCopyDateDown,
   handleClearDateIfRowEmpty,
   applyAsafCheckboxFormatting,
+  applyEnhancedFormatting as applyEnhanced,
 } from "./formatting";
 
 /**
@@ -113,6 +115,11 @@ export function handleMonthlySheetEdit(
   const numRows = e.range.getNumRows();
   const col = e.range.getColumn();
 
+  // Check for Asaf checkbox edits (column B)
+  if (col === PIPELINE_COLUMNS.ASAF) {
+    log.info(`Processing Asaf checkbox edit in column ${col}`);
+  }
+
   // Process edits in columns C–H (3–8) for date copying and clearing
   if (col >= DATA_COLUMNS.start && col <= DATA_COLUMNS.end) {
     for (let i = 0; i < numRows; i++) {
@@ -122,15 +129,17 @@ export function handleMonthlySheetEdit(
     }
   }
 
-  // Always apply formatting for any edit in monthly sheets
+  // Execute Asaf formatting work
+  if (col === PIPELINE_COLUMNS.ASAF) {
+    // Column B - Asaf checkbox
+    for (let i = 0; i < numRows; i++) {
+      const row = startRow + i;
+      applyAsafCheckboxFormatting(sheet, row);
+    }
+  }
 
-  log.info(`Processing edit in ${sheetName} at row ${startRow}, column ${col}`);
-
-  // Apply date group borders
+  // Apply date group borders (always needed for visual consistency)
   applyDateGroupBorders(sheet);
-
-  // Apply Asaf checkbox formatting
-  applyAsafCheckboxFormatting(sheet);
 }
 
 /**
@@ -208,8 +217,6 @@ export function applyEnhancedFormatting(): void {
   }
 
   // Apply enhanced formatting directly
-  const { applyEnhancedFormatting: applyEnhanced } = require("./formatting");
-
   applyEnhanced(pipelineSheet, {
     alternateRowColors: true,
     highlightToday: true,
