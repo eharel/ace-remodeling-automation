@@ -1,0 +1,5 @@
+{
+  "scriptId": "YOUR_DEV_SCRIPT_ID_HERE",
+  "rootDir": ".",
+  "description": "Development version of ACE Payments Pipeline"
+}

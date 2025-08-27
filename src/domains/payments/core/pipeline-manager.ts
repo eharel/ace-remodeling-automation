@@ -19,6 +19,7 @@ import {
   applyPipelineFormatting,
   handleCopyDateDown,
   handleClearDateIfRowEmpty,
+  applyAsafCheckboxFormatting,
 } from "./formatting";
 
 /**
@@ -68,7 +69,7 @@ export function updatePipeline(options: PipelineUpdateOptions = {}): void {
       `Pipeline updated successfully with ${spreadsheetData.length} rows`
     );
   } catch (error) {
-    log.error("Failed to update pipeline:", error);
+    log.error("Failed to update pipeline:", { error: String(error) });
     throw error;
   }
 }
@@ -112,19 +113,24 @@ export function handleMonthlySheetEdit(
   const numRows = e.range.getNumRows();
   const col = e.range.getColumn();
 
-  // Only act if editing columns C–H (3–8)
-  if (col < DATA_COLUMNS.start || col > DATA_COLUMNS.end) return;
+  // Process edits in columns C–H (3–8) for date copying and clearing
+  if (col >= DATA_COLUMNS.start && col <= DATA_COLUMNS.end) {
+    for (let i = 0; i < numRows; i++) {
+      const row = startRow + i;
+      handleCopyDateDown(sheet, row);
+      handleClearDateIfRowEmpty(sheet, row);
+    }
+  }
+
+  // Always apply formatting for any edit in monthly sheets
 
   log.info(`Processing edit in ${sheetName} at row ${startRow}, column ${col}`);
 
-  for (let i = 0; i < numRows; i++) {
-    const row = startRow + i;
-    handleCopyDateDown(sheet, row);
-    handleClearDateIfRowEmpty(sheet, row);
-  }
-
   // Apply date group borders
   applyDateGroupBorders(sheet);
+
+  // Apply Asaf checkbox formatting
+  applyAsafCheckboxFormatting(sheet);
 }
 
 /**
@@ -201,6 +207,7 @@ export function applyEnhancedFormatting(): void {
     return;
   }
 
+  // Apply enhanced formatting directly
   const { applyEnhancedFormatting: applyEnhanced } = require("./formatting");
 
   applyEnhanced(pipelineSheet, {

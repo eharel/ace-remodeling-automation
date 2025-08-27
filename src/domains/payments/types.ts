@@ -4,14 +4,14 @@
 
 export interface PipelineRow {
   date: Date | string;
-  projectName: string;
-  clientName: string;
+  asaf: string;
+  name: string;
+  project: string;
   amount: number | string;
-  status: string;
-  notes: string;
-  pm: string;
-  category: string;
-  murphy: string; // Renamed from "Shay" to "Murphy"
+  how: string;
+  comment: string;
+  confirmation: string;
+  murphy: string;
   monthValue: Date | string; // Computed month value for grouping
 }
 

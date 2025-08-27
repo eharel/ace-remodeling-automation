@@ -59,13 +59,13 @@ function applyBasicFormatting(
   // Set header values
   const headers = [
     "Date",
-    "Project Name",
-    "Client Name",
+    "Asaf",
+    "Name",
+    "Project",
     "Amount",
-    "Status",
-    "Notes",
-    "PM",
-    "Category",
+    "How",
+    "Comment",
+    "Confirmation",
     "Murphy",
   ];
   headerRange.setValues([headers]);
@@ -119,38 +119,31 @@ function applyConditionalFormatting(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   lastRow: number
 ): void {
-  // Status-based formatting
-  const statusRange = sheet.getRange(
-    2,
-    PIPELINE_COLUMNS.STATUS,
-    lastRow - 1,
-    1
-  );
+  // How-based formatting (replacing status)
+  const howRange = sheet.getRange(2, PIPELINE_COLUMNS.HOW, lastRow - 1, 1);
 
-  // Create conditional formatting rules
+  // Create conditional formatting rules for How column
   const rules = [
-    // Completed projects - green background
+    // You can customize these based on your "How" values
     SpreadsheetApp.newConditionalFormatRule()
       .whenTextEqualTo("Completed")
       .setBackground("#d4edda")
       .setFontColor("#155724")
-      .setRanges([statusRange])
+      .setRanges([howRange])
       .build(),
 
-    // Pending projects - yellow background
     SpreadsheetApp.newConditionalFormatRule()
       .whenTextEqualTo("Pending")
       .setBackground("#fff3cd")
       .setFontColor("#856404")
-      .setRanges([statusRange])
+      .setRanges([howRange])
       .build(),
 
-    // Cancelled projects - red background
     SpreadsheetApp.newConditionalFormatRule()
       .whenTextEqualTo("Cancelled")
       .setBackground("#f8d7da")
       .setFontColor("#721c24")
-      .setRanges([statusRange])
+      .setRanges([howRange])
       .build(),
   ];
 
@@ -177,9 +170,14 @@ function applyColumnFormatting(
   );
   amountRange.setNumberFormat("$#,##0.00");
 
-  // Notes column - wrap text
-  const notesRange = sheet.getRange(2, PIPELINE_COLUMNS.NOTES, lastRow - 1, 1);
-  notesRange.setWrap(true);
+  // Comment column - wrap text
+  const commentRange = sheet.getRange(
+    2,
+    PIPELINE_COLUMNS.COMMENT,
+    lastRow - 1,
+    1
+  );
+  commentRange.setWrap(true);
 }
 
 /**
@@ -315,23 +313,59 @@ function applyPMColorCoding(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   lastRow: number
 ): void {
-  const pmRange = sheet.getRange(2, PIPELINE_COLUMNS.PM, lastRow - 1, 1);
+  const nameRange = sheet.getRange(2, PIPELINE_COLUMNS.NAME, lastRow - 1, 1);
 
-  // Define PM colors (you can customize these)
-  const pmColors = {
+  // Define name colors (you can customize these)
+  const nameColors = {
     John: "#ffebee", // Light red
     Sarah: "#e8f5e8", // Light green
     Mike: "#fff3e0", // Light orange
     Lisa: "#f3e5f5", // Light purple
   };
 
-  const rules = Object.entries(pmColors).map(([pm, color]) =>
+  const rules = Object.entries(nameColors).map(([name, color]) =>
     SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo(pm)
+      .whenTextEqualTo(name)
       .setBackground(color)
-      .setRanges([pmRange])
+      .setRanges([nameRange])
       .build()
   );
 
   sheet.setConditionalFormatRules(rules);
+}
+
+/**
+ * Applies grey background to columns D-H when Asaf checkbox is marked
+ * This function should be called on monthly sheets when the Asaf column changes
+ */
+export function applyAsafCheckboxFormatting(
+  sheet: GoogleAppsScript.Spreadsheet.Sheet
+): void {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+
+  // Asaf column is column B (column 2)
+  const asafColumn = 2; // Column B
+
+  // Get the Asaf column values (checkboxes)
+  const asafRange = sheet.getRange(2, asafColumn, lastRow - 1, 1);
+  const asafValues = asafRange.getValues();
+
+  // Get the range for columns D-H (Project, Amount, How, Comment, Confirmation)
+  const targetRange = sheet.getRange(2, 4, lastRow - 1, 5); // D-H = columns 4-8
+
+  // Clear existing background colors first
+  targetRange.setBackground(null);
+
+  // Apply grey background where Asaf checkbox is checked
+  for (let i = 0; i < asafValues.length; i++) {
+    const isChecked = asafValues[i][0] === true;
+    if (isChecked) {
+      // Apply grey background to the entire row in columns D-H
+      const rowRange = sheet.getRange(i + 2, 4, 1, 5); // +2 because we start from row 2
+      rowRange.setBackground("#e0e0e0"); // Light grey
+    }
+  }
+
+  log.info(`Applied Asaf checkbox formatting to ${lastRow - 1} rows`);
 }

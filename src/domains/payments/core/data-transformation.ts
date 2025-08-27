@@ -29,20 +29,20 @@ export function transformPipelineData(rows: PipelineRow[]): PipelineData {
  */
 function validateAndCleanRow(row: PipelineRow): PipelineRow | null {
   // Basic validation
-  if (!row.date && !row.projectName && !row.clientName) {
+  if (!row.date && !row.name && !row.project) {
     return null; // Skip completely empty rows
   }
 
   // Clean and normalize data
   return {
     ...row,
-    projectName: cleanString(row.projectName),
-    clientName: cleanString(row.clientName),
+    asaf: cleanString(row.asaf),
+    name: cleanString(row.name),
+    project: cleanString(row.project),
     amount: cleanAmount(row.amount),
-    status: cleanString(row.status),
-    notes: cleanString(row.notes),
-    pm: cleanString(row.pm),
-    category: cleanString(row.category),
+    how: cleanString(row.how),
+    comment: cleanString(row.comment),
+    confirmation: cleanString(row.confirmation),
     murphy: cleanString(row.murphy),
   };
 }
@@ -85,13 +85,13 @@ function cleanAmount(value: any): number | string {
 export function convertToSpreadsheetFormat(data: PipelineData): any[][] {
   return data.rows.map((row) => [
     row.date,
-    row.projectName,
-    row.clientName,
+    row.asaf,
+    row.name,
+    row.project,
     row.amount,
-    row.status,
-    row.notes,
-    row.pm,
-    row.category,
+    row.how,
+    row.comment,
+    row.confirmation,
     row.murphy,
   ]);
 }
@@ -110,7 +110,7 @@ export function sortPipelineData(data: PipelineData): PipelineData {
     }
 
     // Then by project name
-    return (a.projectName || "").localeCompare(b.projectName || "");
+    return (a.project || "").localeCompare(b.project || "");
   });
 
   return {

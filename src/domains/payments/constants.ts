@@ -17,14 +17,14 @@ export const BUSINESS_HOURS = {
 // Column configurations
 export const PIPELINE_COLUMNS = {
   DATE: 1, // Column A
-  PROJECT_NAME: 2, // Column B
-  CLIENT_NAME: 3, // Column C
-  AMOUNT: 4, // Column D
-  STATUS: 5, // Column E
-  NOTES: 6, // Column F
-  PM: 7, // Column G
-  CATEGORY: 8, // Column H
-  MURPHY: 9, // Column I (formerly "Shay")
+  ASAF: 2, // Column B (checkbox)
+  NAME: 3, // Column C
+  PROJECT: 4, // Column D
+  AMOUNT: 5, // Column E
+  HOW: 6, // Column F
+  COMMENT: 7, // Column G
+  CONFIRMATION: 8, // Column H
+  MURPHY: 9, // Column I
 } as const;
 
 // Data processing columns (C-H for validation)

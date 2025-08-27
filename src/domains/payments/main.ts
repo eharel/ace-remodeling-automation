@@ -12,35 +12,40 @@ import {
   applyEnhancedFormatting,
   getPipelineStats,
 } from "./core/pipeline-manager";
-import { applyPipelineFormatting } from "./core/formatting";
+import {
+  applyPipelineFormatting,
+  applyAsafCheckboxFormatting,
+} from "./core/formatting";
 
-// Export functions for Google Apps Script
-declare const global: any;
+// Google Apps Script event handlers (like PM toolkit)
+export function onOpen() {
+  log.info("🚀 onOpen triggered for payments domain");
+  setupPipelineMenu();
+}
 
-// Main pipeline functions
-global.updatePipeline = updatePipeline;
-global.autoUpdatePipeline = autoUpdatePipeline;
-global.applyPipelineFormatting = applyPipelineFormatting;
-global.applyEnhancedFormatting = applyEnhancedFormatting;
-global.getPipelineStats = getPipelineStats;
+export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
+  const sheet = e.range.getSheet();
+  const sheetName = sheet.getName();
 
-// Event handlers
-global.onEdit = handleMonthlySheetEdit;
-global.onOpen = setupPipelineMenu;
+  log.info(`📝 onEdit triggered in sheet: ${sheetName}`);
 
-// Legacy function names for backward compatibility
-global.getPipelineData = () => {
-  log.warn("getPipelineData is deprecated. Use updatePipeline instead.");
-  updatePipeline();
-};
+  // Handle edits in monthly sheets
+  if (isMonthlySheet(sheetName)) {
+    handleMonthlySheetEdit(e);
+  }
+}
 
-// Export for module system
+// Helper function to check if a sheet is a monthly sheet
+function isMonthlySheet(sheetName: string): boolean {
+  return /^\w+ \d{4}$/.test(sheetName);
+}
+
+// Export functions for Google Apps Script (simplified like PM toolkit)
 export {
   updatePipeline,
   autoUpdatePipeline,
-  handleMonthlySheetEdit,
-  setupPipelineMenu,
   applyPipelineFormatting,
   applyEnhancedFormatting,
+  applyAsafCheckboxFormatting,
   getPipelineStats,
 };
