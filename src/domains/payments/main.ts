@@ -9,7 +9,6 @@ import {
   autoUpdatePipeline,
   handleMonthlySheetEdit,
   setupPipelineMenu,
-  applyEnhancedFormatting,
   getPipelineStats,
 } from "./core/pipeline-manager";
 import {
@@ -43,7 +42,6 @@ export {
   updatePipeline,
   autoUpdatePipeline,
   applyPipelineFormatting,
-  applyEnhancedFormatting,
   applyAsafCheckboxFormatting,
   getPipelineStats,
 };

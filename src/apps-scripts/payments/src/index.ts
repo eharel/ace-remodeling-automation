@@ -5,7 +5,6 @@ import {
   onOpen,
   onEdit,
   applyPipelineFormatting,
-  applyEnhancedFormatting,
   applyAsafCheckboxFormatting,
   getPipelineStats,
 } from "../../../domains/payments/main";
@@ -19,7 +18,6 @@ declare global {
   var applyPipelineFormatting: (
     sheet: GoogleAppsScript.Spreadsheet.Sheet
   ) => void;
-  var applyEnhancedFormatting: () => void;
   var applyAsafCheckboxFormatting: (
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     row: number
@@ -33,6 +31,5 @@ globalThis.autoUpdatePipeline = autoUpdatePipeline;
 globalThis.onEdit = onEdit;
 globalThis.onOpen = onOpen;
 globalThis.applyPipelineFormatting = applyPipelineFormatting;
-globalThis.applyEnhancedFormatting = applyEnhancedFormatting;
 globalThis.applyAsafCheckboxFormatting = applyAsafCheckboxFormatting;
 globalThis.getPipelineStats = getPipelineStats;

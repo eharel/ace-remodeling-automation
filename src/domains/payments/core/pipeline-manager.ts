@@ -21,7 +21,6 @@ import {
   handleCopyDateDown,
   handleClearDateIfRowEmpty,
   applyAsafCheckboxFormatting,
-  applyEnhancedFormatting as applyEnhanced,
 } from "./formatting";
 
 /**
@@ -199,32 +198,7 @@ export function setupPipelineMenu(): void {
     .addItem("Refresh Pipeline", "updatePipeline")
     .addItem("Auto Update Pipeline", "autoUpdatePipeline")
     .addItem("Apply Formatting", "applyPipelineFormatting")
-    .addSeparator()
-    .addItem("Enhanced Formatting", "applyEnhancedFormatting")
     .addToUi();
-}
-
-/**
- * Applies enhanced formatting with all options enabled
- */
-export function applyEnhancedFormatting(): void {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const pipelineSheet = ss.getSheetByName(PIPELINE_SHEET_NAME);
-
-  if (!pipelineSheet) {
-    log.error("No '_pipeline' sheet found");
-    return;
-  }
-
-  // Apply enhanced formatting directly
-  applyEnhanced(pipelineSheet, {
-    alternateRowColors: true,
-    highlightToday: true,
-    boldAmounts: true,
-    colorCodePMs: true,
-  });
-
-  log.info("Enhanced formatting applied");
 }
 
 /**
