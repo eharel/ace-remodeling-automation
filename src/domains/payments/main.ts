@@ -15,11 +15,21 @@ import {
   applyPipelineFormatting,
   applyAsafCheckboxFormatting,
 } from "./core/formatting";
+import { showWeeklySummary, refreshSummary } from "./core/weekly-summary";
 
 // Google Apps Script event handlers (like PM toolkit)
 export function onOpen() {
   log.info("🚀 onOpen triggered for payments domain");
   setupPipelineMenu();
+
+  // Auto-open weekly summary sidebar if on a monthly sheet
+  const activeSheet = SpreadsheetApp.getActiveSheet();
+  const sheetName = activeSheet.getName();
+
+  if (isMonthlySheet(sheetName)) {
+    log.info("Auto-opening weekly summary for monthly sheet", { sheetName });
+    showWeeklySummary();
+  }
 }
 
 export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
@@ -32,6 +42,10 @@ export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   }
 }
 
+// Note: Google Apps Script doesn't have a built-in onSelectionChange trigger
+// The sidebar will open automatically on spreadsheet open if on a monthly sheet
+// Users can also manually open it via the menu
+
 // Helper function to check if a sheet is a monthly sheet
 function isMonthlySheet(sheetName: string): boolean {
   return /^\w+ \d{4}$/.test(sheetName);
@@ -40,8 +54,8 @@ function isMonthlySheet(sheetName: string): boolean {
 // Export functions for Google Apps Script (simplified like PM toolkit)
 export {
   updatePipeline,
-  autoUpdatePipeline,
-  applyPipelineFormatting,
   applyAsafCheckboxFormatting,
   getPipelineStats,
+  showWeeklySummary,
+  refreshSummary,
 };

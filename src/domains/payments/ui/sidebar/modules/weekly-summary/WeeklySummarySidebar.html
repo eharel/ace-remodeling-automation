@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+        background: #f8f9fa;
+        font-size: 14px;
+      }
+
+      .header {
+        background: #1a73e8;
+        color: white;
+        padding: 12px 16px;
+        margin: -16px -16px 20px -16px;
+        border-radius: 0;
+      }
+
+      .header h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .week-item {
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.2s;
+      }
+
+      .week-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .week-title {
+        font-weight: 600;
+        color: #202124;
+        margin-bottom: 4px;
+      }
+
+      .week-dates {
+        color: #5f6368;
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+
+      .week-amount {
+        font-size: 18px;
+        font-weight: 600;
+        color: #137333;
+      }
+
+      .total-section {
+        background: #e8f0fe;
+        border: 2px solid #1a73e8;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .total-label {
+        color: #1a73e8;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .total-amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a73e8;
+      }
+
+      .refresh-btn {
+        background: #1a73e8;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-top: 16px;
+        width: 100%;
+      }
+
+      .refresh-btn:hover {
+        background: #1557b0;
+      }
+
+      .error {
+        background: #fce8e6;
+        color: #d93025;
+        padding: 12px;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .loading {
+        text-align: center;
+        color: #5f6368;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2 id="sheetTitle">Weekly Summary</h2>
+    </div>
+
+    <div id="content">
+      <div class="loading">Loading weekly data...</div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshData()">Refresh Data</button>
+
+    <script>
+      // Initialize with server data
+      let weeklyData = <?= JSON.stringify(weeklyData) ?>;
+      let sheetName = "<?= sheetName ?>";
+
+      function displayData(data) {
+        const content = document.getElementById('content');
+        const title = document.getElementById('sheetTitle');
+
+        if (data.error) {
+          content.innerHTML = `<div class="error">${data.error}</div>`;
+          title.textContent = 'Weekly Summary';
+          return;
+        }
+
+        title.textContent = `${data.sheetName} - Weekly Summary`;
+
+        let html = '';
+
+        if (data.weeks && data.weeks.length > 0) {
+          data.weeks.forEach(week => {
+            html += `
+              <div class="week-item">
+                <div class="week-title">Week ${week.week}</div>
+                <div class="week-dates">${week.startDate} - ${week.endDate}</div>
+                <div class="week-amount">${week.formattedTotal}</div>
+              </div>
+            `;
+          });
+
+          html += `
+            <div class="total-section">
+              <div class="total-label">Monthly Total</div>
+              <div class="total-amount">${data.grandTotal}</div>
+            </div>
+          `;
+        } else {
+          html = '<div class="error">No payment data found for this sheet</div>';
+        }
+
+        content.innerHTML = html;
+      }
+
+      function refreshData() {
+        document.getElementById('content').innerHTML = '<div class="loading">Refreshing...</div>';
+
+        google.script.run
+          .withSuccessHandler(displayData)
+          .withFailureHandler(function(error) {
+            document.getElementById('content').innerHTML =
+              `<div class="error">Error loading data: ${error.message}</div>`;
+          })
+          .refreshSummary();
+      }
+
+      // Auto-refresh function for real-time updates
+      function startAutoRefresh() {
+        // Refresh every 2 seconds when sidebar is active
+        setInterval(function() {
+          // Only refresh if the sidebar is visible and active
+          if (document.visibilityState === 'visible') {
+            google.script.run
+              .withSuccessHandler(function(data) {
+                // Only update if data actually changed
+                const currentTotal = document.querySelector('.total-amount')?.textContent;
+                if (data.grandTotal !== currentTotal) {
+                  displayData(data);
+                }
+              })
+              .withFailureHandler(function(error) {
+                console.log('Auto-refresh error:', error);
+              })
+              .refreshSummary();
+          }
+        }, 2000); // Update every 2 seconds
+      }
+
+      // Display initial data and start auto-refresh
+      displayData(weeklyData);
+      startAutoRefresh();
+    </script>
+  </body>
+</html>

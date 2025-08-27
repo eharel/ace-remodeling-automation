@@ -1,6 +1,7 @@
 {
   "name": "ace-payments-scripts",
   "version": "1.0.0",
+  "type": "module",
   "description": "ACE Remodeling Payments Pipeline Scripts",
   "main": "src/index.ts",
   "scripts": {

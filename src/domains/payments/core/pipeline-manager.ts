@@ -22,6 +22,7 @@ import {
   handleClearDateIfRowEmpty,
   applyAsafCheckboxFormatting,
 } from "./formatting";
+import { refreshSidebarIfOpen, shouldUpdateSidebar } from "./weekly-summary";
 
 /**
  * Main function to update the pipeline with current data
@@ -139,6 +140,13 @@ export function handleMonthlySheetEdit(
 
   // Apply date group borders (always needed for visual consistency)
   applyDateGroupBorders(sheet);
+
+  // Update sidebar if relevant columns were edited
+  if (shouldUpdateSidebar(e.range)) {
+    // Small delay to ensure the edit is processed
+    Utilities.sleep(50);
+    refreshSidebarIfOpen();
+  }
 }
 
 /**
@@ -196,8 +204,8 @@ export function setupPipelineMenu(): void {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu("Ace Remodeling")
     .addItem("Refresh Pipeline", "updatePipeline")
-    .addItem("Auto Update Pipeline", "autoUpdatePipeline")
-    .addItem("Apply Formatting", "applyPipelineFormatting")
+    .addSeparator()
+    .addItem("📊 Weekly Summary", "showWeeklySummary")
     .addToUi();
 }
 
