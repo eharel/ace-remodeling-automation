@@ -116,7 +116,7 @@ export function getWeeklyTotals(): WeeklySummaryResponse {
 
     const date = new Date(dateValue);
 
-    // Detect week boundaries (when there's a gap or visual break)
+    // Detect week boundaries based on Friday-Thursday pay weeks
     if (isNewWeek(date, currentWeekEnd)) {
       // Save previous week if it exists
       if (currentWeekStart) {
@@ -129,13 +129,13 @@ export function getWeeklyTotals(): WeeklySummaryResponse {
         });
       }
 
-      // Start new week
-      currentWeekStart = date;
+      // Start new week with proper Friday-Thursday pay week boundaries
+      currentWeekStart = getWeekStart(date);
+      currentWeekEnd = getWeekEnd(date);
       currentWeekTotal = 0;
       weekNumber++;
     }
 
-    currentWeekEnd = date;
     currentWeekTotal += amountValue;
   }
 
@@ -168,15 +168,33 @@ export function getWeeklyTotals(): WeeklySummaryResponse {
 }
 
 /**
- * Determines if a new week should start based on date gaps
+ * Gets the start of the week (Friday) for a given date
+ */
+function getWeekStart(date: Date): Date {
+  const day = date.getDay();
+  // Friday = 5, so we need to find the most recent Friday
+  const diff = date.getDate() - day + (day < 5 ? -2 : 5); // Friday
+  return new Date(date.getFullYear(), date.getMonth(), diff);
+}
+
+/**
+ * Gets the end of the week (Thursday) for a given date
+ */
+function getWeekEnd(date: Date): Date {
+  const weekStart = getWeekStart(date);
+  return new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000); // Thursday (6 days later)
+}
+
+/**
+ * Determines if a new week should start based on Friday-Thursday pay weeks
  */
 function isNewWeek(currentDate: Date, lastDate: Date | null): boolean {
   if (!lastDate) return true;
 
-  // Check if there's more than 2 days gap (indicates week break)
-  const daysDiff =
-    (currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
-  return daysDiff > 2;
+  const currentWeekStart = getWeekStart(currentDate);
+  const lastWeekStart = getWeekStart(lastDate);
+
+  return currentWeekStart.getTime() !== lastWeekStart.getTime();
 }
 
 /**
