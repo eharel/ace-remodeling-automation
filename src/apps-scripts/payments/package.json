@@ -1,0 +1,19 @@
+{
+  "name": "ace-payments-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ACE Remodeling Payments Pipeline Scripts",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "node clasp-build.js",
+    "push:raw": "clasp push",
+    "push": "npm run build && npm run push:raw",
+    "deploy": "npm run build && npm run push:raw"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.78",
+    "typescript": "^5.0.0"
+  }
+}

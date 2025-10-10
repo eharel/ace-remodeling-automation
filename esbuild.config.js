@@ -47,6 +47,11 @@ const domains = [
     entryPoint: "src/apps-scripts/forms-library/src/index.ts",
     outfile: "src/apps-scripts/forms-library/build/code.js",
   },
+  {
+    name: "payments",
+    entryPoint: "src/apps-scripts/payments/src/index.ts",
+    outfile: "src/apps-scripts/payments/build/code.js",
+  },
   // Add additional domains below if needed
   // {
   //   name: "another-domain",

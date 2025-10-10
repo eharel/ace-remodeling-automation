@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../../src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../../src/domains/payments/**/*.ts",
+    "../../../src/lib/**/*.ts",
+    "../../../src/utils/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}
